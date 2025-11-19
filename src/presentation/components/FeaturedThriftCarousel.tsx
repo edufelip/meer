@@ -5,9 +5,10 @@ import { ThriftAvatar } from "./ThriftAvatar";
 
 interface FeaturedThriftCarouselProps {
   stores: ThriftStore[];
+  onPressItem?: (store: ThriftStore) => void;
 }
 
-export function FeaturedThriftCarousel({ stores }: FeaturedThriftCarouselProps) {
+export function FeaturedThriftCarousel({ stores, onPressItem }: FeaturedThriftCarouselProps) {
   return (
     <ScrollView
       horizontal
@@ -17,7 +18,7 @@ export function FeaturedThriftCarousel({ stores }: FeaturedThriftCarouselProps) 
     >
       <View className="flex-row space-x-4">
         {stores.map((store) => (
-          <ThriftAvatar key={store.id} store={store} />
+          <ThriftAvatar key={store.id} store={store} onPress={onPressItem} />
         ))}
       </View>
     </ScrollView>

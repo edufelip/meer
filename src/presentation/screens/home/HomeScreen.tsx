@@ -10,8 +10,12 @@ import { GuideContentCard } from "../../components/GuideContentCard";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import type { GuideContent } from "../../../domain/entities/GuideContent";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../../app/navigation/RootStack";
 
 export function HomeScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { getFeaturedThriftStoresUseCase, getNearbyThriftStoresUseCase, getGuideContentUseCase } =
     useDependencies();
   const [featured, setFeatured] = useState<ThriftStore[]>([]);
@@ -49,7 +53,10 @@ export function HomeScreen() {
       >
         <View className="bg-white py-6">
           <SectionTitle title="Brechós em destaque" />
-          <FeaturedThriftCarousel stores={featured} />
+          <FeaturedThriftCarousel
+            stores={featured}
+            onPressItem={(store) => navigation.navigate("thriftDetail", { id: store.id })}
+          />
         </View>
 
         <View className="px-4 py-6">
@@ -65,7 +72,11 @@ export function HomeScreen() {
           />
           <View className="space-y-3 mt-4">
             {nearby.slice(0, 2).map((store) => (
-              <NearbyThriftListItem key={store.id} store={store} />
+              <NearbyThriftListItem
+                key={store.id}
+                store={store}
+                onPress={() => navigation.navigate("thriftDetail", { id: store.id })}
+              />
             ))}
           </View>
           <View className="mt-4 items-center">

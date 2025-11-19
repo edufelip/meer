@@ -3,8 +3,12 @@ import { FlatList, SafeAreaView, StatusBar, Text, View } from "react-native";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { FavoriteThriftCard } from "../../components/FavoriteThriftCard";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../../app/navigation/RootStack";
 
 export function FavoritesScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { getFavoriteThriftStoresUseCase } = useDependencies();
   const [favorites, setFavorites] = useState<ThriftStore[]>([]);
 
@@ -31,7 +35,9 @@ export function FavoritesScreen() {
         data={favorites}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{ padding: 16, paddingBottom: 32, gap: 16 }}
-        renderItem={({ item }) => <FavoriteThriftCard store={item} />}
+        renderItem={({ item }) => (
+          <FavoriteThriftCard store={item} onPress={(store) => navigation.navigate("thriftDetail", { id: store.id })} />
+        )}
         showsVerticalScrollIndicator={false}
         className="bg-[#F3F4F6]"
       />
