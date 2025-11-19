@@ -1,0 +1,59 @@
+import type { Category } from "../../domain/entities/Category";
+import type { CategoryRepository } from "../../domain/repositories/CategoryRepository";
+
+const categories: Category[] = [
+  {
+    id: "casa",
+    name: "Brechó de Casa",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCZGMTQ5nEIDknFS9WEw1xvH_oBUVWuXyKJ3TWuT9_ju9P1jlTDxjReHPCkz1ZvMb1-HnXzyyZASUJp9jLTO8smSs1TLuql_tw6JqJ41WTKhsUgHiLsgG_R5_KV8QzqGR0yTlWE4XeMjVCJqMNbl9ONeBcAI9kx_J_6EX6rZmiWH9CVwMAofJa6AbJkY5hOAzgYbaYLZo-CJa7zvTdqMD-ey7W5FdfgoG7jj55SjJ-B0hLdUMVarmzRwS3STq4ssotZBfDAFOeLKRs"
+  },
+  {
+    id: "masculino",
+    name: "Brechó Masculino",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAIQeD2BLjGUFmgktlmjwzbFnMefDYlX3AzyHWHa74DzttAlY3oXHc73LW2IUxm3QcGWSn7O2-ca6nomg-w9VX1bEF17Je6mbh2UpDtR6RLVT33uYoR21Kwm5qx3ZhOKqB0Dt0fT4Sw1-z8LvlEehxPOFQ85K_45O5VSf4JxnTqxAWqc7DbOZKv-wz8J8O6DmqFXFE_ra2Qe6n3iTLeW8V62fLpCkS4oSQIlgFWL2bkzXc4BFrQ9VdEzGGSsqX9Q4-BTm2EmJ6M568"
+  },
+  {
+    id: "feminino",
+    name: "Brechó Feminino",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAaY3J6icAVDI3qOYyafw6rZYxxcE_xEA8gdL7KGl6TweF2x_fnH723NgUSR6tW3R5YS8QkYM4n6pSuD6RqUk9bDts6trSDBvJJAgpkArrw1WqtciOHpq608Viu5YMmoutbo0CoFiVyCVtsD-KJDit1mxsp78MiOUhqjOZ0hNWko8-9stIpGUN5UX4wUUigJkW-9WS0CT3MLIgLYCldEd99ntyQYjIEjoZXub7TLd5yQJK6DNctPh4xtmI-qG_QYbeeGrbzWwblKO4"
+  },
+  {
+    id: "infantil",
+    name: "Brechó Infantil",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuBakeE0kVUkskF2SM3UHccDtsOe1zUXJuhNljIeZ-WBzgHzGIsXEyeSWedq4WzvhVq9k9AkUfcHIWCiSPSYvCpxWsZFXYpC8Nfl6zDmgDlJTvieM62ckIOfug1sJ1y2lmSSXTmo4FQRbZZ1Pwo8c34uwBLJKwnY_QD2P47KdRQcC2PKaebv3r696tP7sSASJRB2JivDhSPi7F3fqzHrmboitDIMsQUd2C1CTrYhlPIFifTPNNGRnNVXKb8zE_K5D5eRxWa13KSz11Y"
+  },
+  {
+    id: "luxo",
+    name: "Brechó de Luxo",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCe3OUeXawTvbpQFELBd1bP1qvutFFNxJ84OCvA7qo4qJ6A6xc1Z1JL7W__WawHTFPCKnkTKRshN32rKXOIvJOh0BUMJvFxqOJXyh4GFUqMAFll_Qfw8CTMYJw-40LZIieRJLZuP5iVcxMw0_6PJz-Eu5CLCQDV0z1B-av9wtv0pwm-SyjEznmLXC-xFrfbdyidlEyRcIQSvFB398QKfPhU1V24IJ1F00mJChdiEfEmm_tBdg7bO1C4EFqviRyxg4ruy2G2b-KTPRo"
+  },
+  {
+    id: "designer",
+    name: "Brechó de Designer",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuDQYeFS7dIMan6Bp9vzHnw_yCsrs4I2nV8RjONKznuJ5co4fxm-ZWQ4VhVeN30yZIEltFSZ0NsPqTHAoxSJq22YjtCN6MoqrLBn4OViKlXBZ0cPTPczo70MkFBVsUyGpU2WTwFUme_WhSv-EpmQLpOYLX2tw8n3Y8m3kuua0gXlm8MptpT3Vhd6a_IbHt3OW7upqlGHtIneojjJa6gQc1XpE2eDtutcGap4rwdmhkbueihSzyu4Ct_wqUazRXUcAUU9SuFHeEnv_Zc"
+  },
+  {
+    id: "desapego",
+    name: "Brechó de Desapego",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAm60xAy5AcRYfrj-Fa74Hg0S0TOc2xMV1Z3OywCcp9sXonmvgZsdjyQpAlT8k7iqFEModPSDklEA4YHh-Ls-Rw9KqqT3z7vYuti4e-qrQwRsoHkKbJNoDMfxmMLjcdbghsVpXAcgJi3thwCA0l8xwQuBiLxIXg5brSP9wvl1lpqsLGknQv5bYwM2fEEP9fRoVNsL0-qYupHomFeDpgvdG5_o2iq-B5GD3UFd22ImXyokZ6RaXPc1E77BvQpXKAf-ma4HwjMVOCBl4"
+  },
+  {
+    id: "geral",
+    name: "Brechós Gerais",
+    imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuClrOAQGt0nOXUIMXViDuxkf6ezf0MTa2ls9v2uE6fkMP_mTqAv90ay3yxSoPTd4BpdmEPQ7XLM8cWd0_egBjvUmm5015W5BMP7RoHc9ieoE0k3tbBITUvktXfYdcXXonPEq3EyrkIjR0RiQWkNjHRru7WVQ7WJNSZXUaN4n3i-aS7pPKeJtNfuhKxQwNKCsdmq7_6PFebC1as8ilMDkMb-YG05e22TcZpuZE39ZUFNujCo-Cva43Mm5kHlp86bTHaExDq4_VFEO1A"
+  }
+];
+
+export class InMemoryCategoryRepository implements CategoryRepository {
+  async list(): Promise<Category[]> {
+    return categories;
+  }
+}

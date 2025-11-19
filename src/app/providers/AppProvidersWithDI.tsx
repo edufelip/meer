@@ -3,11 +3,13 @@ import { AsyncStorageUserLocalDataSource } from "../../data/datasources/impl/Asy
 import { UserRepositoryImpl } from "../../data/repositories/UserRepositoryImpl";
 import { InMemoryThriftStoreRepository } from "../../data/repositories/InMemoryThriftStoreRepository";
 import { InMemoryGuideContentRepository } from "../../data/repositories/InMemoryGuideContentRepository";
+import { InMemoryCategoryRepository } from "../../data/repositories/InMemoryCategoryRepository";
 import { GetCurrentUserUseCase } from "../../domain/usecases/GetCurrentUserUseCase";
 import { GetFeaturedThriftStoresUseCase } from "../../domain/usecases/GetFeaturedThriftStoresUseCase";
 import { GetNearbyThriftStoresUseCase } from "../../domain/usecases/GetNearbyThriftStoresUseCase";
 import { GetGuideContentUseCase } from "../../domain/usecases/GetGuideContentUseCase";
 import { GetFavoriteThriftStoresUseCase } from "../../domain/usecases/GetFavoriteThriftStoresUseCase";
+import { GetCategoriesUseCase } from "../../domain/usecases/GetCategoriesUseCase";
 
 interface Dependencies {
   getCurrentUserUseCase: GetCurrentUserUseCase;
@@ -15,6 +17,7 @@ interface Dependencies {
   getNearbyThriftStoresUseCase: GetNearbyThriftStoresUseCase;
   getGuideContentUseCase: GetGuideContentUseCase;
   getFavoriteThriftStoresUseCase: GetFavoriteThriftStoresUseCase;
+  getCategoriesUseCase: GetCategoriesUseCase;
 }
 
 const DependenciesContext = createContext<Dependencies | undefined>(undefined);
@@ -35,19 +38,22 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const userRepository = new UserRepositoryImpl(userLocalDataSource);
     const thriftStoreRepository = new InMemoryThriftStoreRepository();
     const guideContentRepository = new InMemoryGuideContentRepository();
+    const categoryRepository = new InMemoryCategoryRepository();
 
     const getCurrentUserUseCase = new GetCurrentUserUseCase(userRepository);
     const getFeaturedThriftStoresUseCase = new GetFeaturedThriftStoresUseCase(thriftStoreRepository);
     const getNearbyThriftStoresUseCase = new GetNearbyThriftStoresUseCase(thriftStoreRepository);
     const getGuideContentUseCase = new GetGuideContentUseCase(guideContentRepository);
     const getFavoriteThriftStoresUseCase = new GetFavoriteThriftStoresUseCase(thriftStoreRepository);
+    const getCategoriesUseCase = new GetCategoriesUseCase(categoryRepository);
 
     return {
       getCurrentUserUseCase,
       getFeaturedThriftStoresUseCase,
       getNearbyThriftStoresUseCase,
       getGuideContentUseCase,
-      getFavoriteThriftStoresUseCase
+      getFavoriteThriftStoresUseCase,
+      getCategoriesUseCase
     };
   }, []);
 
