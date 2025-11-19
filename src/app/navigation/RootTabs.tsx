@@ -1,10 +1,11 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { Text } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { HomeScreen } from "../../presentation/screens/home/HomeScreen";
 import { FavoritesScreen } from "../../presentation/screens/favorites/FavoritesScreen";
 import { CategoriesScreen } from "../../presentation/screens/categories/CategoriesScreen";
 import { ProfileScreen } from "../../presentation/screens/profile/ProfileScreen";
+import { theme } from "../../shared/theme";
 
 export type RootTabParamList = {
   home: undefined;
@@ -20,8 +21,31 @@ export function RootTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarLabel: route.name.charAt(0).toUpperCase() + route.name.slice(1),
-        tabBarIcon: () => <Text>•</Text>
+        tabBarLabel:
+          route.name === "home"
+            ? "Home"
+            : route.name === "favorites"
+            ? "Favoritos"
+            : route.name === "categories"
+            ? "Categorias"
+            : "Perfil",
+        tabBarIcon: ({ color, size = 22 }) => {
+          const iconName =
+            route.name === "home"
+              ? "home"
+              : route.name === "favorites"
+              ? "heart"
+              : route.name === "categories"
+              ? "grid"
+              : "person";
+          return <Ionicons name={iconName as never} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: theme.colors.highlight,
+        tabBarInactiveTintColor: theme.colors.textSubtle,
+        tabBarStyle: {
+          backgroundColor: "#FFFFFF",
+          borderTopColor: "#E5E7EB"
+        }
       })}
     >
       <Tab.Screen name="home" component={HomeScreen} />
