@@ -10,4 +10,9 @@ export interface ThriftStore {
   neighborhood?: string;
   addressLine?: string;
   walkTimeMinutes?: number;
+  mapImageUrl?: string;
+  galleryUrls?: string[];
+  socialHandle?: string;
+  openingHours?: string;
+  categories?: string[];
 }

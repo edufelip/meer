@@ -4,4 +4,5 @@ export interface ThriftStoreRepository {
   getFeatured(): Promise<ThriftStore[]>;
   getNearby(): Promise<ThriftStore[]>;
   getFavorites(): Promise<ThriftStore[]>;
+  getById(id: ThriftStoreId): Promise<ThriftStore | null>;
 }

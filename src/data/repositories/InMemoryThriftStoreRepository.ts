@@ -12,7 +12,17 @@ const featured: ThriftStore[] = [
     neighborhood: "Pinheiros",
     addressLine: "Rua Augusta, 123",
     distanceKm: 0.5,
-    walkTimeMinutes: 5
+    walkTimeMinutes: 5,
+    mapImageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuATD7G9oKF2W1aQjxAqHpYvVPamBIvCIZ6Q7I74RHrH7zwrJHn7iFRGMdMEHWLTMlP9DQ7oquk7Frb_j9QaIiT7ZSYMjZJhvTjFAJU7U-X73PmboiSxOHwS4QZ9mIBO-fJWAbwbdWu5yfwTrXn0c6HHGRpI5fDlZ_HckG3G5-IAsF_Vsh98T6DdyXbPl0bdG-iC9J2bjl6tqGgQIoeItBfJUqcnWgrKl9Y05nEY0VjB15UkZf5t6v0xiO0VVOuXFpoAn1Z7WNfG-dc",
+    galleryUrls: [
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCDc8o6tnd5QOnPOUU42DRZc1lTSDgHzs_9rxx03e8f9QqfYjThUYyl2W4ZeppLlSijBNvzr7QrBJVFVUlpTnKA3NTM89MnnbqgGdAkzXfaJ9CXpj_Jk5LJUtzBc23IiYM8nJAiO1KYpp18N7_VvB2G1UhgcF61wQFhfHyL2KAjO2qT5Njga6RVVOwsTQgwtfKeTSrx_GcdUlzfWuyje8Bipda7HDjvtZGDsOpUQBGpMvCcXKNfU2alOHxgBY_Jp5t8SoGU0-D8rGo",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuD6OPgESZuU8fSgkHv8zYcNkPjfla8WAVHotSjb0RV0qvSHKdcUdk4etGFpStgaFrvYWgXW86lRMHyppOyGxxjfQp4CBYkhhx9xRfuD9AdXBxn4gb5Ygm7jy_3aRu3YXa6vbjEucgmZ-DHeeLC2vXdqgSPx7Wmut7JlgmC_46TADF4zyytyy4NNuL61cJ_-GEDqd2J19kxjqf5rjT6NzwrsrIuVxWpaBhnTlkjHHY8SotnepNGL9ftpnp4Sw4Y09mRwLvXG8gSFTpQ",
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAVj1am_3KAlL2lhQ5nmLdTYqVkNPmwpBMSnFQ_7FPl4RLjBE_NWPIFDDe7KnvUN-nK-4cnejhE6TsZPLWy_4TdURNK0_pW2kPxyCn5O7zeREkAiTuF5jv2xAON88g3J01YFMTuQ75HqaxA15xAyzjInXSd4jxggv_PDMpBZpYk1szpy4BldQxpzmA01dlkU2HhwLTDs1ZgERC8N4sdoXvw7_3jdC77X5YmM17EEBjBVfdxNf84_yvsfEo66LBhZWyQpaF9FWYOWJw"
+    ],
+    socialHandle: "@vintagevibes",
+    openingHours: "Seg a Sáb: 10:00 - 19:00",
+    categories: ["Feminino", "Vintage", "Acessórios"]
   },
   {
     id: "secondhand-chic",
@@ -112,5 +122,10 @@ export class InMemoryThriftStoreRepository implements ThriftStoreRepository {
 
   async getFavorites(): Promise<ThriftStore[]> {
     return favorites;
+  }
+
+  async getById(id: ThriftStore["id"]): Promise<ThriftStore | null> {
+    const all = [...featured, ...nearby, ...favorites];
+    return all.find((s) => s.id === id) ?? null;
   }
 }
