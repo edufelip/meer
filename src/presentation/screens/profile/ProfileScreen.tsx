@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Image, Pressable, SafeAreaView, ScrollView, StatusBar, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, SafeAreaView, ScrollView, StatusBar, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { User } from "../../../domain/entities/User";
@@ -10,6 +10,7 @@ export function ProfileScreen() {
   const { getCurrentUserUseCase, getFavoriteThriftStoresUseCase } = useDependencies();
   const [user, setUser] = useState<User | null>(null);
   const [favorites, setFavorites] = useState<ThriftStore[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -21,6 +22,7 @@ export function ProfileScreen() {
       if (isMounted) {
         setUser(maybeUser);
         setFavorites(favs);
+        setLoading(false);
       }
     })();
     return () => {
@@ -52,11 +54,16 @@ export function ProfileScreen() {
         </View>
       </View>
 
-      <ScrollView
-        className="flex-1 bg-[#F3F4F6]"
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ paddingBottom: 24 }}
-      >
+      {loading ? (
+        <View className="flex-1 items-center justify-center bg-[#F3F4F6]">
+          <ActivityIndicator size="large" color={theme.colors.highlight} />
+        </View>
+      ) : (
+        <ScrollView
+          className="flex-1 bg-[#F3F4F6]"
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={{ paddingBottom: 24 }}
+        >
         <View className="bg-white">
           <View className="flex-col items-center p-6 space-y-4">
             <View className="relative">
@@ -108,7 +115,8 @@ export function ProfileScreen() {
             ))}
           </View>
         </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }

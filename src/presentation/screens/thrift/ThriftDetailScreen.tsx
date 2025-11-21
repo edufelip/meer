@@ -7,7 +7,8 @@ import {
   Text,
   View,
   Pressable,
-  SafeAreaView
+  SafeAreaView,
+  ActivityIndicator
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -23,6 +24,7 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
   const { getThriftStoreByIdUseCase, getFeaturedThriftStoresUseCase } = useDependencies();
   const navigation = useNavigation();
   const [store, setStore] = useState<ThriftStore | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -36,6 +38,7 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
           const fallback = (await getFeaturedThriftStoresUseCase.execute())[0] ?? null;
           setStore(fallback);
         }
+        setLoading(false);
       }
     })();
     return () => {
@@ -43,8 +46,15 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
     };
   }, [getThriftStoreByIdUseCase, getFeaturedThriftStoresUseCase, route?.params?.id]);
 
-  if (!store) {
-    return null;
+  if (loading || !store) {
+    return (
+      <SafeAreaView className="flex-1 bg-[#F3F4F6]">
+        <StatusBar barStyle="dark-content" />
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator size="large" color={theme.colors.highlight} />
+        </View>
+      </SafeAreaView>
+    );
   }
 
   return (

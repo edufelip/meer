@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, Pressable, SafeAreaView, StatusBar, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, SafeAreaView, StatusBar, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { Category } from "../../../domain/entities/Category";
@@ -9,6 +9,7 @@ import { theme } from "../../../shared/theme";
 export function CategoriesScreen() {
   const { getCategoriesUseCase } = useDependencies();
   const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -16,6 +17,7 @@ export function CategoriesScreen() {
       const data = await getCategoriesUseCase.execute();
       if (isMounted) {
         setCategories(data);
+        setLoading(false);
       }
     })();
     return () => {
@@ -35,16 +37,22 @@ export function CategoriesScreen() {
         </View>
       </View>
 
-      <FlatList
-        data={categories}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        columnWrapperStyle={{ gap: 16 }}
-        contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 32 }}
-        renderItem={({ item }) => <CategoryCard category={item} />}
-        showsVerticalScrollIndicator={false}
-        className="bg-[#F3F4F6]"
-      />
+      {loading ? (
+        <View className="flex-1 items-center justify-center bg-[#F3F4F6]">
+          <ActivityIndicator size="large" color={theme.colors.highlight} />
+        </View>
+      ) : (
+        <FlatList
+          data={categories}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={{ gap: 16 }}
+          contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 32 }}
+          renderItem={({ item }) => <CategoryCard category={item} />}
+          showsVerticalScrollIndicator={false}
+          className="bg-[#F3F4F6]"
+        />
+      )}
     </SafeAreaView>
   );
 }

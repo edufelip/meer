@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, ScrollView, StatusBar, View, Text } from "react-native";
+import { SafeAreaView, ScrollView, StatusBar, View, Text, ActivityIndicator } from "react-native";
 import { AppHeader } from "../../components/AppHeader";
 import { SectionTitle } from "../../components/SectionTitle";
 import { FeaturedThriftCarousel } from "../../components/FeaturedThriftCarousel";
@@ -22,6 +22,7 @@ export function HomeScreen() {
   const [nearby, setNearby] = useState<ThriftStore[]>([]);
   const [guides, setGuides] = useState<GuideContent[]>([]);
   const [activeFilter, setActiveFilter] = useState("Próximos a mim");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let isMounted = true;
@@ -35,6 +36,7 @@ export function HomeScreen() {
         setFeatured(featuredStores);
         setNearby(nearbyStores);
         setGuides(guideItems);
+        setLoading(false);
       }
     })();
     return () => {
@@ -46,11 +48,16 @@ export function HomeScreen() {
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" />
       <AppHeader title="Guia Brechó" />
-      <ScrollView
-        className="flex-1 bg-[#F3F4F6]"
-        contentInsetAdjustmentBehavior="automatic"
-        contentContainerStyle={{ paddingBottom: 24 }}
-      >
+      {loading ? (
+        <View className="flex-1 items-center justify-center bg-[#F3F4F6]">
+          <ActivityIndicator size="large" color={theme.colors.highlight} />
+        </View>
+      ) : (
+        <ScrollView
+          className="flex-1 bg-[#F3F4F6]"
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={{ paddingBottom: 24 }}
+        >
         <View className="bg-white py-6">
           <SectionTitle title="Brechós em destaque" />
           <FeaturedThriftCarousel
@@ -93,7 +100,8 @@ export function HomeScreen() {
           </View>
           {guides[0] ? <GuideContentCard content={guides[0]} /> : null}
         </View>
-      </ScrollView>
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
