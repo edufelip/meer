@@ -1,15 +1,6 @@
 import React, { useMemo, useState } from "react";
-import {
-  SafeAreaView,
-  StatusBar,
-  View,
-  Text,
-  Pressable,
-  Image,
-  TextInput,
-  ScrollView,
-  Switch
-} from "react-native";
+import { StatusBar, View, Text, Pressable, Image, TextInput, ScrollView, Switch } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { User } from "../../../domain/entities/User";

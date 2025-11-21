@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Image, Pressable, SafeAreaView, ScrollView, StatusBar, Text, View } from "react-native";
+import { ActivityIndicator, Image, Pressable, ScrollView, StatusBar, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { User } from "../../../domain/entities/User";
