@@ -45,13 +45,8 @@ export function ProfileScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white">
       <StatusBar barStyle="dark-content" />
-      <View className="bg-white">
-        <View className="flex-row items-center p-4">
-          <Pressable className="p-2 rounded-full" onPress={() => {}}>
-            <Ionicons name="arrow-back" size={22} color={theme.colors.highlight} />
-          </Pressable>
-          <Text className="flex-1 text-center text-lg font-bold text-[#1F2937] pr-10">Perfil</Text>
-        </View>
+      <View className="bg-white px-4 py-4 border-b border-gray-100">
+        <Text className="text-center text-lg font-bold text-[#1F2937]">Perfil</Text>
       </View>
 
       {loading ? (
