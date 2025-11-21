@@ -10,6 +10,7 @@ import {
   SafeAreaView
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { ThriftStore, ThriftStoreId } from "../../../domain/entities/ThriftStore";
 import { theme } from "../../../shared/theme";
@@ -20,6 +21,7 @@ interface ThriftDetailScreenProps {
 
 export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
   const { getThriftStoreByIdUseCase, getFeaturedThriftStoresUseCase } = useDependencies();
+  const navigation = useNavigation();
   const [store, setStore] = useState<ThriftStore | null>(null);
 
   useEffect(() => {
@@ -57,7 +59,18 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
         >
           <View className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           <View className="absolute top-4 left-4 right-4 flex-row justify-between">
-            <Pressable className="p-2 rounded-full bg-white/80">
+            <Pressable
+              className="p-2 rounded-full bg-white/80"
+              onPress={() => {
+                if (navigation.canGoBack()) {
+                  navigation.goBack();
+                } else {
+                  navigation.navigate("tabs" as never);
+                }
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Voltar"
+            >
               <Ionicons name="arrow-back" size={22} color={theme.colors.textDark} />
             </Pressable>
             <Pressable className="p-2 rounded-full bg-white/80">
