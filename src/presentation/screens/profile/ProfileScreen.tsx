@@ -13,7 +13,9 @@ import type { RootStackParamList } from "../../../app/navigation/RootStack";
 export function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { getFavoriteThriftStoresUseCase, getProfileUseCase } = useDependencies();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<(User & { bio?: string; notifyNewStores: boolean; notifyPromos: boolean }) | null>(
+    null
+  );
   const [favorites, setFavorites] = useState<ThriftStore[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -88,7 +90,17 @@ export function ProfileScreen() {
           <View className="bg-white rounded-lg shadow-sm">
             <Pressable
               className="flex-row items-center justify-between p-4 border-b border-gray-200"
-              onPress={() => navigation.navigate("editProfile")}
+              onPress={() =>
+                navigation.navigate("editProfile", {
+                  profile: {
+                    ...(user ?? displayUser),
+                    bio: user?.bio,
+                    notifyNewStores: user?.notifyNewStores ?? false,
+                    notifyPromos: user?.notifyPromos ?? false,
+                    avatarUrl: user?.avatarUrl
+                  }
+                })
+              }
             >
               <Text className="text-[#374151]">Editar Perfil</Text>
               <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />

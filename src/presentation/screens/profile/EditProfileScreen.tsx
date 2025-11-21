@@ -2,12 +2,15 @@ import React, { useEffect, useState } from "react";
 import { StatusBar, View, Text, Pressable, Image, TextInput, ScrollView, Switch, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { theme } from "../../../shared/theme";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
+import type { RouteProp } from "@react-navigation/native";
+import type { RootStackParamList } from "../../../app/navigation/RootStack";
 
 export function EditProfileScreen() {
   const navigation = useNavigation();
+  const route = useRoute<RouteProp<RootStackParamList, "editProfile">>();
   const { getProfileUseCase, updateProfileUseCase } = useDependencies();
   const goBackSafe = () => {
     if (navigation.canGoBack()) {
@@ -17,14 +20,19 @@ export function EditProfileScreen() {
     }
   };
 
-  const [name, setName] = useState("");
-  const [bio, setBio] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined);
-  const [notifyNewStores, setNotifyNewStores] = useState(true);
-  const [notifyPromos, setNotifyPromos] = useState(false);
+  const preloaded = route.params?.profile;
+  const [name, setName] = useState(preloaded?.name ?? "");
+  const [bio, setBio] = useState(preloaded?.bio ?? "");
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(preloaded?.avatarUrl);
+  const [notifyNewStores, setNotifyNewStores] = useState(preloaded?.notifyNewStores ?? true);
+  const [notifyPromos, setNotifyPromos] = useState(preloaded?.notifyPromos ?? false);
   const [, setEmail] = useState<string | undefined>(undefined);
 
   useEffect(() => {
+    if (preloaded) {
+      setEmail(preloaded.email);
+      return;
+    }
     (async () => {
       const profile = await getProfileUseCase.execute();
       setName(profile.name);
@@ -34,7 +42,7 @@ export function EditProfileScreen() {
       setNotifyPromos(profile.notifyPromos);
       setEmail(profile.email);
     })();
-  }, [getProfileUseCase]);
+  }, [getProfileUseCase, preloaded]);
 
   const remainingBio = 200 - bio.length;
   const canSave = name.trim().length > 0 && remainingBio >= 0;

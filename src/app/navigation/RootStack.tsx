@@ -4,11 +4,14 @@ import { RootTabs } from "./RootTabs";
 import { ThriftDetailScreen } from "../../presentation/screens/thrift/ThriftDetailScreen";
 import { EditProfileScreen } from "../../presentation/screens/profile/EditProfileScreen";
 import type { ThriftStoreId } from "../../domain/entities/ThriftStore";
+import type { User } from "../../domain/entities/User";
 
 export type RootStackParamList = {
   tabs: undefined;
   thriftDetail: { id: ThriftStoreId };
-  editProfile: undefined;
+  editProfile: {
+    profile: User & { bio?: string; notifyNewStores: boolean; notifyPromos: boolean; avatarUrl?: string };
+  };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
