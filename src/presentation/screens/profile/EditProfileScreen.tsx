@@ -7,6 +7,7 @@ import { theme } from "../../../shared/theme";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { RouteProp } from "@react-navigation/native";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export function EditProfileScreen() {
   const navigation = useNavigation();
@@ -28,23 +29,44 @@ export function EditProfileScreen() {
   const [notifyPromos, setNotifyPromos] = useState(preloaded?.notifyPromos ?? false);
   const [, setEmail] = useState<string | undefined>(undefined);
 
+  const STORAGE_NOTIFY_STORES = "preferences.notifyNewStores";
+  const STORAGE_NOTIFY_PROMOS = "preferences.notifyPromos";
+  // Keeping max bio as a constant for validations
+  const MAX_BIO = 200;
+
   useEffect(() => {
-    if (preloaded) {
-      setEmail(preloaded.email);
-      return;
-    }
-    (async () => {
+    let mounted = true;
+    const load = async () => {
+      if (preloaded) {
+        setEmail(preloaded.email);
+        return;
+      }
       const profile = await getProfileUseCase.execute();
+      if (!mounted) return;
       setName(profile.name);
       setBio(profile.bio ?? "");
       setAvatarUrl(profile.avatarUrl);
       setNotifyNewStores(profile.notifyNewStores);
       setNotifyPromos(profile.notifyPromos);
       setEmail(profile.email);
-    })();
-  }, [getProfileUseCase, preloaded]);
+    };
+    const loadPrefs = async () => {
+      const [storedStores, storedPromos] = await Promise.all([
+        AsyncStorage.getItem(STORAGE_NOTIFY_STORES),
+        AsyncStorage.getItem(STORAGE_NOTIFY_PROMOS)
+      ]);
+      if (!mounted) return;
+      if (storedStores !== null) setNotifyNewStores(storedStores === "true");
+      if (storedPromos !== null) setNotifyPromos(storedPromos === "true");
+    };
+    load();
+    loadPrefs();
+    return () => {
+      mounted = false;
+    };
+  }, [STORAGE_NOTIFY_PROMOS, STORAGE_NOTIFY_STORES, getProfileUseCase, preloaded]);
 
-  const remainingBio = 200 - bio.length;
+  const remainingBio = MAX_BIO - bio.length;
   const canSave = name.trim().length > 0 && remainingBio >= 0;
 
   const handleSave = async () => {
@@ -52,6 +74,10 @@ export function EditProfileScreen() {
       Alert.alert("Verifique os campos", "Nome é obrigatório e bio deve ter no máximo 200 caracteres.");
       return;
     }
+    await Promise.all([
+      AsyncStorage.setItem(STORAGE_NOTIFY_STORES, String(notifyNewStores)),
+      AsyncStorage.setItem(STORAGE_NOTIFY_PROMOS, String(notifyPromos))
+    ]);
     await updateProfileUseCase.execute({
       name: name.trim(),
       bio: bio.trim(),
@@ -117,7 +143,7 @@ export function EditProfileScreen() {
             <Text className="text-sm font-bold text-[#1F2937] mb-1">Bio</Text>
             <TextInput
               value={bio}
-              onChangeText={(text) => setBio(text.slice(0, 200))}
+              onChangeText={(text) => setBio(text.slice(0, MAX_BIO))}
               multiline
               numberOfLines={6}
               className="w-full p-3 bg-white border border-gray-300 rounded-lg"
