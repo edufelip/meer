@@ -45,7 +45,7 @@ export function HomeScreen() {
   }, [getFeaturedThriftStoresUseCase, getNearbyThriftStoresUseCase, getGuideContentUseCase]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" />
       {/* Header matching reference */}
       <View className="bg-white/90 backdrop-blur-sm px-4 py-3 border-b border-gray-100">

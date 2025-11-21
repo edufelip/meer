@@ -27,7 +27,7 @@ export function CategoriesScreen() {
   }, [getCategoriesUseCase]);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" />
       <View className="bg-white">
         <View className="flex-row items-center p-4">

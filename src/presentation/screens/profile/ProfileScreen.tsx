@@ -48,7 +48,7 @@ export function ProfileScreen() {
   );
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" />
       <View className="bg-white px-4 py-4 border-b border-gray-100">
         <Text className="text-center text-lg font-bold text-[#1F2937]">Perfil</Text>
