@@ -44,7 +44,10 @@ export function RootTabs() {
         tabBarInactiveTintColor: theme.colors.textSubtle,
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
-          borderTopColor: "#E5E7EB"
+          borderTopColor: "#E5E7EB",
+          height: 68,
+          paddingBottom: 8,
+          paddingTop: 6
         }
       })}
     >
