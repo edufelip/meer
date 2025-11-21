@@ -1,9 +1,12 @@
 import React, { PropsWithChildren, createContext, useContext, useMemo } from "react";
 import { AsyncStorageUserLocalDataSource } from "../../data/datasources/impl/AsyncStorageUserLocalDataSource";
 import { UserRepositoryImpl } from "../../data/repositories/UserRepositoryImpl";
-import { InMemoryThriftStoreRepository } from "../../data/repositories/InMemoryThriftStoreRepository";
-import { InMemoryGuideContentRepository } from "../../data/repositories/InMemoryGuideContentRepository";
-import { InMemoryCategoryRepository } from "../../data/repositories/InMemoryCategoryRepository";
+import { JsonThriftStoreRemoteDataSource } from "../../data/datasources/impl/JsonThriftStoreRemoteDataSource";
+import { JsonGuideContentRemoteDataSource } from "../../data/datasources/impl/JsonGuideContentRemoteDataSource";
+import { JsonCategoryRemoteDataSource } from "../../data/datasources/impl/JsonCategoryRemoteDataSource";
+import { ThriftStoreRepositoryJson } from "../../data/repositories/ThriftStoreRepositoryJson";
+import { GuideContentRepositoryJson } from "../../data/repositories/GuideContentRepositoryJson";
+import { CategoryRepositoryJson } from "../../data/repositories/CategoryRepositoryJson";
 import { GetCurrentUserUseCase } from "../../domain/usecases/GetCurrentUserUseCase";
 import { GetFeaturedThriftStoresUseCase } from "../../domain/usecases/GetFeaturedThriftStoresUseCase";
 import { GetNearbyThriftStoresUseCase } from "../../domain/usecases/GetNearbyThriftStoresUseCase";
@@ -38,9 +41,13 @@ export function DependenciesProvider(props: PropsWithChildren) {
   const value = useMemo<Dependencies>(() => {
     const userLocalDataSource = new AsyncStorageUserLocalDataSource();
     const userRepository = new UserRepositoryImpl(userLocalDataSource);
-    const thriftStoreRepository = new InMemoryThriftStoreRepository();
-    const guideContentRepository = new InMemoryGuideContentRepository();
-    const categoryRepository = new InMemoryCategoryRepository();
+    const thriftStoreRemote = new JsonThriftStoreRemoteDataSource();
+    const guideContentRemote = new JsonGuideContentRemoteDataSource();
+    const categoryRemote = new JsonCategoryRemoteDataSource();
+
+    const thriftStoreRepository = new ThriftStoreRepositoryJson(thriftStoreRemote);
+    const guideContentRepository = new GuideContentRepositoryJson(guideContentRemote);
+    const categoryRepository = new CategoryRepositoryJson(categoryRemote);
 
     const getCurrentUserUseCase = new GetCurrentUserUseCase(userRepository);
     const getFeaturedThriftStoresUseCase = new GetFeaturedThriftStoresUseCase(thriftStoreRepository);
