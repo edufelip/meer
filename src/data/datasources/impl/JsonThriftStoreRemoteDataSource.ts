@@ -1,6 +1,6 @@
 import type { ThriftStore, ThriftStoreId } from "../../../domain/entities/ThriftStore";
 import type { ThriftStoreRemoteDataSource } from "../ThriftStoreRemoteDataSource";
-import thriftStores from "../../mocks/thriftStores.json";
+import thriftStores from "../../../data/mocks/thriftStores.json";
 import { loadFromJson } from "./LocalJsonClient";
 
 type ThriftStoresResponse = {
