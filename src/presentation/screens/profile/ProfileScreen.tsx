@@ -5,8 +5,12 @@ import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { User } from "../../../domain/entities/User";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import { theme } from "../../../shared/theme";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../../app/navigation/RootStack";
 
 export function ProfileScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { getCurrentUserUseCase, getFavoriteThriftStoresUseCase } = useDependencies();
   const [user, setUser] = useState<User | null>(null);
   const [favorites, setFavorites] = useState<ThriftStore[]>([]);
@@ -79,9 +83,12 @@ export function ProfileScreen() {
         </View>
 
         <View className="px-4 py-4">
-          <Text className="text-lg font-bold mb-2 text-[#1F2937]">Conta</Text>
+            <Text className="text-lg font-bold mb-2 text-[#1F2937]">Conta</Text>
           <View className="bg-white rounded-lg shadow-sm">
-            <Pressable className="flex-row items-center justify-between p-4 border-b border-gray-200">
+            <Pressable
+              className="flex-row items-center justify-between p-4 border-b border-gray-200"
+              onPress={() => navigation.navigate("editProfile")}
+            >
               <Text className="text-[#374151]">Editar Perfil</Text>
               <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
             </Pressable>
