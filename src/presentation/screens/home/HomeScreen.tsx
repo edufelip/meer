@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, ScrollView, StatusBar, View, Text, ActivityIndicator, Pressable, Image } from "react-native";
+import { ScrollView, StatusBar, View, Text, ActivityIndicator, Pressable, Image } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { SectionTitle } from "../../components/SectionTitle";
 import { FeaturedThriftCarousel } from "../../components/FeaturedThriftCarousel";
 import { NearbyMapCard } from "../../components/NearbyMapCard";

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, SafeAreaView, StatusBar, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, StatusBar, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { FavoriteThriftCard } from "../../components/FavoriteThriftCard";

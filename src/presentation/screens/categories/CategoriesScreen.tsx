@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, SafeAreaView, StatusBar, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StatusBar, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { Category } from "../../../domain/entities/Category";
