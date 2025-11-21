@@ -1,6 +1,7 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HomeScreen } from "../../presentation/screens/home/HomeScreen";
 import { FavoritesScreen } from "../../presentation/screens/favorites/FavoritesScreen";
 import { CategoriesScreen } from "../../presentation/screens/categories/CategoriesScreen";
@@ -17,6 +18,7 @@ export type RootTabParamList = {
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
 export function RootTabs() {
+  const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -45,8 +47,7 @@ export function RootTabs() {
         tabBarStyle: {
           backgroundColor: "#FFFFFF",
           borderTopColor: "#E5E7EB",
-          height: 68,
-          paddingBottom: 8,
+          paddingBottom: Math.max(insets.bottom, 12),
           paddingTop: 6
         }
       })}
