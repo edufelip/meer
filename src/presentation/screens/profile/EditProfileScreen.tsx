@@ -88,7 +88,7 @@ export function EditProfileScreen() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" />
       <View className="bg-white/80 backdrop-blur-sm">
         <View className="flex-row items-center p-4">
@@ -139,7 +139,7 @@ export function EditProfileScreen() {
             />
           </View>
 
-          <View>
+          <View className="mt-2">
             <Text className="text-sm font-bold text-[#1F2937] mb-1">Bio</Text>
             <TextInput
               value={bio}
@@ -154,7 +154,7 @@ export function EditProfileScreen() {
             <Text className="text-xs text-gray-500 text-right mt-1">{remainingBio} caracteres restantes</Text>
           </View>
 
-          <View>
+          <View className="mt-2">
             <Text className="text-lg font-bold mb-2 text-[#1F2937]">Preferências de Notificação</Text>
             <View className="bg-white rounded-lg shadow-sm">
               <View className="flex-row items-center justify-between p-4 border-b border-gray-200">
@@ -178,7 +178,7 @@ export function EditProfileScreen() {
             </View>
           </View>
 
-          <View>
+          <View className="mt-4">
             <Text className="text-lg font-bold mb-2 text-[#1F2937]">Contas Vinculadas</Text>
             <View className="bg-white rounded-lg shadow-sm">
               <Pressable className="flex-row items-center justify-between p-4 border-b border-gray-200">
