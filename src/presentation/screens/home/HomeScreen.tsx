@@ -10,6 +10,7 @@ import { GuideContentCard } from "../../components/GuideContentCard";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import type { GuideContent } from "../../../domain/entities/GuideContent";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
+import { theme } from "../../../shared/theme";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
