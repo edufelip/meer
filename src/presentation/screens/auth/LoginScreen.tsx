@@ -98,7 +98,7 @@ export function LoginScreen() {
               </Pressable>
               {Platform.OS === "ios" ? (
                 <Pressable className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5">
-                  <AntDesign name="apple1" size={20} color="#111" />
+                  <Ionicons name="logo-apple" size={20} color="#111" />
                   <Text className="text-base font-bold text-[#374151]">Entrar com Apple</Text>
                 </Pressable>
               ) : null}
