@@ -50,7 +50,7 @@ export function MyContentsScreen() {
             <Pressable
               className="flex-row items-center bg-white rounded-lg shadow-sm overflow-hidden"
               style={{ marginBottom: 12 }}
-              onPress={() => navigation.navigate("editContent" as never, { articleId: item.id } as never)}
+              onPress={() => navigation.navigate("editContent" as never, { articleId: item.id, storeId: route.params.storeId } as never)}
             >
               <View style={{ width: 96, height: 96 }}>
                 <Image source={{ uri: item.imageUrl }} className="w-full h-full" resizeMode="cover" />
@@ -70,6 +70,14 @@ export function MyContentsScreen() {
             <View className="items-center justify-center py-12">
               <Text className="text-[#6B7280]">Nenhum conteúdo ainda.</Text>
             </View>
+          }
+          ListHeaderComponent={
+            <Pressable
+              className="w-full bg-[#B55D05] rounded-lg py-3 px-4 items-center shadow mb-3"
+              onPress={() => navigation.navigate("editContent" as never, { storeId: route.params.storeId } as never)}
+            >
+              <Text className="text-white font-bold">Criar Conteúdo</Text>
+            </Pressable>
           }
           showsVerticalScrollIndicator={false}
         />

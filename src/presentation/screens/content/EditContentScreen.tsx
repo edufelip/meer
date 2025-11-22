@@ -19,14 +19,12 @@ export function EditContentScreen() {
 
   useEffect(() => {
     (async () => {
+      if (!route.params.articleId) return; // creating new
       const articles = await getGuideContentUseCase.execute();
       const article = articles.find((a) => a.id === route.params.articleId);
       if (article) {
         setTitle(article.title);
-        setBody(
-          article.description ||
-            "Prepare-se para o frio com estilo! Todos os casacos de lã, jaquetas de couro e sobretudos com 50% de desconto."
-        );
+        setBody(article.description ?? "");
         setMedia([article.imageUrl]);
       }
     })();
