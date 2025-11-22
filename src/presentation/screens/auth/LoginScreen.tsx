@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  Modal,
-  ActivityIndicator
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons, MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { RootStackParamList } from "../../../app/navigation/RootStack";
-import { theme } from "../../../shared/theme";
-import { isValidEmail, validatePassword } from "../../../domain/validation/auth";
-import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
-import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
-import { firebaseAuth } from "../../../services/firebase/firebase";
+import * as WebBrowser from "expo-web-browser";
 import { sendPasswordResetEmail } from "firebase/auth";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import type { RootStackParamList } from "../../../app/navigation/RootStack";
+import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
+import { isValidEmail, validatePassword } from "../../../domain/validation/auth";
+import { firebaseAuth } from "../../../services/firebase/firebase";
+import { theme } from "../../../shared/theme";
 
 export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -96,7 +96,7 @@ export function LoginScreen() {
               Explore achados únicos
             </Text>
 
-            <View className="w-full space-y-8">
+            <View className="w-full space-y-12">
               <Pressable
                 className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5"
                 disabled={!request || loading}
@@ -106,7 +106,7 @@ export function LoginScreen() {
                 <Text className="text-base font-bold text-[#374151]">Entrar com Google</Text>
               </Pressable>
               {Platform.OS === "ios" ? (
-                <Pressable className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5 mt-1">
+                <Pressable className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-10">
                   <Ionicons name="logo-apple" size={20} color="#111" />
                   <Text className="text-base font-bold text-[#374151]">Entrar com Apple</Text>
                 </Pressable>
