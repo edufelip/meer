@@ -27,7 +27,7 @@ export function MyContentsScreen() {
     };
   }, [getGuideContentUseCase, route.params.storeId]);
 
-  const gridData = useMemo(() => articles, [articles]);
+  const listData = useMemo(() => articles, [articles]);
 
   return (
     <SafeAreaView className="flex-1 bg-[#F3F4F6]" edges={["top", "left", "right"]}>
@@ -42,26 +42,23 @@ export function MyContentsScreen() {
         </View>
       </View>
 
-      <View className="p-4 space-y-6 flex-1">
-        <Pressable className="w-full bg-[#B55D05] rounded-full shadow-lg py-3 px-4 flex-row items-center justify-center gap-2">
-          <Ionicons name="add-circle" size={20} color="white" />
-          <Text className="text-white font-bold text-base">Criar Novo Conteúdo</Text>
-        </Pressable>
-
+      <View className="p-4 space-y-4 flex-1">
         <FlatList
-          data={gridData}
-          numColumns={2}
+          data={listData}
           keyExtractor={(item) => item.id}
-          columnWrapperStyle={{ justifyContent: "space-between", marginBottom: 12 }}
           renderItem={({ item }) => (
-            <Pressable className="bg-white rounded-xl shadow-sm overflow-hidden" style={{ width: "48%" }}>
-              <View style={{ aspectRatio: 1 }}>
+            <Pressable className="flex-row items-center bg-white rounded-lg shadow-sm overflow-hidden" style={{ marginBottom: 12 }}>
+              <View style={{ width: 96, height: 96 }}>
                 <Image source={{ uri: item.imageUrl }} className="w-full h-full" resizeMode="cover" />
               </View>
-              <View className="p-3">
-                <Text className="font-bold text-sm text-gray-800" numberOfLines={2}>
+              <View className="flex-1 p-3">
+                <Text className="font-bold text-base text-[#1F2937]" numberOfLines={2}>
                   {item.title}
                 </Text>
+                <Text className="text-sm text-gray-500 mt-1">{item.categoryLabel}</Text>
+              </View>
+              <View className="px-2">
+                <Ionicons name="pencil" size={18} color="#9CA3AF" />
               </View>
             </Pressable>
           )}
