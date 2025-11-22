@@ -17,7 +17,7 @@
 * Expo (SDK 54)
 * React Native + NativeWind
 * React Navigation (stack + tabs)
-* Firebase Authentication (email/senha + Google) — via @react-native-firebase/app/auth
+* Firebase Authentication (email/senha + Google) — via @react-native-firebase/app/auth (domain/use cases decoupled to swap providers later)
 * Firebase Messaging, Crashlytics, Performance (scaffolded)
 * AsyncStorage (preferências locais)
 * Clean architecture: Presentation → Domain → Data, DI via provider hook
