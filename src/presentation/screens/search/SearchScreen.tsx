@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, FlatList, Pressable, StatusBar, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -6,22 +6,43 @@ import { useNavigation } from "@react-navigation/native";
 import { theme } from "../../../shared/theme";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { NearbyThriftListItem } from "../../components/NearbyThriftListItem";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const suggestionChips = ["Vestidos", "Roupas de festa", "Acessórios", "Vintage"];
 
-const initialRecents = [
-  "Brechó na Vila Madalena",
-  "Jaquetas de couro",
-  "Sapatos femininos"
-];
+const SEARCH_HISTORY_KEY = "search.history";
 
 export function SearchScreen() {
   const navigation = useNavigation();
   const { searchThriftStoresUseCase } = useDependencies();
   const [query, setQuery] = useState("");
-  const [recents, setRecents] = useState(initialRecents);
+  const [recents, setRecents] = useState<string[]>([]);
   const [results, setResults] = useState([] as Awaited<ReturnType<typeof searchThriftStoresUseCase.execute>>);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const raw = await AsyncStorage.getItem(SEARCH_HISTORY_KEY);
+      if (!active) return;
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw) as string[];
+          if (Array.isArray(parsed)) setRecents(parsed.slice(0, 5));
+        } catch {
+          // ignore parse errors
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const persistRecents = async (items: string[]) => {
+    setRecents(items);
+    await AsyncStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(items.slice(0, 5)));
+  };
 
   const runSearch = async (text: string) => {
     const term = text.trim();
@@ -34,7 +55,8 @@ export function SearchScreen() {
     setResults(list);
     setLoading(false);
     if (!recents.includes(term)) {
-      setRecents((prev) => [term, ...prev].slice(0, 10));
+      const next = [term, ...recents].slice(0, 5);
+      await persistRecents(next);
     }
   };
 
@@ -118,7 +140,13 @@ export function SearchScreen() {
             <View className="py-4 px-4">
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-lg font-bold text-[#374151]">Pesquisas Recentes</Text>
-                <Pressable onPress={() => setRecents([])}>
+                <Pressable
+                  onPress={async () => {
+                    setResults([]);
+                    setQuery("");
+                    await persistRecents([]);
+                  }}
+                >
                   <Text className="text-sm font-semibold text-[#B55D05]">Limpar</Text>
                 </Pressable>
               </View>
@@ -134,7 +162,12 @@ export function SearchScreen() {
                 <Ionicons name="time-outline" size={18} color="#6B7280" />
                 <Text className="text-[#374151]">{item}</Text>
               </View>
-              <Pressable onPress={() => setRecents((prev) => prev.filter((r) => r !== item))}>
+              <Pressable
+                onPress={async () => {
+                  const next = recents.filter((r) => r !== item);
+                  await persistRecents(next);
+                }}
+              >
                 <Ionicons name="close" size={18} color="#6B7280" />
               </Pressable>
             </View>
