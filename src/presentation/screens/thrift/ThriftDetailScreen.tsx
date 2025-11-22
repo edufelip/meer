@@ -157,8 +157,12 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
             <View style={{ borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
               <Text className="font-bold text-[#374151] mb-2">Galeria de Fotos</Text>
               <View className="flex-row flex-wrap gap-2">
-                {(store.galleryUrls ?? []).slice(0, 6).map((url) => (
-                  <Image key={url} source={{ uri: url }} className="w-[30%] h-24 rounded-lg" />
+                {(store.galleryUrls ?? []).slice(0, 6).map((url, index) => (
+                  <Image
+                    key={`${url}-${index}`}
+                    source={{ uri: url }}
+                    className="w-[30%] h-24 rounded-lg"
+                  />
                 ))}
               </View>
             </View>
