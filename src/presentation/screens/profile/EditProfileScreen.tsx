@@ -20,6 +20,8 @@ import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { RouteProp } from "@react-navigation/native";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
+import { Platform } from "react-native";
 
 export function EditProfileScreen() {
   const navigation = useNavigation();
@@ -96,28 +98,50 @@ export function EditProfileScreen() {
       name: name.trim(),
       bio: bio.trim(),
       notifyNewStores,
-      notifyPromos
+      notifyPromos,
+      avatarUrl: stagedAvatarUri ?? avatarUrl
     });
     goBackSafe();
   };
 
-  const placeholderCamera =
-    "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80";
-  const placeholderGallery =
-    "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=60";
-
   const pickImageFromCamera = async () => {
-    // TODO: swap with expo-image-picker when backend/storage is ready.
-    Alert.alert("Câmera simulada", "Usaremos a câmera real quando o backend estiver pronto.");
-    setStagedAvatarUri(placeholderCamera);
-    setShowAvatarSheet(false);
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permissão necessária", "Precisamos da câmera para tirar sua foto.");
+      return;
+    }
+
+    const result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.85
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      setStagedAvatarUri(result.assets[0].uri);
+      setShowAvatarSheet(false);
+    }
   };
 
   const pickImageFromLibrary = async () => {
-    // TODO: swap with expo-image-picker when backend/storage is ready.
-    Alert.alert("Galeria simulada", "Usaremos a galeria real quando o backend estiver pronto.");
-    setStagedAvatarUri(placeholderGallery);
-    setShowAvatarSheet(false);
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permissão necessária", "Precisamos de acesso à galeria para escolher uma foto.");
+      return;
+    }
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.85,
+      selectionLimit: 1
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      setStagedAvatarUri(result.assets[0].uri);
+      setShowAvatarSheet(false);
+    }
   };
 
   return (
