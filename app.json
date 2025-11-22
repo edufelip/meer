@@ -47,7 +47,13 @@
       "@react-native-firebase/auth",
       "@react-native-firebase/messaging",
       "@react-native-firebase/crashlytics",
-      "@react-native-firebase/perf"
+      "@react-native-firebase/perf",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permitir que o Guia Brechó acesse sua localização para mostrar brechós perto de você."
+        }
+      ]
     ],
     "experiments": {
       "reactCompiler": true

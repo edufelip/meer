@@ -13,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { Ionicons } from "@expo/vector-icons";
+import * as Location from "expo-location";
 
 export function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -23,6 +24,7 @@ export function HomeScreen() {
   const [guides, setGuides] = useState<GuideContent[]>([]);
   const [activeFilter, setActiveFilter] = useState("Próximo a mim");
   const [loading, setLoading] = useState(true);
+  const [locationLabel, setLocationLabel] = useState("São Paulo, SP");
 
   useEffect(() => {
     let isMounted = true;
@@ -44,6 +46,31 @@ export function HomeScreen() {
     };
   }, [getFeaturedThriftStoresUseCase, getNearbyThriftStoresUseCase, getGuideContentUseCase]);
 
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== "granted" || !active) return;
+      try {
+        const position = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.Balanced
+        });
+        if (!active) return;
+        const [place] = await Location.reverseGeocodeAsync(position.coords);
+        if (active && place) {
+          const city = place.subregion ?? place.city ?? place.region ?? "Sua região";
+          const country = place.isoCountryCode ?? "";
+          setLocationLabel(country ? `${city}, ${country}` : city);
+        }
+      } catch {
+        // keep default label
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" />
@@ -57,7 +84,7 @@ export function HomeScreen() {
                 <Text className="text-[#B55D05] text-lg">📍</Text>
               </View>
             </View>
-            <Text className="text-sm text-[#6B7280] mt-0.5">São Paulo, SP</Text>
+            <Text className="text-sm text-[#6B7280] mt-0.5">{locationLabel}</Text>
           </View>
           <Pressable className="w-8 h-8 items-center justify-center" onPress={() => {}}>
             <Ionicons name="search" size={22} color={theme.colors.highlight} />
