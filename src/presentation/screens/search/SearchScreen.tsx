@@ -80,6 +80,23 @@ export function SearchScreen() {
         contentContainerStyle={{ paddingBottom: 24 }}
         ListHeaderComponent={
           <>
+            <View className="px-4 pb-3">
+              <View className="flex-row items-center gap-2 overflow-x-auto pb-2 -mb-2">
+                {["Categoria", "Distância", "Tipo de Produto"].map((label) => (
+                  <Pressable
+                    key={label}
+                    className="flex-row items-center gap-2 rounded-full bg-[#B55D05] px-4 py-2"
+                    onPress={() => {
+                      setQuery(label);
+                      runSearch(label);
+                    }}
+                  >
+                    <Text className="text-sm font-medium text-white">{label}</Text>
+                    <Ionicons name="chevron-down" size={14} color="white" />
+                  </Pressable>
+                ))}
+              </View>
+            </View>
             <View className="py-4 px-4">
               <Text className="text-lg font-bold mb-3 text-[#374151]">Sugestões de busca</Text>
               <View className="flex-row flex-wrap gap-2">
