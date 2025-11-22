@@ -203,6 +203,14 @@ export function LoginScreen() {
                 <Text className="text-base font-bold text-[#B55D05]">Cadastre-se</Text>
               </Pressable>
             </View>
+
+            <Pressable
+              className="mt-4"
+              onPress={() => navigation.navigate("tabs")}
+              accessibilityRole="button"
+            >
+              <Text className="text-sm text-[#6B7280] underline">Bypass (dev)</Text>
+            </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
