@@ -6,6 +6,7 @@ import { EditProfileScreen } from "../../presentation/screens/profile/EditProfil
 import { LoginScreen } from "../../presentation/screens/auth/LoginScreen";
 import { SignUpScreen } from "../../presentation/screens/auth/SignUpScreen";
 import { BrechoFormScreen } from "../../presentation/screens/thrift/BrechoFormScreen";
+import { MyContentsScreen } from "../../presentation/screens/content/MyContentsScreen";
 import type { ThriftStoreId } from "../../domain/entities/ThriftStore";
 import type { User } from "../../domain/entities/User";
 
@@ -18,6 +19,7 @@ export type RootStackParamList = {
     profile: User & { bio?: string; notifyNewStores: boolean; notifyPromos: boolean; avatarUrl?: string };
   };
   brechoForm: { thriftStore: import("../../domain/entities/ThriftStore").ThriftStore | null };
+  myContents: { storeId: ThriftStoreId };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -31,6 +33,7 @@ export function RootStack() {
       <Stack.Screen name="thriftDetail" component={ThriftDetailScreen} />
       <Stack.Screen name="editProfile" component={EditProfileScreen} />
       <Stack.Screen name="brechoForm" component={BrechoFormScreen} />
+      <Stack.Screen name="myContents" component={MyContentsScreen} />
     </Stack.Navigator>
   );
 }

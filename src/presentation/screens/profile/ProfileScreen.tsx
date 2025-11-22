@@ -106,6 +106,19 @@ export function ProfileScreen() {
               </Text>
               <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
             </Pressable>
+            {user?.ownedThriftStore ? (
+              <Pressable
+                className="flex-row items-center justify-between p-4 border-t border-gray-200"
+                onPress={() =>
+                  navigation.navigate("myContents", {
+                    storeId: user.ownedThriftStore!.id
+                  })
+                }
+              >
+                <Text className="text-[#374151]">Meus conteúdos</Text>
+                <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
+              </Pressable>
+            ) : null}
             <Pressable className="flex-row items-center justify-between p-4">
               <Text className="text-red-500">Sair</Text>
               <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />

@@ -6,4 +6,5 @@ export interface GuideContent {
   description: string;
   categoryLabel: string;
   imageUrl: string;
+  storeId: import("./ThriftStore").ThriftStoreId;
 }
