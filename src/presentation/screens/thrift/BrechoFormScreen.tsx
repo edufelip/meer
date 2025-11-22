@@ -150,7 +150,9 @@ export function BrechoFormScreen() {
                   }`}
                   onPress={() => toggleCategory(label)}
                 >
-                  {label}
+                  <Text className={`text-sm font-semibold ${active ? "text-white" : "text-gray-700"}`}>
+                    {label}
+                  </Text>
                 </Pressable>
               );
             })}
