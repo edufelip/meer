@@ -36,6 +36,15 @@ export function LoginScreen() {
   const [resetError, setResetError] = useState<string | null>(null);
   const [resetLoading, setResetLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
+  useEffect(() => {
+    if (!resetVisible) {
+      // Reset state after the modal fully unmounts to avoid flicker on dismiss
+      setResetSuccess(false);
+      setResetError(null);
+      setResetEmail("");
+      setResetLoading(false);
+    }
+  }, [resetVisible]);
 
   WebBrowser.maybeCompleteAuthSession();
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
@@ -201,12 +210,7 @@ export function LoginScreen() {
         visible={resetVisible}
         transparent
         animationType="fade"
-        onRequestClose={() => {
-          setResetVisible(false);
-          setResetSuccess(false);
-          setResetError(null);
-          setResetEmail("");
-        }}
+        onRequestClose={() => setResetVisible(false)}
       >
         <View className="flex-1 bg-black/40 items-center justify-center px-6">
           <View className="w-full max-w-md bg-white rounded-2xl p-6">
@@ -217,12 +221,7 @@ export function LoginScreen() {
                 </Text>
                 <Pressable
                   className="h-12 rounded-lg bg-[#B55D05] items-center justify-center"
-                  onPress={() => {
-                    setResetVisible(false);
-                    setResetSuccess(false);
-                    setResetError(null);
-                    setResetEmail("");
-                  }}
+                  onPress={() => setResetVisible(false)}
                 >
                   <Text className="text-white font-bold">OK</Text>
                 </Pressable>
