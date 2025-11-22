@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -14,10 +14,47 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { theme } from "../../../shared/theme";
+import { isValidEmail, validatePassword } from "../../../domain/validation/auth";
+/* eslint-disable import/no-unresolved */
+import { firebaseAuth } from "../../../services/firebase/firebase";
+import auth from "@react-native-firebase/auth";
+import * as WebBrowser from "expo-web-browser";
+import * as Google from "expo-auth-session/providers/google";
 
 export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  WebBrowser.maybeCompleteAuthSession();
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    clientId: "YOUR_GOOGLE_CLIENT_ID",
+    iosClientId: "YOUR_IOS_CLIENT_ID",
+    androidClientId: "YOUR_ANDROID_CLIENT_ID",
+    scopes: ["profile", "email"]
+  });
+
+  useEffect(() => {
+    const doGoogle = async () => {
+      if (response?.type === "success" && response.params?.id_token) {
+        const { id_token } = response.params;
+        try {
+          setLoading(true);
+          const credential = auth.GoogleAuthProvider.credential(id_token);
+          await firebaseAuth().signInWithCredential(credential);
+          navigation.navigate("tabs");
+        } catch {
+          setError("Não foi possível entrar com Google. Tente novamente.");
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    doGoogle();
+  }, [navigation, response]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -44,7 +81,11 @@ export function LoginScreen() {
             </Text>
 
             <View className="w-full space-y-3">
-              <Pressable className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5">
+              <Pressable
+                className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5"
+                disabled={!request || loading}
+                onPress={() => promptAsync()}
+              >
                 <AntDesign name="google" size={18} color="#4285F4" />
                 <Text className="text-base font-bold text-[#374151]">Entrar com Google</Text>
               </Pressable>
@@ -66,6 +107,8 @@ export function LoginScreen() {
               <View>
                 <Text className="text-base font-medium text-[#374151] pb-2">E-mail</Text>
                 <TextInput
+                  value={email}
+                  onChangeText={setEmail}
                   placeholder="seuemail@dominio.com"
                   placeholderTextColor="#9CA3AF"
                   keyboardType="email-address"
@@ -80,6 +123,8 @@ export function LoginScreen() {
                 </View>
                 <View className="relative w-full">
                   <TextInput
+                    value={password}
+                    onChangeText={setPassword}
                     placeholder="Sua senha"
                     placeholderTextColor="#9CA3AF"
                     secureTextEntry={!passwordVisible}
@@ -102,12 +147,37 @@ export function LoginScreen() {
               </View>
             </View>
 
+            {error ? <Text className="text-sm text-red-500 w-full text-left mt-2">{error}</Text> : null}
+
             <View className="w-full pt-6">
               <Pressable
-                className="h-14 rounded-lg bg-[#B55D05] items-center justify-center"
-                onPress={() => navigation.navigate("tabs")}
+                className={`h-14 rounded-lg items-center justify-center ${
+                  loading ? "bg-[#B55D05]/60" : "bg-[#B55D05]"
+                }`}
+                disabled={loading}
+                onPress={async () => {
+                  setError(null);
+                  if (!isValidEmail(email)) {
+                    setError("Digite um e-mail válido.");
+                    return;
+                  }
+                  const pass = validatePassword(password);
+                  if (!pass.valid) {
+                    setError(pass.error ?? "Senha inválida.");
+                    return;
+                  }
+                  try {
+                    setLoading(true);
+                    await firebaseAuth().signInWithEmailAndPassword(email.trim(), password);
+                    navigation.navigate("tabs");
+                  } catch {
+                    setError("Não foi possível entrar. Verifique suas credenciais.");
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
               >
-                <Text className="text-base font-bold text-white">Entrar</Text>
+                <Text className="text-base font-bold text-white">{loading ? "Entrando..." : "Entrar"}</Text>
               </Pressable>
             </View>
 

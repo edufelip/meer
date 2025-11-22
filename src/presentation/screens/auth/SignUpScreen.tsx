@@ -14,11 +14,19 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { theme } from "../../../shared/theme";
+import { isValidEmail, validatePassword, passwordsMatch } from "../../../domain/validation/auth";
+import { firebaseAuth } from "../../../services/firebase/firebase";
 
 export function SignUpScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -61,6 +69,8 @@ export function SignUpScreen() {
               <View>
                 <Text className="text-base font-medium text-[#374151] pb-2">Nome Completo</Text>
                 <TextInput
+                  value={fullName}
+                  onChangeText={setFullName}
                   placeholder="Seu nome completo"
                   placeholderTextColor="#9CA3AF"
                   className="h-14 rounded-lg border border-[#E5E7EB] bg-[#F3F4F6] px-4 text-base text-[#374151]"
@@ -70,6 +80,8 @@ export function SignUpScreen() {
               <View>
                 <Text className="text-base font-medium text-[#374151] pb-2">E-mail</Text>
                 <TextInput
+                  value={email}
+                  onChangeText={setEmail}
                   placeholder="seuemail@dominio.com"
                   placeholderTextColor="#9CA3AF"
                   keyboardType="email-address"
@@ -82,6 +94,8 @@ export function SignUpScreen() {
                 <Text className="text-base font-medium text-[#374151] pb-2">Senha</Text>
                 <View className="relative w-full">
                   <TextInput
+                    value={password}
+                    onChangeText={setPassword}
                     placeholder="Crie uma senha"
                     placeholderTextColor="#9CA3AF"
                     secureTextEntry={!passwordVisible}
@@ -104,6 +118,8 @@ export function SignUpScreen() {
                 <Text className="text-base font-medium text-[#374151] pb-2">Confirme sua Senha</Text>
                 <View className="relative w-full">
                   <TextInput
+                    value={confirm}
+                    onChangeText={setConfirm}
                     placeholder="Repita a senha"
                     placeholderTextColor="#9CA3AF"
                     secureTextEntry={!confirmVisible}
@@ -123,12 +139,46 @@ export function SignUpScreen() {
               </View>
             </View>
 
+            {error ? <Text className="text-sm text-red-500 w-full text-left mt-2">{error}</Text> : null}
+
             <View className="w-full pt-6">
               <Pressable
-                className="h-14 rounded-lg bg-[#B55D05] items-center justify-center"
-                onPress={() => navigation.navigate("tabs")}
+                className={`h-14 rounded-lg items-center justify-center ${
+                  loading ? "bg-[#B55D05]/60" : "bg-[#B55D05]"
+                }`}
+                disabled={loading}
+                onPress={async () => {
+                  setError(null);
+                  if (!fullName.trim()) {
+                    setError("Informe seu nome completo.");
+                    return;
+                  }
+                  if (!isValidEmail(email)) {
+                    setError("Digite um e-mail válido.");
+                    return;
+                  }
+                  const pass = validatePassword(password);
+                  if (!pass.valid) {
+                    setError(pass.error ?? "Senha inválida.");
+                    return;
+                  }
+                  if (!passwordsMatch(password, confirm)) {
+                    setError("As senhas não coincidem.");
+                    return;
+                  }
+                  try {
+                    setLoading(true);
+                    const userCred = await firebaseAuth().createUserWithEmailAndPassword(email.trim(), password);
+                    await userCred.user.updateProfile({ displayName: fullName.trim() });
+                    navigation.navigate("tabs");
+                  } catch {
+                    setError("Não foi possível criar a conta. Tente novamente.");
+                  } finally {
+                    setLoading(false);
+                  }
+                }}
               >
-                <Text className="text-base font-bold text-white">Cadastrar</Text>
+                <Text className="text-base font-bold text-white">{loading ? "Cadastrando..." : "Cadastrar"}</Text>
               </Pressable>
             </View>
           </View>

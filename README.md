@@ -1,50 +1,59 @@
-# Welcome to your Expo app 👋
+# Meer
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+<p align="center">
+  <a href="https://android-arsenal.com/api?level=24"><img alt="API" src="https://img.shields.io/badge/API-24%2B-brightgreen.svg?style=flat"/></a>
+  <a href="https://github.com/edufelip"><img alt="Build Status" src="https://img.shields.io/static/v1?label=CI&message=local%20scripts&color=green&logo=github"/></a>
+  <a href="https://medium.com/@eduardofelipi"><img alt="Medium" src="https://img.shields.io/static/v1?label=Medium&message=@edu_santos&color=gray&logo=medium"/></a><br>
+  <a href="https://www.youtube.com/channel/UCYcwwX7nDU_U0FP-TsXMwVg"><img alt="Profile" src="https://img.shields.io/static/v1?label=Youtube&message=edu_santos&color=red&logo=youtube"/></a>
+  <a href="https://github.com/edufelip"><img alt="Profile" src="https://img.shields.io/static/v1?label=Github&message=edufelip&color=white&logo=github"/></a>
+  <a href="https://www.linkedin.com/in/eduardo-felipe-dev/"><img alt="Linkedin" src="https://img.shields.io/static/v1?label=Linkedin&message=edu_santos&color=blue&logo=linkedin"/></a>
+</p>
 
-## Get started
+<p align="center">  
+🛍️ Guia Brechó — encontre, salve e explore brechós com UI mobile first.
+</p>
 
-1. Install dependencies
+## This project uses
+* Expo (SDK 54)
+* React Native + NativeWind
+* React Navigation (stack + tabs)
+* Firebase Authentication (email/senha + Google) — via @react-native-firebase/app/auth
+* Firebase Messaging, Crashlytics, Performance (scaffolded)
+* AsyncStorage (preferências locais)
+* Clean architecture: Presentation → Domain → Data, DI via provider hook
 
-   ```bash
-   npm install
-   ```
+Key recent changes
+- Login screen added as initial route; Google button only on iOS. Email/senha auth wired to Firebase; validations for e-mail e senha.
+- Signup screen with validations, Firebase email/password creation, and name saved to displayName.
+- Edit Profile preloads profile, shows bottom-sheet avatar picker (camera/galeria stub), validates bio (200 chars) and name, persists toggle prefs in AsyncStorage.
+- Firebase config paths set for iOS/Android; service files are git-ignored (add your real `GoogleService-Info.plist` at repo root and `android/app/google-services.json` locally).
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
+## Installation
 ```bash
-npm run reset-project
+git clone <repo>
+cd Meer
+npm install   # fix ~/.npm permissions first if needed
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Firebase setup (local)
+1) Download `GoogleService-Info.plist` (iOS) and place at project root.  
+2) Download `google-services.json` (Android) and place at `android/app/google-services.json`.  
+3) Bundle/package ID: `com.edufelip.meer` (set in app.json).  
+4) Run `npm install` to pull @react-native-firebase packages (requires fixing ~/.npm permissions if prompted).  
+5) Start: `npm start -- --clear`
 
-## Learn more
+## Build & Run
+- Expo Go / Dev build: `npm start`
+- iOS simulator: `npm run ios`
+- Android emulator: `npm run android`
 
-To learn more about developing your project with Expo, look at the following resources:
+## Testing
+- Lint: `npm run lint`
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Architecture (Clean)
+UI (screens/components) → use cases → repositories → data sources.  
+DI provided via `DependenciesProvider` hook.
 
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Notes
+- Google login needs valid client IDs in `LoginScreen` (Expo Auth Session). Replace placeholder IDs with yours.
+- Service files are ignored; ensure you add them locally before building.
