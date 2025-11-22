@@ -94,31 +94,68 @@ export function ProfileScreen() {
               <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
             </Pressable>
             <Pressable
-              className="flex-row items-center justify-between p-4"
-              onPress={() =>
-                navigation.navigate("brechoForm", {
-                  thriftStore: user?.ownedThriftStore ?? null
-                })
-              }
+              className="flex-row items-center justify-between p-4 border-t border-gray-200"
+              onPress={() => {
+                // placeholder contact action
+              }}
             >
-              <Text className="text-[#374151]">
-                {user?.ownedThriftStore ? "Meu Brechó" : "Cadastrar Brechó"}
-              </Text>
+              <Text className="text-[#374151]">Fale Conosco</Text>
               <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
             </Pressable>
-            {user?.ownedThriftStore ? (
+          </View>
+        </View>
+
+        {user?.ownedThriftStore ? (
+          <View className="px-4 pt-0 pb-4">
+            <Text className="text-lg font-bold mb-2 text-[#1F2937]">Meu Brechó</Text>
+            <View className="bg-white rounded-lg shadow-sm">
               <Pressable
-                className="flex-row items-center justify-between p-4 border-t border-gray-200"
+                className="flex-row items-center justify-between p-4 border-b border-gray-200"
                 onPress={() =>
-                  navigation.navigate("myContents", {
-                    storeId: user.ownedThriftStore!.id
+                  navigation.navigate("brechoForm", {
+                    thriftStore: user?.ownedThriftStore ?? null
                   })
                 }
               >
-                <Text className="text-[#374151]">Meus conteúdos</Text>
+                <Text className="text-[#374151]">Gerenciar Brechó</Text>
                 <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
               </Pressable>
-            ) : null}
+              <Pressable
+                className="flex-row items-center justify-between p-4 border-b border-gray-200"
+                onPress={() => navigation.navigate("myContents", { storeId: user.ownedThriftStore.id })}
+              >
+                <Text className="text-[#374151]">Criar Conteúdo</Text>
+                <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
+              </Pressable>
+              <Pressable
+                className="flex-row items-center justify-between p-4"
+                onPress={() => navigation.navigate("myContents", { storeId: user.ownedThriftStore.id })}
+              >
+                <Text className="text-[#374151]">Meus Conteúdos</Text>
+                <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
+              </Pressable>
+            </View>
+          </View>
+        ) : (
+          <View className="px-4 pt-0 pb-4">
+            <View className="bg-white rounded-lg shadow-sm">
+              <Pressable
+                className="flex-row items-center justify-between p-4"
+                onPress={() =>
+                  navigation.navigate("brechoForm", {
+                    thriftStore: null
+                  })
+                }
+              >
+                <Text className="text-[#374151]">Cadastrar Brechó</Text>
+                <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
+              </Pressable>
+            </View>
+          </View>
+        )}
+
+        <View className="px-4 pb-6">
+          <View className="bg-white rounded-lg shadow-sm">
             <Pressable className="flex-row items-center justify-between p-4">
               <Text className="text-red-500">Sair</Text>
               <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
