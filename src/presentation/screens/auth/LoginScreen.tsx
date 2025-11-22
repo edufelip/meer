@@ -6,7 +6,9 @@ import {
   Pressable,
   ScrollView,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Modal,
+  ActivityIndicator
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialIcons, AntDesign } from "@expo/vector-icons";
@@ -18,6 +20,8 @@ import { isValidEmail, validatePassword } from "../../../domain/validation/auth"
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
+import { firebaseAuth } from "../../../services/firebase/firebase";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -27,6 +31,11 @@ export function LoginScreen() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [resetVisible, setResetVisible] = useState(false);
+  const [resetEmail, setResetEmail] = useState("");
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   WebBrowser.maybeCompleteAuthSession();
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
@@ -139,7 +148,7 @@ export function LoginScreen() {
                     />
                   </Pressable>
                 </View>
-                <Pressable className="items-end mt-2">
+                <Pressable className="items-end mt-2" onPress={() => setResetVisible(true)}>
                   <Text className="text-sm font-medium text-[#B55D05]">Esqueceu sua senha?</Text>
                 </Pressable>
               </View>
@@ -188,6 +197,84 @@ export function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <Modal
+        visible={resetVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => {
+          setResetVisible(false);
+          setResetSuccess(false);
+          setResetError(null);
+          setResetEmail("");
+        }}
+      >
+        <View className="flex-1 bg-black/40 items-center justify-center px-6">
+          <View className="w-full max-w-md bg-white rounded-2xl p-6">
+            {resetSuccess ? (
+              <>
+                <Text className="text-base text-[#374151] mb-6">
+                  Você receberá um e-mail em breve, verifique sua caixa de entrada.
+                </Text>
+                <Pressable
+                  className="h-12 rounded-lg bg-[#B55D05] items-center justify-center"
+                  onPress={() => {
+                    setResetVisible(false);
+                    setResetSuccess(false);
+                    setResetError(null);
+                    setResetEmail("");
+                  }}
+                >
+                  <Text className="text-white font-bold">OK</Text>
+                </Pressable>
+              </>
+            ) : (
+              <>
+                <Text className="text-base text-[#374151] mb-4">
+                  Nos informe seu e-mail para enviarmos o link de redefinição de senha
+                </Text>
+                <TextInput
+                  value={resetEmail}
+                  onChangeText={setResetEmail}
+                  placeholder="seuemail@dominio.com"
+                  placeholderTextColor="#9CA3AF"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  className="h-12 rounded-lg border border-[#E5E7EB] bg-[#F3F4F6] px-4 text-base text-[#374151]"
+                />
+                {resetError ? <Text className="text-sm text-red-500 mt-2">{resetError}</Text> : null}
+                <Pressable
+                  className={`h-12 rounded-lg items-center justify-center mt-4 ${
+                    resetLoading ? "bg-[#B55D05]/60" : "bg-[#B55D05]"
+                  }`}
+                  disabled={resetLoading}
+                  onPress={async () => {
+                    setResetError(null);
+                    if (!isValidEmail(resetEmail)) {
+                      setResetError("Digite um e-mail válido.");
+                      return;
+                    }
+                    try {
+                      setResetLoading(true);
+                      await sendPasswordResetEmail(firebaseAuth(), resetEmail.trim());
+                      setResetSuccess(true);
+                    } catch {
+                      setResetError("Não foi possível enviar o e-mail. Tente novamente.");
+                    } finally {
+                      setResetLoading(false);
+                    }
+                  }}
+                >
+                  {resetLoading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text className="text-white font-bold">Enviar</Text>
+                  )}
+                </Pressable>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
