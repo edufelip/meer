@@ -1,5 +1,5 @@
 import React from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View, type StyleProp, type ViewStyle } from "react-native";
 import type { ThriftStore } from "../../domain/entities/ThriftStore";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../../shared/theme";
@@ -7,9 +7,10 @@ import { theme } from "../../shared/theme";
 interface NearbyThriftListItemProps {
   store: ThriftStore;
   onPress?: () => void;
+  style?: StyleProp<ViewStyle>;
 }
 
-export function NearbyThriftListItem({ store, onPress }: NearbyThriftListItemProps) {
+export function NearbyThriftListItem({ store, onPress, style }: NearbyThriftListItemProps) {
   const distanceLabel =
     store.distanceKm !== undefined && store.walkTimeMinutes
       ? `${store.distanceKm.toFixed(1)} km · ${store.walkTimeMinutes} min`
@@ -22,6 +23,7 @@ export function NearbyThriftListItem({ store, onPress }: NearbyThriftListItemPro
       className="bg-white rounded-xl shadow-sm p-3 flex-row items-center"
       onPress={onPress}
       accessibilityRole="button"
+      style={style}
     >
       <Image source={{ uri: store.imageUrl }} className="w-16 h-16 rounded-lg mr-2" />
       <View className="flex-1 ml-2">

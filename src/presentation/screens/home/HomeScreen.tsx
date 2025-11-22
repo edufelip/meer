@@ -175,14 +175,15 @@ export function HomeScreen() {
               </ScrollView>
             </View>
 
-            <View className="space-y-2 mt-4">
+            <View className="mt-4">
               {(activeFilter === "Próximo a mim"
                 ? nearby
                 : nearby.filter((s) => s.neighborhood === activeFilter)
-              ).map((store) => (
+              ).map((store, idx, arr) => (
                 <NearbyThriftListItem
                   key={store.id}
                   store={store}
+                  style={{ marginBottom: idx === arr.length - 1 ? 0 : 8 }}
                   onPress={() => navigation.navigate("thriftDetail", { id: store.id })}
                 />
               ))}
