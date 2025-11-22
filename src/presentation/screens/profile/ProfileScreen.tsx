@@ -11,11 +11,12 @@ import { theme } from "../../../shared/theme";
 
 export function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { getProfileUseCase } = useDependencies();
+  const { getProfileUseCase, getGuideContentUseCase } = useDependencies();
   const [user, setUser] = useState<(User & { bio?: string; notifyNewStores: boolean; notifyPromos: boolean }) | null>(
     null
   );
   const [loading, setLoading] = useState(true);
+  const [hasArticles, setHasArticles] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -23,13 +24,21 @@ export function ProfileScreen() {
       const maybeUser = await getProfileUseCase.execute();
       if (isMounted) {
         setUser(maybeUser);
-        setLoading(false);
       }
+      if (maybeUser?.ownedThriftStore) {
+        const articles = await getGuideContentUseCase.execute();
+        if (isMounted) {
+          setHasArticles(articles.some((a) => a.storeId === maybeUser.ownedThriftStore?.id));
+        }
+      } else if (isMounted) {
+        setHasArticles(false);
+      }
+      if (isMounted) setLoading(false);
     })();
     return () => {
       isMounted = false;
     };
-  }, [getProfileUseCase]);
+  }, [getProfileUseCase, getGuideContentUseCase]);
 
   const displayUser = user;
 
@@ -125,13 +134,15 @@ export function ProfileScreen() {
                 <Text className="text-[#374151]">Criar Conteúdo</Text>
                 <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
               </Pressable>
-              <Pressable
-                className="flex-row items-center justify-between p-4"
-                onPress={() => navigation.navigate("myContents", { storeId: user.ownedThriftStore.id })}
-              >
-                <Text className="text-[#374151]">Meus Conteúdos</Text>
-                <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
-              </Pressable>
+              {hasArticles ? (
+                <Pressable
+                  className="flex-row items-center justify-between p-4"
+                  onPress={() => navigation.navigate("myContents", { storeId: user.ownedThriftStore.id })}
+                >
+                  <Text className="text-[#374151]">Meus Conteúdos</Text>
+                  <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
+                </Pressable>
+              ) : null}
             </View>
           </View>
         ) : (
@@ -145,7 +156,7 @@ export function ProfileScreen() {
                   })
                 }
               >
-                <Text className="text-[#374151]">Cadastrar Brechó</Text>
+                <Text className="text-[#374151]">Criar Brechó</Text>
                 <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
               </Pressable>
             </View>
