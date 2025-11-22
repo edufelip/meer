@@ -96,7 +96,10 @@ export function HomeScreen() {
             </View>
             <Text className="text-sm text-[#6B7280] mt-0.5">{locationLabel}</Text>
           </View>
-          <Pressable className="w-8 h-8 items-center justify-center" onPress={() => {}}>
+          <Pressable
+            className="w-8 h-8 items-center justify-center"
+            onPress={() => navigation.navigate("search")}
+          >
             <Ionicons name="search" size={22} color={theme.colors.highlight} />
           </Pressable>
         </View>
