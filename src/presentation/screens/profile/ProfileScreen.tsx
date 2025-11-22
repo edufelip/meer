@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Pressable, ScrollView, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
@@ -31,17 +31,7 @@ export function ProfileScreen() {
     };
   }, [getProfileUseCase]);
 
-  const displayUser = useMemo<User>(
-    () =>
-      user ?? {
-        id: "placeholder",
-        name: "Sophia",
-        avatarUrl:
-          "https://lh3.googleusercontent.com/aida-public/AB6AXuDGrbbSjpb-IU9VQCZt_O84OMey95QcA2Wfu9tio0CPk5BMqL4ACHte-bSQP5aFMaAQ2pUWHWfNgFlNu8E9tukKEMD8rXJs07_0l4a-apj6H0cCaD8ct7DuJbmwluannXuLWhIOjFiu49M3Y3stl-f2r9iAI0eqmc7FoYw_8DkwTDRfCoC__DRgLVS84OVBKmNLCAwSg_QhjdMimAa77l1ZQbNccSgYf2naYfQ3no8s_JCFTa7gK8aXTopp4wcHfrImuSe0Co2cAbo",
-        email: "sophia.silva@email.com"
-      },
-    [user]
-  );
+  const displayUser = user;
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
@@ -63,15 +53,22 @@ export function ProfileScreen() {
         <View className="bg-white">
           <View className="flex-col items-center p-6 space-y-4">
             <View className="relative">
-              <Image
-                source={{ uri: displayUser.avatarUrl ?? "" }}
-                className="w-32 h-32 rounded-full"
-                style={{ borderWidth: 4, borderColor: "#EC4899" }}
-              />
+              {displayUser?.avatarUrl ? (
+                <Image
+                  source={{ uri: displayUser.avatarUrl }}
+                  className="w-32 h-32 rounded-full"
+                  style={{ borderWidth: 4, borderColor: "#EC4899" }}
+                />
+              ) : (
+                <View
+                  className="w-32 h-32 rounded-full bg-gray-200"
+                  style={{ borderWidth: 4, borderColor: "#EC4899" }}
+                />
+              )}
             </View>
-            <View className="items-center">
-              <Text className="text-2xl font-bold text-[#1F2937]">{displayUser.name}</Text>
-              <Text className="text-gray-500">{displayUser.email ?? "contato@brecho.app"}</Text>
+            <View className="items-center mt-2">
+              <Text className="text-2xl font-bold text-[#1F2937]">{displayUser?.name ?? ""}</Text>
+              <Text className="text-gray-500">{displayUser?.email ?? ""}</Text>
             </View>
           </View>
         </View>
