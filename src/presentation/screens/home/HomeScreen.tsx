@@ -118,13 +118,13 @@ export function HomeScreen() {
               onLocate={() => {}}
             />
             <View className="absolute inset-0 rounded-xl">
-                <View className="absolute bottom-0 left-0 right-0 p-4 pb-6">
+                <View className="absolute bottom-0 left-0 right-0 p-4 pb-4">
                   <View className="flex-row items-end justify-between">
                     <View>
                       <Text className="text-lg font-bold text-white">Brechós próximos</Text>
-                      <Text className="text-sm text-white/90 mb-6">Encontre brechós perto de você</Text>
+                      <Text className="text-sm text-white/90 mb-3">Encontre brechós perto de você</Text>
                     </View>
-                    <Pressable className="bg-[#B55D05] px-4 py-2 rounded-full shadow-lg">
+                    <Pressable className="bg-[#B55D05] px-4 py-2 rounded-full shadow-lg mb-3">
                       <Text className="text-sm font-bold text-white">Ver lista</Text>
                     </Pressable>
                   </View>
