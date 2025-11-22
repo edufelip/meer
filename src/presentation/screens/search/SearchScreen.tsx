@@ -19,6 +19,7 @@ export function SearchScreen() {
   const [recents, setRecents] = useState<string[]>([]);
   const [results, setResults] = useState([] as Awaited<ReturnType<typeof searchThriftStoresUseCase.execute>>);
   const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -54,6 +55,7 @@ export function SearchScreen() {
     const list = await searchThriftStoresUseCase.execute(term);
     setResults(list);
     setLoading(false);
+    setHasSearched(true);
     if (!recents.includes(term)) {
       const next = [term, ...recents].slice(0, 5);
       await persistRecents(next);
@@ -181,7 +183,17 @@ export function SearchScreen() {
         ListFooterComponent={
           <View className="px-4 pt-6 gap-3">
             {loading ? (
-              <ActivityIndicator color={theme.colors.highlight} />
+              <View className="gap-3">
+                {[0, 1, 2].map((idx) => (
+                  <View key={idx} className="flex-row items-center bg-white rounded-xl shadow-sm p-3" style={{ opacity: 0.7 }}>
+                    <View className="w-16 h-16 bg-gray-200 rounded-lg mr-3" />
+                    <View className="flex-1 gap-2">
+                      <View className="h-4 bg-gray-200 rounded-full w-3/4" />
+                      <View className="h-3 bg-gray-200 rounded-full w-1/2" />
+                    </View>
+                  </View>
+                ))}
+              </View>
             ) : results.length > 0 ? (
               results.map((store) => (
                 <NearbyThriftListItem
@@ -191,6 +203,8 @@ export function SearchScreen() {
                   style={{ marginBottom: 8 }}
                 />
               ))
+            ) : hasSearched ? (
+              <Text className="text-[#6B7280]">Nenhum resultado para "{query}".</Text>
             ) : null}
           </View>
         }
