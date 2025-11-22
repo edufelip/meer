@@ -22,6 +22,9 @@ import { UpdateProfileUseCase } from "../../domain/usecases/UpdateProfileUseCase
 import { SignInWithEmailUseCase } from "../../domain/usecases/SignInWithEmailUseCase";
 import { SignUpWithEmailUseCase } from "../../domain/usecases/SignUpWithEmailUseCase";
 import { SignInWithGoogleUseCase } from "../../domain/usecases/SignInWithGoogleUseCase";
+import { FavoriteRepositoryAsyncStorage } from "../../data/repositories/FavoriteRepositoryAsyncStorage";
+import { ToggleFavoriteThriftStoreUseCase } from "../../domain/usecases/ToggleFavoriteThriftStoreUseCase";
+import { IsFavoriteThriftStoreUseCase } from "../../domain/usecases/IsFavoriteThriftStoreUseCase";
 
 interface Dependencies {
   getCurrentUserUseCase: GetCurrentUserUseCase;
@@ -29,6 +32,8 @@ interface Dependencies {
   getNearbyThriftStoresUseCase: GetNearbyThriftStoresUseCase;
   getGuideContentUseCase: GetGuideContentUseCase;
   getFavoriteThriftStoresUseCase: GetFavoriteThriftStoresUseCase;
+  toggleFavoriteThriftStoreUseCase: ToggleFavoriteThriftStoreUseCase;
+  isFavoriteThriftStoreUseCase: IsFavoriteThriftStoreUseCase;
   getCategoriesUseCase: GetCategoriesUseCase;
   getThriftStoreByIdUseCase: GetThriftStoreByIdUseCase;
   getProfileUseCase: GetProfileUseCase;
@@ -59,6 +64,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const categoryRemote = new JsonCategoryRemoteDataSource();
     const profileRemote = new JsonProfileRemoteDataSource();
     const authRepository = new AuthRepositoryFirebase();
+    const favoriteRepository = new FavoriteRepositoryAsyncStorage();
 
     const thriftStoreRepository = new ThriftStoreRepositoryJson(thriftStoreRemote);
     const guideContentRepository = new GuideContentRepositoryJson(guideContentRemote);
@@ -69,7 +75,9 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const getFeaturedThriftStoresUseCase = new GetFeaturedThriftStoresUseCase(thriftStoreRepository);
     const getNearbyThriftStoresUseCase = new GetNearbyThriftStoresUseCase(thriftStoreRepository);
     const getGuideContentUseCase = new GetGuideContentUseCase(guideContentRepository);
-    const getFavoriteThriftStoresUseCase = new GetFavoriteThriftStoresUseCase(thriftStoreRepository);
+    const getFavoriteThriftStoresUseCase = new GetFavoriteThriftStoresUseCase(favoriteRepository);
+    const toggleFavoriteThriftStoreUseCase = new ToggleFavoriteThriftStoreUseCase(favoriteRepository);
+    const isFavoriteThriftStoreUseCase = new IsFavoriteThriftStoreUseCase(favoriteRepository);
     const getCategoriesUseCase = new GetCategoriesUseCase(categoryRepository);
     const getThriftStoreByIdUseCase = new GetThriftStoreByIdUseCase(thriftStoreRepository);
     const getProfileUseCase = new GetProfileUseCase(profileRepository);
@@ -84,6 +92,8 @@ export function DependenciesProvider(props: PropsWithChildren) {
       getNearbyThriftStoresUseCase,
       getGuideContentUseCase,
       getFavoriteThriftStoresUseCase,
+      toggleFavoriteThriftStoreUseCase,
+      isFavoriteThriftStoreUseCase,
       getCategoriesUseCase,
       getThriftStoreByIdUseCase,
       getProfileUseCase,

@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { ActivityIndicator, FlatList, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { FavoriteThriftCard } from "../../components/FavoriteThriftCard";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 
@@ -14,19 +14,21 @@ export function FavoritesScreen() {
   const [favorites, setFavorites] = useState<ThriftStore[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      const stores = await getFavoriteThriftStoresUseCase.execute();
-      if (isMounted) {
-        setFavorites(stores);
-        setLoading(false);
-      }
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, [getFavoriteThriftStoresUseCase]);
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      (async () => {
+        const stores = await getFavoriteThriftStoresUseCase.execute();
+        if (active) {
+          setFavorites(stores);
+          setLoading(false);
+        }
+      })();
+      return () => {
+        active = false;
+      };
+    }, [getFavoriteThriftStoresUseCase])
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>

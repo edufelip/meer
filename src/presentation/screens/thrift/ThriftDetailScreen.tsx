@@ -21,10 +21,16 @@ interface ThriftDetailScreenProps {
 }
 
 export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
-  const { getThriftStoreByIdUseCase, getFeaturedThriftStoresUseCase } = useDependencies();
+  const {
+    getThriftStoreByIdUseCase,
+    getFeaturedThriftStoresUseCase,
+    toggleFavoriteThriftStoreUseCase,
+    isFavoriteThriftStoreUseCase
+  } = useDependencies();
   const navigation = useNavigation();
   const [store, setStore] = useState<ThriftStore | null>(null);
   const [loading, setLoading] = useState(true);
+  const [favorite, setFavorite] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -38,13 +44,18 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
           const fallback = (await getFeaturedThriftStoresUseCase.execute())[0] ?? null;
           setStore(fallback);
         }
+        const target = match ?? null;
+        if (target) {
+          const fav = await isFavoriteThriftStoreUseCase.execute(target.id);
+          if (isMounted) setFavorite(fav);
+        }
         setLoading(false);
       }
     })();
     return () => {
       isMounted = false;
     };
-  }, [getThriftStoreByIdUseCase, getFeaturedThriftStoresUseCase, route?.params?.id]);
+  }, [getThriftStoreByIdUseCase, getFeaturedThriftStoresUseCase, isFavoriteThriftStoreUseCase, route?.params?.id]);
 
   if (loading || !store) {
     return (
@@ -83,8 +94,17 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
             >
               <Ionicons name="arrow-back" size={22} color={theme.colors.textDark} />
             </Pressable>
-            <Pressable className="p-2 rounded-full bg-white/80">
-              <Ionicons name="heart" size={22} color={theme.colors.accent} />
+            <Pressable
+              className="p-2 rounded-full bg-white/80"
+              onPress={async () => {
+                if (!store) return;
+                const next = await toggleFavoriteThriftStoreUseCase.execute(store);
+                setFavorite(next);
+              }}
+              accessibilityRole="button"
+              accessibilityLabel="Favoritar"
+            >
+              <Ionicons name={favorite ? "heart" : "heart-outline"} size={22} color={theme.colors.accent} />
             </Pressable>
           </View>
           <View className="absolute bottom-4 left-4">
