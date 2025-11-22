@@ -1,5 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { StatusBar, View, Text, Pressable, Image, TextInput, ScrollView, Switch, Alert } from "react-native";
+import {
+  StatusBar,
+  View,
+  Text,
+  Pressable,
+  Image,
+  TextInput,
+  ScrollView,
+  Switch,
+  Alert,
+  Modal,
+  TouchableWithoutFeedback
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -25,9 +37,11 @@ export function EditProfileScreen() {
   const [name, setName] = useState(preloaded?.name ?? "");
   const [bio, setBio] = useState(preloaded?.bio ?? "");
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(preloaded?.avatarUrl);
+  const [stagedAvatarUri, setStagedAvatarUri] = useState<string | undefined>(undefined);
   const [notifyNewStores, setNotifyNewStores] = useState(preloaded?.notifyNewStores ?? true);
   const [notifyPromos, setNotifyPromos] = useState(preloaded?.notifyPromos ?? false);
   const [, setEmail] = useState<string | undefined>(undefined);
+  const [showAvatarSheet, setShowAvatarSheet] = useState(false);
 
   const STORAGE_NOTIFY_STORES = "preferences.notifyNewStores";
   const STORAGE_NOTIFY_PROMOS = "preferences.notifyPromos";
@@ -87,6 +101,25 @@ export function EditProfileScreen() {
     goBackSafe();
   };
 
+  const placeholderCamera =
+    "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80";
+  const placeholderGallery =
+    "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=60";
+
+  const pickImageFromCamera = async () => {
+    // TODO: swap with expo-image-picker when backend/storage is ready.
+    Alert.alert("Câmera simulada", "Usaremos a câmera real quando o backend estiver pronto.");
+    setStagedAvatarUri(placeholderCamera);
+    setShowAvatarSheet(false);
+  };
+
+  const pickImageFromLibrary = async () => {
+    // TODO: swap with expo-image-picker when backend/storage is ready.
+    Alert.alert("Galeria simulada", "Usaremos a galeria real quando o backend estiver pronto.");
+    setStagedAvatarUri(placeholderGallery);
+    setShowAvatarSheet(false);
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" />
@@ -108,9 +141,9 @@ export function EditProfileScreen() {
         <View className="bg-white">
           <View className="flex-col items-center p-6 space-y-4">
             <View className="relative">
-              {avatarUrl ? (
+              {stagedAvatarUri || avatarUrl ? (
                 <Image
-                  source={{ uri: avatarUrl }}
+                  source={{ uri: stagedAvatarUri ?? avatarUrl }}
                   className="w-32 h-32 rounded-full"
                   style={{ borderWidth: 4, borderColor: "#EC4899" }}
                 />
@@ -120,7 +153,10 @@ export function EditProfileScreen() {
                   style={{ borderWidth: 4, borderColor: "#EC4899" }}
                 />
               )}
-              <Pressable className="absolute bottom-0 right-0 bg-[#B55D05] p-2 rounded-full shadow-lg">
+              <Pressable
+                className="absolute bottom-0 right-0 bg-[#B55D05] p-2 rounded-full shadow-lg"
+                onPress={() => setShowAvatarSheet(true)}
+              >
                 <Ionicons name="pencil" size={14} color="#FFFFFF" />
               </Pressable>
             </View>
@@ -218,6 +254,34 @@ export function EditProfileScreen() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal visible={showAvatarSheet} transparent animationType="fade" onRequestClose={() => setShowAvatarSheet(false)}>
+        <TouchableWithoutFeedback onPress={() => setShowAvatarSheet(false)}>
+          <View className="flex-1 bg-black/40" />
+        </TouchableWithoutFeedback>
+        <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-4 space-y-3 shadow-2xl">
+          <Text className="text-center text-sm font-semibold text-[#6B7280] mb-1">Atualizar foto</Text>
+          <Pressable
+            className="flex-row items-center gap-3 py-3"
+            onPress={pickImageFromCamera}
+            accessibilityRole="button"
+          >
+            <Ionicons name="camera" size={20} color={theme.colors.highlight} />
+            <Text className="text-base font-semibold text-[#1F2937]">Tirar foto</Text>
+          </Pressable>
+          <Pressable
+            className="flex-row items-center gap-3 py-3"
+            onPress={pickImageFromLibrary}
+            accessibilityRole="button"
+          >
+            <Ionicons name="image" size={20} color={theme.colors.highlight} />
+            <Text className="text-base font-semibold text-[#1F2937]">Escolher da galeria</Text>
+          </Pressable>
+          <Pressable className="items-center py-2" onPress={() => setShowAvatarSheet(false)}>
+            <Text className="text-sm text-[#6B7280]">Cancelar</Text>
+          </Pressable>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
