@@ -13,7 +13,7 @@ export function NearbyMapCard({ imageUrl, onLocate }: NearbyMapCardProps) {
       <ImageBackground source={{ uri: imageUrl }} className="h-48 w-full" resizeMode="cover" />
       <View className="absolute inset-0 bg-black/20" />
       <Pressable
-        className="absolute top-2 right-2 bg-white/85 px-3 py-2 rounded-full shadow-md"
+        className="absolute top-2 right-2 bg-white/85 px-3 py-2 rounded-full shadow-md mt-2 mr-2"
         onPress={onLocate}
         accessibilityRole="button"
         accessibilityLabel="Localizar"

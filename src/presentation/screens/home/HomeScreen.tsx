@@ -110,26 +110,26 @@ export function HomeScreen() {
           </View>
 
           <View className="px-4 py-6">
-            <SectionTitle title="Descubra brechós perto de você" className="px-0" />
-            {/* Hero card closer to reference */}
-            <View className="relative rounded-xl overflow-hidden">
-              <NearbyMapCard
-                imageUrl="https://lh3.googleusercontent.com/aida-public/AB6AXuBSugh5Wg37gnoj6GkKkSiS8awJbFlS80QERNJycKgn68NF7oXxiwdsiEEo58M8fByFbIwXzreAIouFbxQR4E7vXlnFdvYSzoshsmN1iHWV2ji6iYl2awjYiBJnN3e-UpF_app3jtWsq7lVod9vG57HH_d6pjIzdWFNwQ6aTTUZnOxvNUEpuYq3ny9OSzx1Hz6W0f3DuJ2uxyhVgq1lhVQnHEMmXcEmyIN-WBUTV5K9e8lMJ8HpqH6_TbZC7CNVMuy3snEnVSGvP7g"
-                onLocate={() => {}}
-              />
-              <View className="absolute inset-0 rounded-xl">
-                <View className="absolute bottom-0 left-0 right-0 p-4">
+          <SectionTitle title="Descubra brechós perto de você" className="px-0" />
+          {/* Hero card closer to reference */}
+          <View className="relative rounded-xl overflow-hidden">
+            <NearbyMapCard
+              imageUrl="https://lh3.googleusercontent.com/aida-public/AB6AXuBSugh5Wg37gnoj6GkKkSiS8awJbFlS80QERNJycKgn68NF7oXxiwdsiEEo58M8fByFbIwXzreAIouFbxQR4E7vXlnFdvYSzoshsmN1iHWV2ji6iYl2awjYiBJnN3e-UpF_app3jtWsq7lVod9vG57HH_d6pjIzdWFNwQ6aTTUZnOxvNUEpuYq3ny9OSzx1Hz6W0f3DuJ2uxyhVgq1lhVQnHEMmXcEmyIN-WBUTV5K9e8lMJ8HpqH6_TbZC7CNVMuy3snEnVSGvP7g"
+              onLocate={() => {}}
+            />
+            <View className="absolute inset-0 rounded-xl">
+                <View className="absolute bottom-0 left-0 right-0 p-4 pb-6">
                   <View className="flex-row items-end justify-between">
                     <View>
                       <Text className="text-lg font-bold text-white">Brechós próximos</Text>
-                      <Text className="text-sm text-white/90">Encontre brechós perto de você</Text>
+                      <Text className="text-sm text-white/90 mb-6">Encontre brechós perto de você</Text>
                     </View>
                     <Pressable className="bg-[#B55D05] px-4 py-2 rounded-full shadow-lg">
                       <Text className="text-sm font-bold text-white">Ver lista</Text>
                     </Pressable>
                   </View>
                 </View>
-              </View>
+            </View>
             </View>
 
             {/* Filter chips with icon on first */}
