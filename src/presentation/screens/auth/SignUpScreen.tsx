@@ -78,7 +78,7 @@ export function SignUpScreen() {
                 />
               </View>
 
-              <View className="mt-2">
+              <View className="mt-4">
                 <Text className="text-base font-medium text-[#374151] pb-2">E-mail</Text>
                 <TextInput
                   value={email}
@@ -91,7 +91,7 @@ export function SignUpScreen() {
                 />
               </View>
 
-              <View className="mt-2">
+              <View className="mt-4">
                 <Text className="text-base font-medium text-[#374151] pb-2">Senha</Text>
                 <View className="relative w-full">
                   <TextInput
@@ -115,7 +115,7 @@ export function SignUpScreen() {
                 </View>
               </View>
 
-              <View className="mt-2">
+              <View className="mt-4">
                 <Text className="text-base font-medium text-[#374151] pb-2">Confirme sua Senha</Text>
                 <View className="relative w-full">
                   <TextInput
@@ -142,7 +142,7 @@ export function SignUpScreen() {
 
             {error ? <Text className="text-sm text-red-500 w-full text-left mt-2">{error}</Text> : null}
 
-            <View className="w-full pt-8">
+            <View className="w-full pt-10">
               <Pressable
                 className={`h-14 rounded-lg items-center justify-center ${
                   loading ? "bg-[#B55D05]/60" : "bg-[#B55D05]"

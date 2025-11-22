@@ -83,11 +83,11 @@ export function LoginScreen() {
             <Text className="text-[32px] font-bold text-center text-[#374151] leading-tight">
               Conheça seu novo{"\n"}Guia de Brechós!
             </Text>
-            <Text className="text-lg text-center text-[#374151]/80 pt-2 pb-8">
+            <Text className="text-xl text-center text-[#374151]/80 pt-2 pb-8">
               Explore achados únicos
             </Text>
 
-            <View className="w-full space-y-4">
+            <View className="w-full space-y-5">
               <Pressable
                 className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5"
                 disabled={!request || loading}
@@ -97,7 +97,7 @@ export function LoginScreen() {
                 <Text className="text-base font-bold text-[#374151]">Entrar com Google</Text>
               </Pressable>
               {Platform.OS === "ios" ? (
-                <Pressable className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5">
+                <Pressable className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5 mt-1">
                   <Ionicons name="logo-apple" size={20} color="#111" />
                   <Text className="text-base font-bold text-[#374151]">Entrar com Apple</Text>
                 </Pressable>
