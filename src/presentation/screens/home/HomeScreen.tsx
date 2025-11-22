@@ -25,6 +25,7 @@ export function HomeScreen() {
   const [activeFilter, setActiveFilter] = useState("Próximo a mim");
   const [loading, setLoading] = useState(true);
   const [locationLabel, setLocationLabel] = useState("São Paulo, SP");
+  const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -38,6 +39,13 @@ export function HomeScreen() {
         setFeatured(featuredStores);
         setNearby(nearbyStores);
         setGuides(guideItems);
+        const hoods = new Set<string>();
+        [...featuredStores, ...nearbyStores].forEach((s) => {
+          if (s.neighborhood) {
+            hoods.add(s.neighborhood);
+          }
+        });
+        setNeighborhoods(["Próximo a mim", ...Array.from(hoods)]);
         setLoading(false);
       }
     })();
@@ -141,8 +149,9 @@ export function HomeScreen() {
                 className="overflow-visible"
               >
                 <View className="flex-row gap-2">
-                  {["Próximo a mim", "Vila Madalena", "Pinheiros", "Centro", "Augusta"].map((label) => {
+                  {neighborhoods.map((label, idx) => {
                     const active = label === activeFilter;
+                    const isFirst = idx === 0;
                     return (
                       <Pressable
                         key={label}
@@ -151,11 +160,9 @@ export function HomeScreen() {
                         }`}
                         onPress={() => setActiveFilter(label)}
                       >
-                        {active ? (
-                          <Ionicons name="navigate" size={16} color="white" />
-                        ) : (
-                          <></>
-                        )}
+                        {isFirst ? (
+                          <Ionicons name="navigate" size={16} color={active ? "white" : "#374151"} />
+                        ) : null}
                         <Text
                           className={`text-sm font-semibold ${active ? "text-white" : "text-gray-700"}`}
                         >
@@ -169,7 +176,10 @@ export function HomeScreen() {
             </View>
 
             <View className="space-y-3 mt-4">
-              {nearby.slice(0, 2).map((store) => (
+              {(activeFilter === "Próximo a mim"
+                ? nearby
+                : nearby.filter((s) => s.neighborhood === activeFilter)
+              ).map((store) => (
                 <NearbyThriftListItem
                   key={store.id}
                   store={store}

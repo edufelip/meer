@@ -45,7 +45,7 @@
       "categories": ["Feminino", "Luxo"],
       "distanceKm": 1.2,
       "walkTimeMinutes": 15,
-      "neighborhood": "Bela Vista",
+      "neighborhood": "Vila Madalena",
       "description": "Grifes seminovas autenticadas e em ótimo estado."
     },
     {
@@ -89,7 +89,7 @@
       "categories": ["Sustentável", "Unissex"],
       "distanceKm": 3.1,
       "walkTimeMinutes": 35,
-      "neighborhood": "Moema",
+      "neighborhood": "Augusta",
       "description": "Curadoria eco-friendly com marcas locais."
     }
   ],
@@ -110,7 +110,7 @@
       "walkTimeMinutes": 8,
       "openingHours": "Seg a Sáb: 10:00 - 19:30",
       "categories": ["Street", "Vintage"],
-      "neighborhood": "Consolação"
+      "neighborhood": "Augusta"
     },
     {
       "id": "querido-brecho",
@@ -128,7 +128,7 @@
       "walkTimeMinutes": 15,
       "openingHours": "Seg a Sex: 11:00 - 18:30",
       "categories": ["Feminino", "Genderless"],
-      "neighborhood": "Higienópolis"
+      "neighborhood": "Pinheiros"
     },
     {
       "id": "revive",
@@ -146,7 +146,7 @@
       "walkTimeMinutes": 25,
       "openingHours": "Qua a Dom: 12:00 - 20:00",
       "categories": ["Vintage", "Restauração"],
-      "neighborhood": "Bela Vista"
+      "neighborhood": "Centro"
     }
   ],
   "favorites": [
@@ -166,7 +166,7 @@
       "walkTimeMinutes": 30,
       "openingHours": "Seg a Sáb: 10:00 - 19:00",
       "categories": ["Colorido", "Vintage"],
-      "neighborhood": "Liberdade"
+      "neighborhood": "Centro"
     },
     {
       "id": "urbano-pop",
@@ -184,7 +184,7 @@
       "walkTimeMinutes": 11,
       "openingHours": "Seg a Dom: 10:00 - 21:00",
       "categories": ["Street", "Casual"],
-      "neighborhood": "Consolação"
+      "neighborhood": "Augusta"
     },
     {
       "id": "luxo-coletivo",
@@ -202,7 +202,7 @@
       "walkTimeMinutes": 22,
       "openingHours": "Seg a Sex: 11:00 - 20:00",
       "categories": ["Luxo", "Feminino"],
-      "neighborhood": "Jardins",
+      "neighborhood": "Vila Madalena",
       "isFavorite": true
     }
   ]
