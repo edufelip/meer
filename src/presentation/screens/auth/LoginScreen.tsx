@@ -48,10 +48,12 @@ export function LoginScreen() {
                 <AntDesign name="google" size={18} color="#4285F4" />
                 <Text className="text-base font-bold text-[#374151]">Entrar com Google</Text>
               </Pressable>
-              <Pressable className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5">
-                <AntDesign name="apple1" size={18} color="#111" />
-                <Text className="text-base font-bold text-[#374151]">Entrar com Apple</Text>
-              </Pressable>
+              {Platform.OS === "ios" ? (
+                <Pressable className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5">
+                  <AntDesign name="apple1" size={18} color="#111" />
+                  <Text className="text-base font-bold text-[#374151]">Entrar com Apple</Text>
+                </Pressable>
+              ) : null}
             </View>
 
             <View className="flex-row items-center w-full gap-4 py-6">
