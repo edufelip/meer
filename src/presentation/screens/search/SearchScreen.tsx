@@ -116,28 +116,6 @@ export function SearchScreen() {
             </View>
 
             <View className="py-4 px-4">
-              <Text className="text-lg font-bold mb-4 text-[#374151]">Filtrar por</Text>
-              <View className="flex-row flex-wrap gap-4">
-                {[ 
-                  { icon: "pricetag-outline", label: "Categorias" },
-                  { icon: "storefront-outline", label: "Nome do Brechó" },
-                  { icon: "location-outline", label: "Localização" },
-                  { icon: "time-outline", label: "Aberto Agora" }
-                ].map((item) => (
-                  <Pressable
-                    key={item.label}
-                    className="flex-1 min-w-[44%] items-center justify-center p-4 bg-white rounded-xl shadow-sm"
-                  >
-                    <Ionicons name={item.icon as any} size={28} color={theme.colors.highlight} />
-                    <Text className="font-semibold text-sm text-[#374151] mt-2 text-center">
-                      {item.label}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-
-            <View className="py-4 px-4">
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-lg font-bold text-[#374151]">Pesquisas Recentes</Text>
                 <Pressable onPress={() => setRecents([])}>
