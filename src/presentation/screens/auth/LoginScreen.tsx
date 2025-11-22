@@ -96,7 +96,7 @@ export function LoginScreen() {
               Explore achados únicos
             </Text>
 
-            <View className="w-full space-y-6">
+            <View className="w-full space-y-8">
               <Pressable
                 className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5"
                 disabled={!request || loading}
