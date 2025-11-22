@@ -1,9 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { FlatList, Pressable, StatusBar, Text, TextInput, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, StatusBar, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { theme } from "../../../shared/theme";
+import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
+import { NearbyThriftListItem } from "../../components/NearbyThriftListItem";
 
 const suggestionChips = ["Vestidos", "Roupas de festa", "Acessórios", "Vintage"];
 
@@ -15,8 +17,26 @@ const initialRecents = [
 
 export function SearchScreen() {
   const navigation = useNavigation();
+  const { searchThriftStoresUseCase } = useDependencies();
   const [query, setQuery] = useState("");
   const [recents, setRecents] = useState(initialRecents);
+  const [results, setResults] = useState([] as Awaited<ReturnType<typeof searchThriftStoresUseCase.execute>>);
+  const [loading, setLoading] = useState(false);
+
+  const runSearch = async (text: string) => {
+    const term = text.trim();
+    if (!term) {
+      setResults([]);
+      return;
+    }
+    setLoading(true);
+    const list = await searchThriftStoresUseCase.execute(term);
+    setResults(list);
+    setLoading(false);
+    if (!recents.includes(term)) {
+      setRecents((prev) => [term, ...prev].slice(0, 10));
+    }
+  };
 
   const filteredRecents = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -49,6 +69,7 @@ export function SearchScreen() {
               placeholderTextColor="#9CA3AF"
               autoFocus
               returnKeyType="search"
+              onSubmitEditing={() => runSearch(query)}
             />
           </View>
         </View>
@@ -66,7 +87,10 @@ export function SearchScreen() {
                   <Pressable
                     key={label}
                     className="py-2 px-4 rounded-full bg-gray-200"
-                    onPress={() => setQuery(label)}
+                    onPress={() => {
+                      setQuery(label);
+                      runSearch(label);
+                    }}
                   >
                     <Text className="text-sm font-semibold text-gray-700">{label}</Text>
                   </Pressable>
@@ -124,6 +148,22 @@ export function SearchScreen() {
         ListEmptyComponent={
           <View className="px-4">
             <Text className="text-[#6B7280]">Nenhuma busca recente.</Text>
+          </View>
+        }
+        ListFooterComponent={
+          <View className="px-4 pt-6 gap-3">
+            {loading ? (
+              <ActivityIndicator color={theme.colors.highlight} />
+            ) : results.length > 0 ? (
+              results.map((store) => (
+                <NearbyThriftListItem
+                  key={store.id}
+                  store={store}
+                  onPress={() => navigation.navigate("thriftDetail" as never, { id: store.id } as never)}
+                  style={{ marginBottom: 8 }}
+                />
+              ))
+            ) : null}
           </View>
         }
       />

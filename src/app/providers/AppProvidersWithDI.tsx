@@ -17,6 +17,7 @@ import { GetGuideContentUseCase } from "../../domain/usecases/GetGuideContentUse
 import { GetFavoriteThriftStoresUseCase } from "../../domain/usecases/GetFavoriteThriftStoresUseCase";
 import { GetCategoriesUseCase } from "../../domain/usecases/GetCategoriesUseCase";
 import { GetThriftStoreByIdUseCase } from "../../domain/usecases/GetThriftStoreByIdUseCase";
+import { SearchThriftStoresUseCase } from "../../domain/usecases/SearchThriftStoresUseCase";
 import { GetProfileUseCase } from "../../domain/usecases/GetProfileUseCase";
 import { UpdateProfileUseCase } from "../../domain/usecases/UpdateProfileUseCase";
 import { SignInWithEmailUseCase } from "../../domain/usecases/SignInWithEmailUseCase";
@@ -32,6 +33,7 @@ interface Dependencies {
   getNearbyThriftStoresUseCase: GetNearbyThriftStoresUseCase;
   getGuideContentUseCase: GetGuideContentUseCase;
   getFavoriteThriftStoresUseCase: GetFavoriteThriftStoresUseCase;
+  searchThriftStoresUseCase: SearchThriftStoresUseCase;
   toggleFavoriteThriftStoreUseCase: ToggleFavoriteThriftStoreUseCase;
   isFavoriteThriftStoreUseCase: IsFavoriteThriftStoreUseCase;
   getCategoriesUseCase: GetCategoriesUseCase;
@@ -76,6 +78,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const getNearbyThriftStoresUseCase = new GetNearbyThriftStoresUseCase(thriftStoreRepository);
     const getGuideContentUseCase = new GetGuideContentUseCase(guideContentRepository);
     const getFavoriteThriftStoresUseCase = new GetFavoriteThriftStoresUseCase(favoriteRepository);
+    const searchThriftStoresUseCase = new SearchThriftStoresUseCase(thriftStoreRepository);
     const toggleFavoriteThriftStoreUseCase = new ToggleFavoriteThriftStoreUseCase(favoriteRepository);
     const isFavoriteThriftStoreUseCase = new IsFavoriteThriftStoreUseCase(favoriteRepository);
     const getCategoriesUseCase = new GetCategoriesUseCase(categoryRepository);
@@ -92,6 +95,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
       getNearbyThriftStoresUseCase,
       getGuideContentUseCase,
       getFavoriteThriftStoresUseCase,
+      searchThriftStoresUseCase,
       toggleFavoriteThriftStoreUseCase,
       isFavoriteThriftStoreUseCase,
       getCategoriesUseCase,

@@ -5,4 +5,5 @@ export interface ThriftStoreRemoteDataSource {
   getNearby(): Promise<ThriftStore[]>;
   getFavorites(): Promise<ThriftStore[]>;
   getById(id: ThriftStoreId): Promise<ThriftStore | null>;
+  search(query: string): Promise<ThriftStore[]>;
 }

@@ -24,4 +24,8 @@ export class ThriftStoreRepositoryJson implements ThriftStoreRepository {
   getById(id: ThriftStoreId): Promise<ThriftStore | null> {
     return this.remote.getById(id);
   }
+
+  search(query: string): Promise<ThriftStore[]> {
+    return this.remote.search(query);
+  }
 }

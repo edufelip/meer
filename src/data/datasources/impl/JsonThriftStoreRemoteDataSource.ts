@@ -24,7 +24,20 @@ export class JsonThriftStoreRemoteDataSource implements ThriftStoreRemoteDataSou
 
   async getById(id: ThriftStoreId): Promise<ThriftStore | null> {
     const all = (thriftStores as ThriftStoresResponse);
-    const match = [...all.featured, ...all.nearby, ...all.favorites].find((s) => s.id === id);
+    const match = [...all.feature, ...all.nearby, ...(all.favorites ?? [])].find((s) => s.id === id);
     return loadFromJson<ThriftStore | null>(match ?? null);
+  }
+
+  async search(query: string): Promise<ThriftStore[]> {
+    const all = thriftStores as ThriftStoresResponse;
+    const haystack = [...all.feature, ...all.nearby, ...(all.favorites ?? [])];
+    const term = query.trim().toLowerCase();
+    if (!term) return loadFromJson<ThriftStore[]>(haystack);
+    const filtered = haystack.filter((s) =>
+      [s.name, s.tagline, s.description, s.neighborhood, s.addressLine]
+        .filter(Boolean)
+        .some((field) => field!.toLowerCase().includes(term))
+    );
+    return loadFromJson<ThriftStore[]>(filtered);
   }
 }
