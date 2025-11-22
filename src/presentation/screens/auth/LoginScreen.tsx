@@ -87,7 +87,7 @@ export function LoginScreen() {
               Explore achados únicos
             </Text>
 
-            <View className="w-full space-y-5">
+            <View className="w-full space-y-6">
               <Pressable
                 className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5"
                 disabled={!request || loading}
@@ -124,7 +124,7 @@ export function LoginScreen() {
                 />
               </View>
 
-              <View className="mt-2">
+              <View className="mt-4">
                 <View className="flex-row items-center justify-between pb-2">
                   <Text className="text-base font-medium text-[#374151]">Senha</Text>
                 </View>
