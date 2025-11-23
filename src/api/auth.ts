@@ -30,3 +30,8 @@ export async function signup(payload: SignupPayload): Promise<AuthResponse> {
   const res = await api.post<AuthResponse>("/auth/signup", payload);
   return res.data;
 }
+
+export async function validateToken(): Promise<AuthResponse["user"]> {
+  const res = await api.get<AuthResponse>("/auth/me");
+  return res.data.user;
+}

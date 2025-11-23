@@ -4,6 +4,10 @@ import { useCrashlytics } from "../../services/firebase/crashlyticsSetup";
 import { useFirebaseMessaging } from "../../services/firebase/messagingSetup";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "../../hooks/reactQueryClient";
+import { getTokens, clearTokens } from "../../storage/authStorage";
+import { useValidateToken } from "../../hooks/useValidateToken";
+import { NavigationContainer } from "@react-navigation/native";
+import { RootStack } from "../navigation/RootStack";
 
 // Add cross-cutting providers (theme, auth, localization, etc.) here.
 export function AppProviders(props: PropsWithChildren) {
@@ -12,8 +16,7 @@ export function AppProviders(props: PropsWithChildren) {
   return (
     <DependenciesProvider>
       <QueryClientProvider client={queryClient}>
-        <FirebaseBootstrap />
-        {children}
+        <AuthBootstrap>{children}</AuthBootstrap>
       </QueryClientProvider>
     </DependenciesProvider>
   );
@@ -41,4 +44,37 @@ function FirebaseBootstrap() {
   });
 
   return null;
+}
+
+function AuthBootstrap({ children }: PropsWithChildren) {
+  const [booting, setBooting] = useState(true);
+  const validateTokenQuery = useValidateToken(false);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      const { token } = await getTokens();
+      if (!token) {
+        setBooting(false);
+        return;
+      }
+      validateTokenQuery.refetch({ throwOnError: false });
+      setBooting(false);
+    })();
+    return () => {
+      active = false;
+    };
+  }, [validateTokenQuery]);
+
+  useEffect(() => {
+    if (validateTokenQuery.isError) {
+      clearTokens();
+    }
+  }, [validateTokenQuery.isError]);
+
+  if (booting) {
+    return null; // keep splash
+  }
+
+  return children as JSX.Element;
 }
