@@ -46,3 +46,8 @@ export async function loginWithGoogle(payload: SocialLoginPayload): Promise<Auth
   const res = await api.post<AuthResponse>("/auth/google", payload);
   return res.data;
 }
+
+export async function refreshToken(refreshToken: string): Promise<AuthResponse> {
+  const res = await api.post<AuthResponse>("/auth/refresh", { refreshToken });
+  return res.data;
+}

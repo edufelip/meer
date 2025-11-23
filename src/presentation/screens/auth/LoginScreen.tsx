@@ -53,9 +53,9 @@ export function LoginScreen() {
 
   WebBrowser.maybeCompleteAuthSession();
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: "586821855462-fj374oongu6sksm1cur3b4uc7o5k6vif.apps.googleusercontent.com",
-    iosClientId: "586821855462-equmahdr8nrd8oai6v5e00adaajqm6op.apps.googleusercontent.com",
-    androidClientId: "586821855462-5so49dut8unvht2g9vrp32papt6s7qnq.apps.googleusercontent.com",
+    clientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_ID,
+    iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_ID,
+    androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_ID,
     scopes: ["profile", "email"]
   });
 

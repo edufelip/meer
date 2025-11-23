@@ -17,6 +17,8 @@ import { theme } from "../../../shared/theme";
 import { isValidEmail, validatePassword, passwordsMatch } from "../../../domain/validation/auth";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { useSignup } from "../../../hooks/useSignup";
+import { saveTokens } from "../../../storage/authStorage";
+import { useSignup } from "../../../hooks/useSignup";
 
 export function SignUpScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -171,11 +173,12 @@ export function SignUpScreen() {
                   }
                   try {
                     setLoading(true);
-                    await signupMutation.mutateAsync({
+                    const auth = await signupMutation.mutateAsync({
                       name: fullName.trim(),
                       email: email.trim(),
                       password
                     });
+                    await saveTokens(auth.token, auth.refreshToken);
                     navigation.navigate("tabs");
                   } catch {
                     setError("Não foi possível criar a conta. Tente novamente.");
