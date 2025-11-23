@@ -17,7 +17,6 @@ import { theme } from "../../../shared/theme";
 import { isValidEmail, validatePassword, passwordsMatch } from "../../../domain/validation/auth";
 import { useSignup } from "../../../hooks/useSignup";
 import { saveTokens } from "../../../storage/authStorage";
-import { useSignup } from "../../../hooks/useSignup";
 
 export function SignUpScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
