@@ -22,12 +22,15 @@ import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { isValidEmail, validatePassword } from "../../../domain/validation/auth";
 import { firebaseAuth } from "../../../services/firebase/firebase";
 import { useLogin } from "../../../hooks/useLogin";
+import { saveTokens } from "../../../storage/authStorage";
+import { useLoginWithGoogle } from "../../../hooks/useLoginWithGoogle";
 import { theme } from "../../../shared/theme";
 
 export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { signInWithGoogleUseCase } = useDependencies();
   const loginMutation = useLogin();
+  const googleMutation = useLoginWithGoogle();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,9 +53,9 @@ export function LoginScreen() {
 
   WebBrowser.maybeCompleteAuthSession();
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: "YOUR_GOOGLE_CLIENT_ID",
-    iosClientId: "YOUR_IOS_CLIENT_ID",
-    androidClientId: "YOUR_ANDROID_CLIENT_ID",
+    clientId: "586821855462-fj374oongu6sksm1cur3b4uc7o5k6vif.apps.googleusercontent.com",
+    iosClientId: "586821855462-equmahdr8nrd8oai6v5e00adaajqm6op.apps.googleusercontent.com",
+    androidClientId: "586821855462-5so49dut8unvht2g9vrp32papt6s7qnq.apps.googleusercontent.com",
     scopes: ["profile", "email"]
   });
 
@@ -62,7 +65,13 @@ export function LoginScreen() {
         const { id_token } = response.params;
         try {
           setLoading(true);
-          await signInWithGoogleUseCase.execute(id_token);
+          const platformClient = Platform.OS === "ios" ? "ios" : "android";
+          const auth = await googleMutation.mutateAsync({
+            provider: "google",
+            idToken: id_token,
+            client: platformClient
+          });
+          await saveTokens(auth.token, auth.refreshToken);
           navigation.navigate("tabs");
         } catch {
           setError("Não foi possível entrar com Google. Tente novamente.");
@@ -72,7 +81,7 @@ export function LoginScreen() {
       }
     };
     doGoogle();
-  }, [navigation, response, signInWithGoogleUseCase]);
+  }, [navigation, response, googleMutation]);
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -186,7 +195,8 @@ export function LoginScreen() {
                   }
                   try {
                     setLoading(true);
-                    await loginMutation.mutateAsync({ email: email.trim(), password });
+                    const auth = await loginMutation.mutateAsync({ email: email.trim(), password });
+                    await saveTokens(auth.token, auth.refreshToken);
                     navigation.navigate("tabs");
                   } catch (e) {
                     setError("Não foi possível entrar. Verifique suas credenciais.");

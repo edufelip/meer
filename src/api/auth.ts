@@ -21,6 +21,12 @@ export interface AuthResponse {
   };
 }
 
+export interface SocialLoginPayload {
+  provider: "google";
+  idToken: string;
+  client: "android" | "ios" | "web";
+}
+
 export async function login(payload: LoginPayload): Promise<AuthResponse> {
   const res = await api.post<AuthResponse>("/auth/login", payload);
   return res.data;
@@ -34,4 +40,9 @@ export async function signup(payload: SignupPayload): Promise<AuthResponse> {
 export async function validateToken(): Promise<AuthResponse["user"]> {
   const res = await api.get<AuthResponse>("/auth/me");
   return res.data.user;
+}
+
+export async function loginWithGoogle(payload: SocialLoginPayload): Promise<AuthResponse> {
+  const res = await api.post<AuthResponse>("/auth/google", payload);
+  return res.data;
 }
