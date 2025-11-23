@@ -220,8 +220,12 @@ export function LoginScreen() {
         animationType="fade"
         onRequestClose={() => setResetVisible(false)}
       >
-        <View className="flex-1 bg-black/40 items-center justify-center px-6">
-          <View className="w-full max-w-md bg-white rounded-2xl p-6">
+        <Pressable className="flex-1 bg-black/40" onPress={() => setResetVisible(false)}>
+          <View className="flex-1 items-center justify-center px-6">
+            <Pressable
+              className="w-full max-w-md bg-white rounded-2xl p-6"
+              onPress={(e) => e.stopPropagation()}
+            >
             {resetSuccess ? (
               <>
                 <Text className="text-base text-[#374151] mb-6">
@@ -279,8 +283,9 @@ export function LoginScreen() {
                 </Pressable>
               </>
             )}
+            </Pressable>
           </View>
-        </View>
+        </Pressable>
       </Modal>
     </SafeAreaView>
   );
