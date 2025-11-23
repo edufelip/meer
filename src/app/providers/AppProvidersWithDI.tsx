@@ -5,7 +5,6 @@ import { JsonThriftStoreRemoteDataSource } from "../../data/datasources/impl/Jso
 import { JsonGuideContentRemoteDataSource } from "../../data/datasources/impl/JsonGuideContentRemoteDataSource";
 import { JsonCategoryRemoteDataSource } from "../../data/datasources/impl/JsonCategoryRemoteDataSource";
 import { JsonProfileRemoteDataSource } from "../../data/datasources/impl/JsonProfileRemoteDataSource";
-import { AuthRepositoryFirebase } from "../../data/repositories/AuthRepositoryFirebase";
 import { ThriftStoreRepositoryJson } from "../../data/repositories/ThriftStoreRepositoryJson";
 import { GuideContentRepositoryJson } from "../../data/repositories/GuideContentRepositoryJson";
 import { CategoryRepositoryJson } from "../../data/repositories/CategoryRepositoryJson";
@@ -20,9 +19,6 @@ import { GetThriftStoreByIdUseCase } from "../../domain/usecases/GetThriftStoreB
 import { SearchThriftStoresUseCase } from "../../domain/usecases/SearchThriftStoresUseCase";
 import { GetProfileUseCase } from "../../domain/usecases/GetProfileUseCase";
 import { UpdateProfileUseCase } from "../../domain/usecases/UpdateProfileUseCase";
-import { SignInWithEmailUseCase } from "../../domain/usecases/SignInWithEmailUseCase";
-import { SignUpWithEmailUseCase } from "../../domain/usecases/SignUpWithEmailUseCase";
-import { SignInWithGoogleUseCase } from "../../domain/usecases/SignInWithGoogleUseCase";
 import { FavoriteRepositoryAsyncStorage } from "../../data/repositories/FavoriteRepositoryAsyncStorage";
 import { ToggleFavoriteThriftStoreUseCase } from "../../domain/usecases/ToggleFavoriteThriftStoreUseCase";
 import { IsFavoriteThriftStoreUseCase } from "../../domain/usecases/IsFavoriteThriftStoreUseCase";
@@ -40,9 +36,6 @@ interface Dependencies {
   getThriftStoreByIdUseCase: GetThriftStoreByIdUseCase;
   getProfileUseCase: GetProfileUseCase;
   updateProfileUseCase: UpdateProfileUseCase;
-  signInWithEmailUseCase: SignInWithEmailUseCase;
-  signUpWithEmailUseCase: SignUpWithEmailUseCase;
-  signInWithGoogleUseCase: SignInWithGoogleUseCase;
 }
 
 const DependenciesContext = createContext<Dependencies | undefined>(undefined);
@@ -65,7 +58,6 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const guideContentRemote = new JsonGuideContentRemoteDataSource();
     const categoryRemote = new JsonCategoryRemoteDataSource();
     const profileRemote = new JsonProfileRemoteDataSource();
-    const authRepository = new AuthRepositoryFirebase();
     const favoriteRepository = new FavoriteRepositoryAsyncStorage();
 
     const thriftStoreRepository = new ThriftStoreRepositoryJson(thriftStoreRemote);
@@ -85,9 +77,6 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const getThriftStoreByIdUseCase = new GetThriftStoreByIdUseCase(thriftStoreRepository);
     const getProfileUseCase = new GetProfileUseCase(profileRepository);
     const updateProfileUseCase = new UpdateProfileUseCase(profileRepository);
-    const signInWithEmailUseCase = new SignInWithEmailUseCase(authRepository);
-    const signUpWithEmailUseCase = new SignUpWithEmailUseCase(authRepository);
-    const signInWithGoogleUseCase = new SignInWithGoogleUseCase(authRepository);
 
     return {
       getCurrentUserUseCase,
@@ -101,10 +90,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
       getCategoriesUseCase,
       getThriftStoreByIdUseCase,
       getProfileUseCase,
-      updateProfileUseCase,
-      signInWithEmailUseCase,
-      signUpWithEmailUseCase,
-      signInWithGoogleUseCase
+      updateProfileUseCase
     };
   }, []);
 

@@ -21,19 +21,19 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { isValidEmail, validatePassword } from "../../../domain/validation/auth";
-import { firebaseAuth } from "../../../services/firebase/firebase";
 import { useLogin } from "../../../hooks/useLogin";
 import { saveTokens } from "../../../storage/authStorage";
 import { useLoginWithGoogle } from "../../../hooks/useLoginWithGoogle";
 import { useLoginWithApple } from "../../../hooks/useLoginWithApple";
+import { useForgotPassword } from "../../../hooks/useForgotPassword";
 import { theme } from "../../../shared/theme";
 
 export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { signInWithGoogleUseCase } = useDependencies();
   const loginMutation = useLogin();
   const googleMutation = useLoginWithGoogle();
   const appleMutation = useLoginWithApple();
+  const forgotPasswordMutation = useForgotPassword();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -309,7 +309,7 @@ export function LoginScreen() {
                     }
                     try {
                       setResetLoading(true);
-                      await sendPasswordResetEmail(firebaseAuth(), resetEmail.trim());
+                      const res = await forgotPasswordMutation.mutateAsync({ email: resetEmail.trim() });
                       setResetSuccess(true);
                     } catch {
                       setResetError("Não foi possível enviar o e-mail. Tente novamente.");

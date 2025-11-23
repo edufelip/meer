@@ -15,14 +15,12 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { theme } from "../../../shared/theme";
 import { isValidEmail, validatePassword, passwordsMatch } from "../../../domain/validation/auth";
-import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { useSignup } from "../../../hooks/useSignup";
 import { saveTokens } from "../../../storage/authStorage";
 import { useSignup } from "../../../hooks/useSignup";
 
 export function SignUpScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { signUpWithEmailUseCase } = useDependencies();
   const signupMutation = useSignup();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
