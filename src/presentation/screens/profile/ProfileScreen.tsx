@@ -8,10 +8,12 @@ import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { User } from "../../../domain/entities/User";
 import { theme } from "../../../shared/theme";
+import { useLogout } from "../../../hooks/useLogout";
 
 export function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { getProfileUseCase, getGuideContentUseCase } = useDependencies();
+  const logout = useLogout();
   const [user, setUser] = useState<(User & { bio?: string; notifyNewStores: boolean; notifyPromos: boolean }) | null>(
     null
   );
@@ -165,7 +167,7 @@ export function ProfileScreen() {
 
         <View className="px-4 pb-6">
           <View className="bg-white rounded-lg shadow-sm">
-            <Pressable className="flex-row items-center justify-between p-4">
+            <Pressable className="flex-row items-center justify-between p-4" onPress={logout}>
               <Text className="text-red-500">Sair</Text>
               <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
             </Pressable>
