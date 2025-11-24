@@ -28,4 +28,12 @@ export class ThriftStoreRepositoryJson implements ThriftStoreRepository {
   search(query: string): Promise<ThriftStore[]> {
     return this.remote.search(query);
   }
+
+  listByCategory(params: {
+    categoryId: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<{ items: ThriftStore[]; page: number; hasNext: boolean }> {
+    return this.remote.listByCategory(params);
+  }
 }

@@ -3,12 +3,16 @@ import { ActivityIndicator, FlatList, Pressable, StatusBar, Text, View } from "r
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import type { Category } from "../../../domain/entities/Category";
 import { CategoryCard } from "../../components/CategoryCard";
 import { theme } from "../../../shared/theme";
 
 export function CategoriesScreen() {
   const { getCategoriesUseCase } = useDependencies();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -49,7 +53,17 @@ export function CategoriesScreen() {
           numColumns={2}
           columnWrapperStyle={{ gap: 16 }}
           contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 32 }}
-          renderItem={({ item }) => <CategoryCard category={item} />}
+          renderItem={({ item }) => (
+            <CategoryCard
+              category={item}
+              onPress={() =>
+                navigation.navigate("categoryStores", {
+                  categoryId: item.id,
+                  title: item.nameStringId
+                })
+              }
+            />
+          )}
           showsVerticalScrollIndicator={false}
           className="bg-[#F3F4F6]"
         />

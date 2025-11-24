@@ -40,4 +40,20 @@ export class JsonThriftStoreRemoteDataSource implements ThriftStoreRemoteDataSou
     );
     return loadFromJson<ThriftStore[]>(filtered);
   }
+
+  async listByCategory(params: {
+    categoryId: string;
+    page?: number;
+    pageSize?: number;
+  }): Promise<{ items: ThriftStore[]; page: number; hasNext: boolean }> {
+    const all = thriftStores as ThriftStoresResponse;
+    const haystack = [...all.feature, ...all.nearby, ...(all.favorites ?? [])];
+    const filtered = haystack.filter((s) => s.categories?.includes(params.categoryId));
+    const pageSize = params.pageSize ?? 10;
+    const page = params.page ?? 1;
+    const start = (page - 1) * pageSize;
+    const items = filtered.slice(start, start + pageSize);
+    const hasNext = start + pageSize < filtered.length;
+    return loadFromJson({ items, page, hasNext });
+  }
 }

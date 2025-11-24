@@ -17,6 +17,7 @@ import { GetGuideContentUseCase } from "../../domain/usecases/GetGuideContentUse
 import { GetFavoriteThriftStoresUseCase } from "../../domain/usecases/GetFavoriteThriftStoresUseCase";
 import { GetCategoriesUseCase } from "../../domain/usecases/GetCategoriesUseCase";
 import { GetThriftStoreByIdUseCase } from "../../domain/usecases/GetThriftStoreByIdUseCase";
+import { GetStoresByCategoryUseCase } from "../../domain/usecases/GetStoresByCategoryUseCase";
 import { SearchThriftStoresUseCase } from "../../domain/usecases/SearchThriftStoresUseCase";
 import { GetProfileUseCase } from "../../domain/usecases/GetProfileUseCase";
 import { UpdateProfileUseCase } from "../../domain/usecases/UpdateProfileUseCase";
@@ -35,6 +36,7 @@ interface Dependencies {
   isFavoriteThriftStoreUseCase: IsFavoriteThriftStoreUseCase;
   getCategoriesUseCase: GetCategoriesUseCase;
   getThriftStoreByIdUseCase: GetThriftStoreByIdUseCase;
+  getStoresByCategoryUseCase: GetStoresByCategoryUseCase;
   getProfileUseCase: GetProfileUseCase;
   updateProfileUseCase: UpdateProfileUseCase;
 }
@@ -77,6 +79,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const isFavoriteThriftStoreUseCase = new IsFavoriteThriftStoreUseCase(favoriteRepository);
     const getCategoriesUseCase = new GetCategoriesUseCase(categoryRepository);
     const getThriftStoreByIdUseCase = new GetThriftStoreByIdUseCase(thriftStoreRepository);
+    const getStoresByCategoryUseCase = new GetStoresByCategoryUseCase(thriftStoreRepository);
     const getProfileUseCase = new GetProfileUseCase(profileRepository);
     const updateProfileUseCase = new UpdateProfileUseCase(profileRepository);
 
@@ -91,6 +94,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
       isFavoriteThriftStoreUseCase,
       getCategoriesUseCase,
       getThriftStoreByIdUseCase,
+      getStoresByCategoryUseCase,
       getProfileUseCase,
       updateProfileUseCase
     };

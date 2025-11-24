@@ -6,4 +6,9 @@ export interface ThriftStoreRemoteDataSource {
   getFavorites(): Promise<ThriftStore[]>;
   getById(id: ThriftStoreId): Promise<ThriftStore | null>;
   search(query: string): Promise<ThriftStore[]>;
+  listByCategory(params: { categoryId: string; page?: number; pageSize?: number }): Promise<{
+    items: ThriftStore[];
+    page: number;
+    hasNext: boolean;
+  }>;
 }
