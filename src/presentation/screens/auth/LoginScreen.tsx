@@ -1,10 +1,9 @@
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import * as AppleAuthentication from "expo-apple-authentication";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import * as AppleAuthentication from "expo-apple-authentication";
-import { sendPasswordResetEmail } from "firebase/auth";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -19,14 +18,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
-import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { isValidEmail, validatePassword } from "../../../domain/validation/auth";
-import { useLogin } from "../../../hooks/useLogin";
-import { saveTokens } from "../../../storage/authStorage";
-import { useLoginWithGoogle } from "../../../hooks/useLoginWithGoogle";
-import { useLoginWithApple } from "../../../hooks/useLoginWithApple";
 import { useForgotPassword } from "../../../hooks/useForgotPassword";
+import { useLogin } from "../../../hooks/useLogin";
+import { useLoginWithApple } from "../../../hooks/useLoginWithApple";
+import { useLoginWithGoogle } from "../../../hooks/useLoginWithGoogle";
 import { theme } from "../../../shared/theme";
+import { saveTokens } from "../../../storage/authStorage";
 
 export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -55,23 +53,38 @@ export function LoginScreen() {
   }, [resetVisible]);
 
   WebBrowser.maybeCompleteAuthSession();
+  // Force Expo Auth Proxy to avoid exp:// redirects in dev
+  const redirectUri = "https://auth.expo.io/@eduardo880/meer";
+
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
-    clientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_ID,
+    clientId:
+      Platform.select({
+        ios: process.env.EXPO_PUBLIC_GOOGLE_IOS_ID,
+        android: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_ID,
+        default: process.env.EXPO_PUBLIC_GOOGLE_WEB_ID
+      }) || "",
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_ID,
     iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_ID,
     androidClientId: process.env.EXPO_PUBLIC_GOOGLE_ANDROID_ID,
-    scopes: ["profile", "email"]
+    scopes: ["profile", "email"],
+    redirectUri,
+    responseType: "id_token"
   });
 
   useEffect(() => {
     const doGoogle = async () => {
-      if (response?.type === "success" && response.params?.id_token) {
-        const { id_token } = response.params;
+      const idToken =
+        response?.type === "success"
+          ? response.params?.id_token || response.authentication?.idToken
+          : undefined;
+
+      if (idToken) {
         try {
           setLoading(true);
           const platformClient = Platform.OS === "ios" ? "ios" : "android";
           const auth = await googleMutation.mutateAsync({
             provider: "google",
-            idToken: id_token,
+            idToken,
             client: platformClient
           });
           await saveTokens(auth.token, auth.refreshToken);
@@ -114,7 +127,7 @@ export function LoginScreen() {
               <Pressable
                 className="h-12 rounded-lg bg-[#F3F4F6] flex-row items-center justify-center gap-3 px-5"
                 disabled={!request || loading}
-                onPress={() => promptAsync()}
+                onPress={() => promptAsync({ useProxy: true, showInRecents: true })}
               >
                 <AntDesign name="google" size={20} color="#4285F4" />
                 <Text className="text-base font-bold text-[#374151]">Entrar com Google</Text>
