@@ -3,7 +3,7 @@ import { AsyncStorageUserLocalDataSource } from "../../data/datasources/impl/Asy
 import { UserRepositoryImpl } from "../../data/repositories/UserRepositoryImpl";
 import { JsonThriftStoreRemoteDataSource } from "../../data/datasources/impl/JsonThriftStoreRemoteDataSource";
 import { JsonGuideContentRemoteDataSource } from "../../data/datasources/impl/JsonGuideContentRemoteDataSource";
-import { JsonCategoryRemoteDataSource } from "../../data/datasources/impl/JsonCategoryRemoteDataSource";
+import { HttpCategoryRemoteDataSource } from "../../data/datasources/impl/HttpCategoryRemoteDataSource";
 import { JsonProfileRemoteDataSource } from "../../data/datasources/impl/JsonProfileRemoteDataSource";
 import { ThriftStoreRepositoryJson } from "../../data/repositories/ThriftStoreRepositoryJson";
 import { GuideContentRepositoryJson } from "../../data/repositories/GuideContentRepositoryJson";
@@ -56,7 +56,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const userRepository = new UserRepositoryImpl(userLocalDataSource);
     const thriftStoreRemote = new JsonThriftStoreRemoteDataSource();
     const guideContentRemote = new JsonGuideContentRemoteDataSource();
-    const categoryRemote = new JsonCategoryRemoteDataSource();
+    const categoryRemote = new HttpCategoryRemoteDataSource();
     const profileRemote = new JsonProfileRemoteDataSource();
     const favoriteRepository = new FavoriteRepositoryAsyncStorage();
 
