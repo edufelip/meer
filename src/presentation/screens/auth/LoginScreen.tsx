@@ -1,5 +1,4 @@
 import { AntDesign, Ionicons, MaterialIcons } from "@expo/vector-icons";
-import auth from "@react-native-firebase/auth";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -63,15 +62,11 @@ export function LoginScreen() {
       setError(null);
       setLoading(true);
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      const response = await GoogleSignin.signIn();
-      const idToken = response.data?.idToken
+      const { idToken } = await GoogleSignin.signIn();
       if (!idToken) {
         setError("Não foi possível entrar com Google. Tente novamente.");
         return;
       }
-
-      const credential = auth.GoogleAuthProvider.credential(idToken);
-      await auth().signInWithCredential(credential);
 
       const platformClient = Platform.OS === "ios" ? "ios" : "android";
       const authResult = await googleMutation.mutateAsync({
