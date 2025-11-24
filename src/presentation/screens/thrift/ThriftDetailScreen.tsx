@@ -7,7 +7,8 @@ import {
   Text,
   View,
   Pressable,
-  ActivityIndicator
+  ActivityIndicator,
+  Linking
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -31,6 +32,12 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
   const [store, setStore] = useState<ThriftStore | null>(null);
   const [loading, setLoading] = useState(true);
   const [favorite, setFavorite] = useState(false);
+
+  const openMaps = () => {
+    if (!store?.latitude || !store?.longitude) return;
+    const url = `https://www.google.com/maps/search/?api=1&query=${store.latitude},${store.longitude}`;
+    Linking.openURL(url);
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -131,16 +138,20 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
               </View>
             </View>
 
-            <View className="h-40 rounded-lg bg-gray-200 overflow-hidden">
-              <Image
-                source={{
-                  uri:
-                    store.mapImageUrl ??
-                    "https://lh3.googleusercontent.com/aida-public/AB6AXuATD7G9oKF2W1aQjxAqHpYvVPamBIvCIZ6Q7I74RHrH7zwrJHn7iFRGMdMEHWLTMlP9DQ7oquk7Frb_j9QaIiT7ZSYMjZJhvTjFAJU7U-X73PmboiSxOHwS4QZ9mIBO-fJWAbwbdWu5yfwTrXn0c6HHGRpI5fDlZ_HckG3G5-IAsF_Vsh98T6DdyXbPl0bdG-iC9J2bjl6tqGgQIoeItBfJUqcnWgrKl9Y05nEY0VjB15UkZf5t6v0xiO0VVOuXFpoAn1Z7WNfG-dc"
-                }}
-                className="w-full h-full"
-              />
-            </View>
+            <Pressable className="h-40 rounded-lg bg-gray-200 overflow-hidden" onPress={openMaps}>
+              {store.latitude && store.longitude ? (
+                <Image
+                  source={{
+                    uri: `https://maps.googleapis.com/maps/api/staticmap?center=${store.latitude},${store.longitude}&zoom=15&size=640x320&maptype=roadmap&markers=color:red%7C${store.latitude},${store.longitude}&scale=2&key=${process.env.EXPO_PUBLIC_GOOGLE_MAPS_STATIC_KEY}`
+                  }}
+                  className="w-full h-full"
+                />
+              ) : (
+                <View className="flex-1 items-center justify-center">
+                  <Text className="text-[#6B7280]">Mapa indisponível</Text>
+                </View>
+              )}
+            </Pressable>
 
             <View className="flex-row items-center gap-4">
               <View className="p-3 rounded-lg" style={{ backgroundColor: `${theme.colors.highlight}1a` }}>
