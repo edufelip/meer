@@ -38,7 +38,7 @@ export function CategoryCard({ category, onPress }: CategoryCardProps) {
           <View className="h-10 w-10 rounded bg-white" />
         )}
       </View>
-      <Text className="text-center font-bold text-[#1F2937]">{category.name}</Text>
+      <Text className="text-center font-bold text-[#1F2937]">{category.nameStringId}</Text>
     </Pressable>
   );
 }
