@@ -21,7 +21,8 @@ import { GetStoresByCategoryUseCase } from "../../domain/usecases/GetStoresByCat
 import { SearchThriftStoresUseCase } from "../../domain/usecases/SearchThriftStoresUseCase";
 import { GetProfileUseCase } from "../../domain/usecases/GetProfileUseCase";
 import { UpdateProfileUseCase } from "../../domain/usecases/UpdateProfileUseCase";
-import { FavoriteRepositoryAsyncStorage } from "../../data/repositories/FavoriteRepositoryAsyncStorage";
+import { FavoriteRepositoryHybrid } from "../../data/repositories/FavoriteRepositoryHybrid";
+import { HttpFavoriteRemoteDataSource } from "../../data/datasources/impl/HttpFavoriteRemoteDataSource";
 import { ToggleFavoriteThriftStoreUseCase } from "../../domain/usecases/ToggleFavoriteThriftStoreUseCase";
 import { IsFavoriteThriftStoreUseCase } from "../../domain/usecases/IsFavoriteThriftStoreUseCase";
 
@@ -58,11 +59,12 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const userLocalDataSource = new AsyncStorageUserLocalDataSource();
     const userRepository = new UserRepositoryImpl(userLocalDataSource);
     const thriftStoreRemote = new HttpThriftStoreRemoteDataSource();
+    const favoriteRemote = new HttpFavoriteRemoteDataSource();
     const guideContentRemote = new JsonGuideContentRemoteDataSource();
     const categoryRemote = new HttpCategoryRemoteDataSource();
     const profileRemote = new HttpProfileRemoteDataSource();
     const profileLocal = new AsyncStorageProfileLocalDataSource();
-    const favoriteRepository = new FavoriteRepositoryAsyncStorage();
+    const favoriteRepository = new FavoriteRepositoryHybrid(favoriteRemote);
 
     const thriftStoreRepository = new ThriftStoreRepositoryJson(thriftStoreRemote);
     const guideContentRepository = new GuideContentRepositoryJson(guideContentRemote);
