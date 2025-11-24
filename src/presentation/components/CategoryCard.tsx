@@ -4,14 +4,14 @@ import type { Category } from "../../domain/entities/Category";
 import { theme } from "../../shared/theme";
 
 const categoryImages: Record<string, any> = {
-  "brecho-categories-house": require("../../assets/images/brecho-categories-house.jpg"),
-  "categories-masculino": require("../../assets/images/categories-masculino.jpg"),
-  "categories-feminino": require("../../assets/images/categories-feminino.jpg"),
-  "categories-infantil": require("../../assets/images/categories-infantil.jpg"),
-  "categories-luxo": require("../../assets/images/categories-luxo.jpg"),
-  "categories-designer": require("../../assets/images/categories-designer.jpg"),
-  "categories-desapego": require("../../assets/images/categories-desapego.jpg"),
-  "categories-geral": require("../../assets/images/categories-geral.jpg")
+  "brecho-categories-house": require("../../../assets/images/brecho-categories-house.jpg"),
+  "categories-masculino": require("../../../assets/images/categories-masculino.jpg"),
+  "categories-feminino": require("../../../assets/images/categories-feminino.jpg"),
+  "categories-infantil": require("../../../assets/images/categories-infantil.jpg"),
+  "categories-luxo": require("../../../assets/images/categories-luxo.jpg"),
+  "categories-designer": require("../../../assets/images/categories-designer.jpg"),
+  "categories-desapego": require("../../../assets/images/categories-desapego.jpg"),
+  "categories-geral": require("../../../assets/images/categories-geral.jpg")
 };
 
 interface CategoryCardProps {
