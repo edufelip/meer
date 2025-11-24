@@ -44,6 +44,13 @@ export function EditProfileScreen() {
   const [notifyPromos, setNotifyPromos] = useState(preloaded?.notifyPromos ?? false);
   const [, setEmail] = useState<string | undefined>(undefined);
   const [showAvatarSheet, setShowAvatarSheet] = useState(false);
+  const [initialProfile, setInitialProfile] = useState({
+    name: preloaded?.name ?? "",
+    bio: preloaded?.bio ?? "",
+    avatarUrl: preloaded?.avatarUrl,
+    notifyNewStores: preloaded?.notifyNewStores ?? true,
+    notifyPromos: preloaded?.notifyPromos ?? false
+  });
 
   const STORAGE_NOTIFY_STORES = "preferences.notifyNewStores";
   const STORAGE_NOTIFY_PROMOS = "preferences.notifyPromos";
@@ -65,6 +72,13 @@ export function EditProfileScreen() {
       setNotifyNewStores(profile.notifyNewStores);
       setNotifyPromos(profile.notifyPromos);
       setEmail(profile.email);
+      setInitialProfile({
+        name: profile.name,
+        bio: profile.bio ?? "",
+        avatarUrl: profile.avatarUrl,
+        notifyNewStores: profile.notifyNewStores,
+        notifyPromos: profile.notifyPromos
+      });
     };
     const loadPrefs = async () => {
       const [storedStores, storedPromos] = await Promise.all([
@@ -94,13 +108,26 @@ export function EditProfileScreen() {
       AsyncStorage.setItem(STORAGE_NOTIFY_STORES, String(notifyNewStores)),
       AsyncStorage.setItem(STORAGE_NOTIFY_PROMOS, String(notifyPromos))
     ]);
-    await updateProfileUseCase.execute({
-      name: name.trim(),
-      bio: bio.trim(),
-      notifyNewStores,
-      notifyPromos,
-      avatarUrl: stagedAvatarUri ?? avatarUrl
-    });
+
+    const changes: any = {};
+    if (name.trim() !== initialProfile.name) changes.name = name.trim();
+    if (bio.trim() !== initialProfile.bio) changes.bio = bio.trim();
+    if (notifyNewStores !== initialProfile.notifyNewStores) changes.notifyNewStores = notifyNewStores;
+    if (notifyPromos !== initialProfile.notifyPromos) changes.notifyPromos = notifyPromos;
+
+    if (stagedAvatarUri) {
+      const filename = stagedAvatarUri.split("/").pop() ?? "avatar.jpg";
+      const ext = filename.split(".").pop();
+      const type = ext ? `image/${ext === "jpg" ? "jpeg" : ext}` : "image/jpeg";
+      changes.avatarFile = { uri: stagedAvatarUri, name: filename, type };
+    }
+
+    if (Object.keys(changes).length === 0) {
+      goBackSafe();
+      return;
+    }
+
+    await updateProfileUseCase.execute(changes);
     goBackSafe();
   };
 
