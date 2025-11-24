@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Pressable,
   ScrollView,
@@ -21,6 +21,7 @@ import * as ImagePicker from "expo-image-picker";
 import DraggableFlatList, { RenderItemParams } from "react-native-draggable-flatlist";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { ActivityIndicator } from "react-native";
+import * as Location from "expo-location";
 
 export function BrechoFormScreen() {
   const navigation = useNavigation();
@@ -36,6 +37,10 @@ export function BrechoFormScreen() {
   const [description, setDescription] = useState(initial.description ?? initial.tagline ?? "");
   const [hours, setHours] = useState(initial.openingHours ?? "");
   const [address, setAddress] = useState(initial.addressLine ?? "");
+  const [addressSuggestions, setAddressSuggestions] = useState<
+    Array<{ label: string; latitude?: number; longitude?: number }>
+  >([]);
+  const [addressCoords, setAddressCoords] = useState<{ latitude?: number; longitude?: number } | null>(null);
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [social, setSocial] = useState(initial.social?.instagram ?? "");
@@ -89,6 +94,35 @@ export function BrechoFormScreen() {
     setPhotos((prev) => prev.filter((p) => p.uri !== uri));
   };
 
+  useEffect(() => {
+    const trimmed = address.trim();
+    if (trimmed.length < 4) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      try {
+        const results = await Location.geocodeAsync(trimmed);
+        const suggestions = results.slice(0, 3).map((r) => {
+          const parts = [r.street ?? r.name, r.streetNumber, r.subregion ?? r.district, r.region, r.country].filter(
+            Boolean
+          );
+          return {
+            label: parts.join(", ") || trimmed,
+            latitude: r.latitude,
+            longitude: r.longitude
+          };
+        });
+        setAddressSuggestions(suggestions);
+      } catch {
+        setAddressSuggestions([]);
+      }
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [address]);
+
   const renderPhotoItem = ({ item, drag, isActive, index }: RenderItemParams<{ id?: string; uri: string; isNew?: boolean }>) => {
     const isCover = index === 0;
     return (
@@ -117,7 +151,7 @@ export function BrechoFormScreen() {
     );
   };
 
-  const buildPayload = () => {
+  const buildPayload = async () => {
     const textChanges: any = {};
     if (name.trim()) textChanges.name = name.trim();
     if (description.trim()) textChanges.description = description.trim();
@@ -127,6 +161,22 @@ export function BrechoFormScreen() {
     if (email.trim()) textChanges.email = email.trim();
     if (social.trim()) textChanges.social = { instagram: social.trim() };
     if (categories.length) textChanges.categories = categories;
+
+    // Geocode address to get lat/lng when provided
+    if (addressCoords?.latitude && addressCoords?.longitude) {
+      textChanges.latitude = addressCoords.latitude;
+      textChanges.longitude = addressCoords.longitude;
+    } else if (address.trim()) {
+      try {
+        const geocode = await Location.geocodeAsync(address.trim());
+        if (geocode.length) {
+          textChanges.latitude = geocode[0].latitude;
+          textChanges.longitude = geocode[0].longitude;
+        }
+      } catch {
+        // silent fail; backend can still geocode
+      }
+    }
 
     const existing = photos.filter((p) => !p.isNew && p.id);
     const newOnes = photos.filter((p) => p.isNew);
@@ -146,7 +196,7 @@ export function BrechoFormScreen() {
       return;
     }
 
-    const { textChanges, newOnes, deletePhotoIds, order } = buildPayload();
+    const { textChanges, newOnes, deletePhotoIds, order } = await buildPayload();
 
     if (
       !thriftStore &&
@@ -279,10 +329,30 @@ export function BrechoFormScreen() {
               <Text className="text-sm font-medium text-gray-700 mb-1">Endereço</Text>
               <TextInput
                 value={address}
-                onChangeText={setAddress}
+                onChangeText={(text) => {
+                  setAddress(text);
+                  setAddressCoords(null);
+                }}
                 placeholder="Rua, Número, Bairro"
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-3"
               />
+              {addressSuggestions.length > 0 && (
+                <View className="mt-2 bg-white border border-gray-200 rounded-lg">
+                  {addressSuggestions.map((s) => (
+                    <Pressable
+                      key={s.label + s.latitude}
+                      className="px-3 py-2"
+                      onPress={() => {
+                        setAddress(s.label);
+                        setAddressCoords({ latitude: s.latitude, longitude: s.longitude });
+                        setAddressSuggestions([]);
+                      }}
+                    >
+                      <Text className="text-sm text-[#374151]">{s.label}</Text>
+                    </Pressable>
+                  ))}
+                </View>
+              )}
             </View>
             <View>
               <Text className="text-sm font-medium text-gray-700 mb-1">Telefone / WhatsApp</Text>
