@@ -12,8 +12,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.edufelip.meer",
-      "googleServicesFile": "./GoogleService-Info.plist",
-      "usesAppleSignIn": false
+      "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
       "package": "com.edufelip.meer",
