@@ -27,6 +27,9 @@ import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import NetInfo from "@react-native-community/netinfo";
+import { getAccessTokenSync } from "../../../storage/authStorage";
+
+const DEFAULT_COORDS = { lat: -23.5561782, lng: -46.6375468 };
 
 export function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -41,7 +44,11 @@ export function HomeScreen() {
   const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
   const [offline, setOffline] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const coordsRef = useRef<{ lat: number; lng: number }>(DEFAULT_COORDS);
   const appState = useRef(AppState.currentState);
+  const locationResolved = useRef(false);
+  const isFetching = useRef(false);
+  const authErrored = useRef(false);
 
   const handleAppStateChange = useCallback(
     (nextState: string) => {
@@ -75,14 +82,18 @@ export function HomeScreen() {
   };
 
   const fetchData = useCallback(async () => {
+    // Avoid hammering the API if the user is logged out or already fetching
+    if (!locationResolved.current || !getAccessTokenSync() || isFetching.current || authErrored.current) return;
+    isFetching.current = true;
     try {
-      const { featured: featuredStores, nearby: nearbyStores, content: guideItems } = await getHomeUseCase.execute(
-        coords ?? DEFAULT_COORDS
-      );
-      setFeatured(featuredStores);
-      setNearby(nearbyStores.slice(0, 10));
-      setAllStores([...featuredStores, ...nearbyStores]);
-      setGuides(guideItems);
+      const currentCoords = coordsRef.current ?? DEFAULT_COORDS;
+      const { featured: featuredStores = [], nearby: nearbyStores = [], content: guideItems = [] } =
+        await getHomeUseCase.execute(currentCoords);
+
+      setFeatured(featuredStores ?? []);
+      setNearby((nearbyStores ?? []).slice(0, 10));
+      setAllStores([...(featuredStores ?? []), ...(nearbyStores ?? [])]);
+      setGuides(guideItems ?? []);
       const hoods = new Set<string>();
       [...featuredStores, ...nearbyStores].forEach((s) => {
         if (s.neighborhood) {
@@ -91,23 +102,28 @@ export function HomeScreen() {
       });
       setNeighborhoods(["Próximo a mim", ...Array.from(hoods)]);
       setLoading(false);
-    } catch (e) {
-      setLoading(true);
+    } catch (e: any) {
+      setLoading(false);
+      if (e?.response?.status === 401) {
+        authErrored.current = true;
+        await clearTokens();
+        if (navigation.isFocused()) navigation.navigate("login");
+      }
+    } finally {
+      isFetching.current = false;
     }
-  }, [getHomeUseCase, coords]);
+  }, [getHomeUseCase, coords, navigation]);
 
   useEffect(() => {
     const unsubscribeNet = NetInfo.addEventListener((state) => {
       const connected = !!state.isConnected;
       setOffline(!connected);
-      if (connected) {
+      if (connected && locationResolved.current) {
         fetchData();
       }
     });
 
     const unsubscribeAppState = AppState.addEventListener("change", handleAppStateChange);
-
-    fetchData();
 
     return () => {
       unsubscribeNet();
@@ -138,7 +154,10 @@ export function HomeScreen() {
               ]
             );
           }
+          coordsRef.current = DEFAULT_COORDS;
           setCoords(DEFAULT_COORDS);
+          locationResolved.current = true;
+          fetchData();
           return;
         }
 
@@ -146,24 +165,31 @@ export function HomeScreen() {
           accuracy: Location.Accuracy.Balanced
         });
         const [place] = await Location.reverseGeocodeAsync(position.coords);
-        if (place) {
-          const city = place.subregion ?? place.city ?? place.region ?? "Sua região";
-          const country = place.isoCountryCode ?? "";
-          setLocationLabel(country ? `${city}, ${country}` : city);
+          if (place) {
+            const city = place.subregion ?? place.city ?? place.region ?? "Sua região";
+            const country = place.isoCountryCode ?? "";
+            setLocationLabel(country ? `${city}, ${country}` : city);
+          }
+          const c = { lat: position.coords.latitude, lng: position.coords.longitude };
+          coordsRef.current = c;
+          setCoords(c);
+          locationResolved.current = true;
+          fetchData(); // refetch with new coords
+        } catch {
+          coordsRef.current = DEFAULT_COORDS;
+          setCoords(DEFAULT_COORDS);
+          locationResolved.current = true;
+          fetchData();
         }
-        const c = { lat: position.coords.latitude, lng: position.coords.longitude };
-        setCoords(c);
-        fetchData(); // refetch with new coords
-      } catch {
-        setCoords(DEFAULT_COORDS);
-      }
-    },
-    [fetchData]
+      },
+      [fetchData]
   );
 
   useEffect(() => {
     requestLocation(false);
-  }, [requestLocation]);
+    // intentionally no deps to avoid re-request loops
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const renderShimmer = () => (
     <ScrollView className="flex-1 bg-[#F3F4F6]" contentContainerStyle={{ padding: 16 }}>
@@ -327,7 +353,7 @@ export function HomeScreen() {
                 ? nearby
                 : allStores.filter((s) => s.neighborhood === activeFilter)
               ).map((store, idx, arr) => (
-                <View key={store.id} style={{ marginBottom: idx === arr.length - 1 ? 0 : 8 }}>
+                <View key={`${store.id}-${idx}`} style={{ marginBottom: idx === arr.length - 1 ? 0 : 8 }}>
                   <NearbyThriftListItem
                     store={store}
                     onPress={() => navigation.navigate("thriftDetail", { id: store.id })}

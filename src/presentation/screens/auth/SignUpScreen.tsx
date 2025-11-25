@@ -17,6 +17,7 @@ import { theme } from "../../../shared/theme";
 import { isValidEmail, validatePassword, passwordsMatch } from "../../../domain/validation/auth";
 import { useSignup } from "../../../hooks/useSignup";
 import { saveTokens } from "../../../storage/authStorage";
+import { primeApiToken } from "../../../api/client";
 
 export function SignUpScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -176,6 +177,7 @@ export function SignUpScreen() {
                       password
                     });
                     await saveTokens(auth.token, auth.refreshToken);
+                    primeApiToken(auth.token);
                     navigation.navigate("tabs");
                   } catch {
                     setError("Não foi possível criar a conta. Tente novamente.");

@@ -2,7 +2,7 @@ import React, { PropsWithChildren, createContext, useContext, useMemo } from "re
 import { AsyncStorageUserLocalDataSource } from "../../data/datasources/impl/AsyncStorageUserLocalDataSource";
 import { UserRepositoryImpl } from "../../data/repositories/UserRepositoryImpl";
 import { HttpThriftStoreRemoteDataSource } from "../../data/datasources/impl/HttpThriftStoreRemoteDataSource";
-import { JsonGuideContentRemoteDataSource } from "../../data/datasources/impl/JsonGuideContentRemoteDataSource";
+import { HttpGuideContentRemoteDataSource } from "../../data/datasources/impl/HttpGuideContentRemoteDataSource";
 import { HttpCategoryRemoteDataSource } from "../../data/datasources/impl/HttpCategoryRemoteDataSource";
 import { HttpProfileRemoteDataSource } from "../../data/datasources/impl/HttpProfileRemoteDataSource";
 import { AsyncStorageProfileLocalDataSource } from "../../data/datasources/impl/AsyncStorageProfileLocalDataSource";
@@ -79,7 +79,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const thriftStoreRemote = new HttpThriftStoreRemoteDataSource();
     const favoriteRemote = new HttpFavoriteRemoteDataSource();
     const feedbackRemote = new HttpFeedbackRemoteDataSource();
-    const guideContentRemote = new JsonGuideContentRemoteDataSource();
+    const guideContentRemote = new HttpGuideContentRemoteDataSource();
     const categoryRemote = new HttpCategoryRemoteDataSource();
     const profileRemote = new HttpProfileRemoteDataSource();
     const profileLocal = new AsyncStorageProfileLocalDataSource();

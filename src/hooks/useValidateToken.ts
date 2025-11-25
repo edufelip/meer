@@ -5,6 +5,12 @@ export function useValidateToken(enabled: boolean) {
   return useQuery({
     queryKey: ["auth", "me"],
     queryFn: validateToken,
-    enabled
+    enabled,
+    retry: false,
+    staleTime: Infinity,
+    cacheTime: 0,
+    refetchOnMount: false,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false
   });
 }

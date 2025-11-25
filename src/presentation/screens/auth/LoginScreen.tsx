@@ -24,6 +24,7 @@ import { useLoginWithApple } from "../../../hooks/useLoginWithApple";
 import { useLoginWithGoogle } from "../../../hooks/useLoginWithGoogle";
 import { theme } from "../../../shared/theme";
 import { saveTokens } from "../../../storage/authStorage";
+import { primeApiToken } from "../../../api/client";
 
 export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -76,6 +77,7 @@ export function LoginScreen() {
         client: platformClient
       });
       await saveTokens(authResult.token, authResult.refreshToken);
+      primeApiToken(authResult.token);
       navigation.navigate("tabs");
     } catch (err) {
       setError("Não foi possível entrar com Google. Tente novamente.");
@@ -128,18 +130,19 @@ export function LoginScreen() {
                           AppleAuthentication.AppleAuthenticationScope.EMAIL
                         ]
                       });
-                      if (credential.identityToken) {
-                        setLoading(true);
-                        const auth = await appleMutation.mutateAsync({
-                          provider: "apple",
-                          idToken: credential.identityToken,
-                          authorizationCode: credential.authorizationCode ?? undefined,
-                          client: "ios"
-                        });
-                        await saveTokens(auth.token, auth.refreshToken);
-                        navigation.navigate("tabs");
-                      }
-                    } catch (e: any) {
+                    if (credential.identityToken) {
+                      setLoading(true);
+                      const auth = await appleMutation.mutateAsync({
+                        provider: "apple",
+                        idToken: credential.identityToken,
+                        authorizationCode: credential.authorizationCode ?? undefined,
+                        client: "ios"
+                      });
+                      await saveTokens(auth.token, auth.refreshToken);
+                      primeApiToken(auth.token);
+                      navigation.navigate("tabs");
+                    }
+                  } catch (e: any) {
                       if (e?.code === "ERR_REQUEST_CANCELED") return;
                       setError("Não foi possível entrar com Apple.");
                     } finally {
@@ -226,6 +229,7 @@ export function LoginScreen() {
                     setLoading(true);
                     const auth = await loginMutation.mutateAsync({ email: email.trim(), password });
                     await saveTokens(auth.token, auth.refreshToken);
+                    primeApiToken(auth.token);
                     navigation.navigate("tabs");
                   } catch (e) {
                     setError("Não foi possível entrar. Verifique suas credenciais.");
