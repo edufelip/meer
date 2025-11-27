@@ -16,7 +16,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
-import { useNavigation, useRoute } from "@react-navigation/native";
+import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { theme } from "../../../shared/theme";
@@ -40,6 +40,13 @@ export function CategoryStoresScreen() {
   const { getStoresByCategoryUseCase, getNearbyPaginatedUseCase, toggleFavoriteThriftStoreUseCase } =
     useDependencies();
   const queryClient = useQueryClient();
+
+  useFocusEffect(
+    useCallback(() => {
+      // Refresh data when returning from detail to reflect updated favorite state
+      queryClient.invalidateQueries(["category-stores", categoryId ?? "nearby"]);
+    }, [queryClient, categoryId])
+  );
 
   const query = useInfiniteQuery({
     queryKey: ["category-stores", categoryId ?? "nearby"],
