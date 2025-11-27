@@ -78,7 +78,7 @@ const CategoryChip: React.FC<CategoryChipProps> = ({ id, label, active, onToggle
         RNAnimated.sequence([
           RNAnimated.spring(pressAnim, {
             toValue: 1,
-            useNativeDriver: true,
+            useNativeDriver: false,
             speed: 22,
             bounciness: 7
           }),
@@ -86,7 +86,7 @@ const CategoryChip: React.FC<CategoryChipProps> = ({ id, label, active, onToggle
             toValue: 0,
             duration: 140,
             easing: Easing.out(Easing.quad),
-            useNativeDriver: true
+            useNativeDriver: false
           })
         ]).start();
         onToggle();
