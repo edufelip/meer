@@ -18,6 +18,13 @@ import {
 import DraggableFlatList, { RenderItemParams } from "react-native-draggable-flatlist";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AnimatedRe, {
+  createAnimatedComponent,
+  interpolateColor,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming
+} from "react-native-reanimated";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
@@ -60,6 +67,38 @@ export function BrechoFormScreen() {
   };
 
   const categoryOptions = ["Feminino", "Masculino", "Infantil", "Casa", "Plus Size", "Luxo"];
+
+  const AnimatedPressable = createAnimatedComponent(Pressable);
+  const AnimatedText = createAnimatedComponent(Text);
+
+  const CategoryChip = ({ label, active }: { label: string; active: boolean }) => {
+    const activeSv = useSharedValue(active ? 1 : 0);
+
+    useEffect(() => {
+      activeSv.value = withTiming(active ? 1 : 0, { duration: 180 });
+    }, [active, activeSv]);
+
+    const containerStyle = useAnimatedStyle(() => ({
+      backgroundColor: interpolateColor(activeSv.value, [0, 1], ["#E5E7EB", "#B55D05"])
+    }));
+
+    const textStyle = useAnimatedStyle(() => ({
+      color: interpolateColor(activeSv.value, [0, 1], ["#374151", "#FFFFFF"])
+    }));
+
+    return (
+      <AnimatedPressable
+        key={label}
+        style={containerStyle}
+        className="py-2 px-4 rounded-full"
+        onPress={() => toggleCategory(label)}
+      >
+        <AnimatedText style={textStyle} className="text-sm font-semibold">
+          {label}
+        </AnimatedText>
+      </AnimatedPressable>
+    );
+  };
 
   const pickImage = async (fromCamera: boolean) => {
     const perm = fromCamera
@@ -388,22 +427,9 @@ export function BrechoFormScreen() {
         <View className="bg-white p-4 rounded-xl shadow-sm mb-4">
           <Text className="text-lg font-bold mb-4">Categorias</Text>
           <View className="flex-row flex-wrap gap-2 mb-2">
-            {categoryOptions.map((label) => {
-              const active = categories.includes(label);
-              return (
-                <Pressable
-                  key={label}
-                  className={`py-2 px-4 rounded-full text-sm font-semibold ${
-                    active ? "bg-[#B55D05] text-white" : "bg-gray-200 text-gray-700"
-                  }`}
-                  onPress={() => toggleCategory(label)}
-                >
-                  <Text className={`text-sm font-semibold ${active ? "text-white" : "text-gray-700"}`}>
-                    {label}
-                  </Text>
-                </Pressable>
-              );
-            })}
+            {categoryOptions.map((label) => (
+              <CategoryChip key={label} label={label} active={categories.includes(label)} />
+            ))}
           </View>
         </View>
 
