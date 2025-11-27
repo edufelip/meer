@@ -159,7 +159,7 @@ export function CategoryStoresScreen() {
             <Text className="flex-1 text-center text-xl font-bold text-[#374151] pr-10">{title}</Text>
           </View>
         </View>
-        <View className="flex-1 bg-[#F3F4F6] px-4 py-4 gap-12">
+        <View className="flex-1 bg-[#F3F4F6] px-4 py-4 gap-6">
           {[1, 2, 3, 4].map((key) => (
             <Animated.View
               key={key}
@@ -231,8 +231,8 @@ export function CategoryStoresScreen() {
         <FlatList
           data={stores}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }}
-          ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+        contentContainerStyle={{ padding: 16, gap: 6, paddingBottom: 24 }}
+        ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
           renderItem={renderItem}
           onEndReached={() => hasNext && query.fetchNextPage()}
           onEndReachedThreshold={0.6}
