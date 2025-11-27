@@ -317,12 +317,12 @@ export function EditProfileScreen() {
                     source={{ uri: "https://lh3.googleusercontent.com/aida-public/AB6AXuAGed5Z4pxAPJlUqOVgX5iAMqujCDvqIzPUy1SpYm-7DVhvOb5NnNcF9Uoa7RphRC-Bpim_kWKIwtxKchRqV4qWV7hCH0AcCkEfXyATgADCIOjk-rCov53EFb447NdQpBYhDieKRbztjFPf35COQA3Gs8YC2XW7vDzXpKacf4KbhRPboKJ6jIrnn3-3OJYXJB0BtkZwoGtGyhi2xlKYpPI_GJwRY-dwGdhml95o1C7CyqagNEqv6HQDtGRzZtuKvdCjWXybSWEifzc" }}
                     className="w-6 h-6"
                   />
-                  <Text className="text-[#374151]">Facebook</Text>
-                </View>
-                <Text className="text-sm text-gray-500">Conectado</Text>
-              </Pressable>
+              <Text className="text-[#374151]">Facebook</Text>
             </View>
-          </View>
+            <Text className="text-sm text-[#B55D05]">Conectar</Text>
+          </Pressable>
+        </View>
+      </View>
 
           <View className="flex flex-col gap-3 pt-6">
             <Pressable
