@@ -26,6 +26,93 @@ import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import { theme } from "../../../shared/theme";
 
+type CategoryChipProps = {
+  id: string;
+  label: string;
+  active: boolean;
+  onToggle: () => void;
+};
+
+const CategoryChip: React.FC<CategoryChipProps> = ({ id, label, active, onToggle }) => {
+  const anim = useRef(new RNAnimated.Value(active ? 1 : 0)).current; // color/size based on active
+  const pressAnim = useRef(new RNAnimated.Value(0)).current; // tap bounce
+
+  useEffect(() => {
+    RNAnimated.timing(anim, {
+      toValue: active ? 1 : 0,
+      duration: 220,
+      easing: Easing.out(Easing.quad),
+      useNativeDriver: false // color interpolation
+    }).start();
+  }, [active, anim]);
+
+  const bgStyle = {
+    backgroundColor: anim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["#E5E7EB", "#B55D05"]
+    })
+  };
+
+  const textStyle = {
+    color: anim.interpolate({
+      inputRange: [0, 1],
+      outputRange: ["#374151", "#FFFFFF"]
+    })
+  };
+
+  const activeScale = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.98, 1.08]
+  });
+
+  const pressScale = pressAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 1.07]
+  });
+
+  return (
+    <Pressable
+      key={id}
+      onPress={() => {
+        pressAnim.setValue(0);
+        RNAnimated.sequence([
+          RNAnimated.spring(pressAnim, {
+            toValue: 1,
+            useNativeDriver: true,
+            speed: 22,
+            bounciness: 7
+          }),
+          RNAnimated.timing(pressAnim, {
+            toValue: 0,
+            duration: 140,
+            easing: Easing.out(Easing.quad),
+            useNativeDriver: true
+          })
+        ]).start();
+        onToggle();
+      }}
+    >
+      <RNAnimated.View
+        style={[
+          bgStyle,
+          {
+            transform: [
+              {
+                scale: RNAnimated.multiply(activeScale, pressScale)
+              }
+            ]
+          }
+        ]}
+        className="py-2 px-4 rounded-full"
+      >
+        <RNAnimated.Text style={textStyle} className="text-sm font-semibold">
+          {label}
+        </RNAnimated.Text>
+      </RNAnimated.View>
+    </Pressable>
+  );
+};
+
 export function BrechoFormScreen() {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "brechoForm">>();
@@ -75,73 +162,6 @@ export function BrechoFormScreen() {
     ],
     []
   );
-
-  const CategoryChip = ({ id, label, active }: { id: string; label: string; active: boolean }) => {
-    const anim = useRef(new RNAnimated.Value(active ? 1 : 0)).current; // color/size based on active
-    const pressAnim = useRef(new RNAnimated.Value(0)).current; // tap bounce
-
-    useEffect(() => {
-      RNAnimated.timing(anim, {
-        toValue: active ? 1 : 0,
-        duration: 220,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: false
-      }).start();
-    }, [active, anim]);
-
-    const bgStyle = {
-      backgroundColor: anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: ["#E5E7EB", "#B55D05"]
-      })
-    };
-
-    const textStyle = {
-      color: anim.interpolate({
-        inputRange: [0, 1],
-        outputRange: ["#374151", "#FFFFFF"]
-      })
-    };
-
-    const pressScale = pressAnim.interpolate({
-      inputRange: [0, 1],
-      outputRange: [1, 1.07]
-    });
-
-    const scaleStyle = {
-      transform: [
-        {
-          scale: anim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.98, 1.08]
-          })
-        },
-        {
-          scale: pressScale
-        }
-      ]
-    };
-
-    return (
-      <Pressable
-        key={id}
-        onPress={() => {
-          pressAnim.setValue(0);
-          RNAnimated.sequence([
-            RNAnimated.spring(pressAnim, { toValue: 1, useNativeDriver: true, speed: 22, bounciness: 7 }),
-            RNAnimated.timing(pressAnim, { toValue: 0, duration: 140, easing: Easing.out(Easing.quad), useNativeDriver: true })
-          ]).start();
-          toggleCategory(label);
-        }}
-      >
-        <RNAnimated.View style={[bgStyle, scaleStyle]} className="py-2 px-4 rounded-full">
-          <RNAnimated.Text style={textStyle} className="text-sm font-semibold">
-            {label}
-          </RNAnimated.Text>
-        </RNAnimated.View>
-      </Pressable>
-    );
-  };
 
   const pickImage = async (fromCamera: boolean) => {
     const perm = fromCamera
@@ -477,7 +497,13 @@ export function BrechoFormScreen() {
           <Text className="text-lg font-bold mb-4">Categorias</Text>
           <View className="flex-row flex-wrap gap-2 mb-2">
             {categoryOptions.map((opt) => (
-              <CategoryChip key={opt.id} id={opt.id} label={opt.label} active={categories.includes(opt.label)} />
+              <CategoryChip
+                key={opt.id}
+                id={opt.id}
+                label={opt.label}
+                active={categories.includes(opt.label)}
+                onToggle={() => toggleCategory(opt.label)}
+              />
             ))}
           </View>
         </View>
