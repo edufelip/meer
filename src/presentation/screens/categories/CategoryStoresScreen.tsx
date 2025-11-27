@@ -85,25 +85,25 @@ export function CategoryStoresScreen() {
 
   const renderItem = ({ item }: { item: ThriftStore }) => (
     <Pressable
-      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-row"
+      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-row items-stretch"
       onPress={() => navigation.navigate("thriftDetail", { id: item.id, store: item })}
     >
-      {item.coverImageUrl || item.galleryUrls?.[0] ? (
-        <Image
-          source={{ uri: item.coverImageUrl ?? item.galleryUrls?.[0] }}
-          className="w-28 h-full"
-          style={{ aspectRatio: 1 }}
-          resizeMode="cover"
-        />
-      ) : (
-        <LinearGradient
-          colors={["#E5E7EB", "#D1D5DB"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          className="w-28 h-full"
-          style={{ aspectRatio: 1 }}
-        />
-      )}
+      <View style={{ width: 112, alignSelf: "stretch" }}>
+        {item.coverImageUrl || item.galleryUrls?.[0] ? (
+          <Image
+            source={{ uri: item.coverImageUrl ?? item.galleryUrls?.[0] }}
+            style={{ width: "100%", height: "100%" }}
+            resizeMode="cover"
+          />
+        ) : (
+          <LinearGradient
+            colors={["#E5E7EB", "#D1D5DB"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{ width: "100%", height: "100%" }}
+          />
+        )}
+      </View>
       <View className="p-4 flex-1">
         <View className="flex-row justify-between items-start">
           <Text className="font-bold text-[#374151] text-lg" numberOfLines={1}>
