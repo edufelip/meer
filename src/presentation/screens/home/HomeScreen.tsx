@@ -73,6 +73,7 @@ export function HomeScreen() {
   const lastFetchRef = useRef(0);
   const appState = useRef(AppState.currentState);
   const locationResolved = useRef(false);
+  const loadCacheInFlight = useRef(false);
   const isFetching = useRef(false);
   const hasFetchedOnce = useRef(false);
   const featuredDoneRef = useRef(false);
@@ -142,6 +143,8 @@ export function HomeScreen() {
 
   const loadCacheAndFetch = useCallback(
     async (options?: { force?: boolean }) => {
+      if (loadCacheInFlight.current) return;
+      loadCacheInFlight.current = true;
       const bucket = bucketFor(coordsRef.current ?? DEFAULT_COORDS);
       const cached = await loadHomeCache(bucket);
       const now = Date.now();
@@ -151,8 +154,12 @@ export function HomeScreen() {
         applyCache(cached);
       }
 
-      if (stale || options?.force) {
-        void fetchData({ force: true, forceFeatured: true, silent: !!cached });
+      try {
+        if (stale || options?.force) {
+          await fetchData({ force: true, forceFeatured: true, silent: !!cached });
+        }
+      } finally {
+        loadCacheInFlight.current = false;
       }
     },
     [applyCache, fetchData]
