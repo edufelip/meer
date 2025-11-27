@@ -342,7 +342,7 @@ export function EditProfileScreen() {
             </Pressable>
 
             <Pressable
-              className="items-center justify-center p-3 rounded-lg border border-gray-200"
+              className="items-center justify-center p-3 rounded-lg"
               onPress={handleLogout}
             >
               <Text className="font-bold text-red-500">Sair</Text>
