@@ -10,18 +10,20 @@ import {
   ActivityIndicator,
   Linking
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { ThriftStore, ThriftStoreId } from "../../../domain/entities/ThriftStore";
 import { theme } from "../../../shared/theme";
+import ImageViewing from "react-native-image-viewing";
 
 interface ThriftDetailScreenProps {
   route?: { params?: { id?: ThriftStoreId } };
 }
 
 export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
+  const insets = useSafeAreaInsets();
   const {
     getThriftStoreByIdUseCase,
     getFeaturedThriftStoresUseCase,
@@ -32,6 +34,8 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
   const [store, setStore] = useState<ThriftStore | null>(null);
   const [loading, setLoading] = useState(true);
   const [favorite, setFavorite] = useState(false);
+  const [viewerVisible, setViewerVisible] = useState(false);
+  const [viewerIndex, setViewerIndex] = useState(0);
 
   const openMaps = () => {
     if (!store?.latitude || !store?.longitude) return;
@@ -75,18 +79,24 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
     );
   }
 
+  const heroImage = store.coverImageUrl ?? store.imageUrl;
+  const galleryImages = (store.galleryUrls ?? []).map((uri) => ({ uri }));
+
   return (
-    <SafeAreaView className="flex-1 bg-[#F3F4F6]">
+    <SafeAreaView className="flex-1 bg-[#F3F4F6]" edges={["left", "right", "bottom"]}>
       <StatusBar barStyle="light-content" translucent />
       <View className="relative flex-1 bg-[#F3F4F6]">
         <ImageBackground
-          source={{ uri: store.imageUrl }}
+          source={{ uri: heroImage }}
           className="h-64"
           resizeMode="cover"
           imageStyle={{ opacity: 0.95 }}
         >
           <View className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <View className="absolute top-4 left-4 right-4 flex-row justify-between">
+          <View
+            className="absolute left-4 right-4 flex-row justify-between"
+            style={{ top: insets.top + 8 }}
+          >
             <Pressable
               className="p-2 rounded-full bg-white/80"
               onPress={() => {
@@ -116,7 +126,9 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
           </View>
           <View className="absolute bottom-4 left-4">
             <Text className="text-2xl font-bold text-white">{store.name}</Text>
-            <Text className="text-sm text-white/90">{store.description}</Text>
+            <Text className="text-sm text-white/90" style={{ marginTop: 4, marginBottom: 16 }}>
+              {store.description}
+            </Text>
           </View>
         </ImageBackground>
 
@@ -138,7 +150,10 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
               </View>
             </View>
 
-            <Pressable className="h-40 rounded-lg bg-gray-200 overflow-hidden" onPress={openMaps}>
+            <Pressable
+              className="h-40 rounded-lg bg-gray-200 overflow-hidden mt-4 mb-4"
+              onPress={openMaps}
+            >
               {store.latitude && store.longitude ? (
                 <Image
                   source={{
@@ -165,20 +180,24 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
               </View>
             </View>
 
-            <View style={{ borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
+            <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
               <Text className="font-bold text-[#374151] mb-2">Galeria de Fotos</Text>
               <View className="flex-row flex-wrap gap-2">
                 {(store.galleryUrls ?? []).slice(0, 6).map((url, index) => (
-                  <Image
+                  <Pressable
                     key={`${url}-${index}`}
-                    source={{ uri: url }}
-                    className="w-[30%] h-24 rounded-lg"
-                  />
+                    onPress={() => {
+                      setViewerIndex(index);
+                      setViewerVisible(true);
+                    }}
+                  >
+                    <Image source={{ uri: url }} className="w-[30%] h-24 rounded-lg" />
+                  </Pressable>
                 ))}
               </View>
             </View>
 
-            <View style={{ borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
+            <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
               <Text className="font-bold text-[#374151] mb-2">Redes Sociais</Text>
               <View className="flex-row items-center gap-2">
                 <Ionicons name="logo-instagram" size={18} color={theme.colors.highlight} />
@@ -186,7 +205,7 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
               </View>
             </View>
 
-            <View style={{ borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
+            <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
               <Text className="font-bold text-[#374151] mb-2">Categorias</Text>
               <View className="flex-row flex-wrap gap-2">
                 {(store.categories ?? ["Feminino", "Vintage", "Acessórios"]).map((c) => (
@@ -202,6 +221,15 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
             </View>
           </View>
         </ScrollView>
+
+        {galleryImages.length > 0 ? (
+          <ImageViewing
+            images={galleryImages}
+            imageIndex={viewerIndex}
+            visible={viewerVisible}
+            onRequestClose={() => setViewerVisible(false)}
+          />
+        ) : null}
       </View>
     </SafeAreaView>
   );
