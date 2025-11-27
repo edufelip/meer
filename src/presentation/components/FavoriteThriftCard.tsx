@@ -36,15 +36,15 @@ export function FavoriteThriftCard({ store, onPress }: FavoriteThriftCardProps) 
         <Text className="text-sm text-[#6B7280]" numberOfLines={2}>
           {store.description}
         </Text>
-        <View className="flex-row items-center space-x-2">
-          <Ionicons name="location" size={14} color={theme.colors.highlight} />
+        <View className="flex-row items-center">
+          <Ionicons name="location" size={14} color={theme.colors.highlight} style={{ marginRight: 8 }} />
           <Text className="text-sm text-[#6B7280]" numberOfLines={1}>
             {store.addressLine ?? store.neighborhood ?? "Endereço disponível em breve"}
           </Text>
         </View>
         {store.distanceKm !== undefined && store.walkTimeMinutes !== undefined ? (
-          <View className="flex-row items-center space-x-2">
-            <Ionicons name="walk" size={14} color={theme.colors.highlight} />
+          <View className="flex-row items-center">
+            <Ionicons name="walk" size={14} color={theme.colors.highlight} style={{ marginRight: 8 }} />
             <Text className="text-sm text-[#6B7280]">
               {store.distanceKm.toFixed(1)} km · {store.walkTimeMinutes} min
             </Text>
