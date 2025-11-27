@@ -207,16 +207,34 @@ export function BrechoFormScreen() {
       try {
         const results = await Location.geocodeAsync(trimmed);
         console.log("[Geocode] results", results);
-        const suggestions = results.slice(0, 3).map((r) => {
-          const parts = [r.street ?? r.name, r.streetNumber, r.subregion ?? r.district, r.region, r.country].filter(
-            Boolean
-          );
-          return {
-            label: parts.join(", ") || trimmed,
-            latitude: r.latitude,
-            longitude: r.longitude
-          };
-        });
+
+        const suggestions = await Promise.all(
+          results.slice(0, 3).map(async (r) => {
+            try {
+              const [rev] = await Location.reverseGeocodeAsync({ latitude: r.latitude, longitude: r.longitude });
+              const parts = [
+                rev?.street ?? rev?.name,
+                rev?.streetNumber,
+                rev?.district ?? rev?.subregion,
+                rev?.city ?? rev?.region,
+                rev?.country
+              ].filter(Boolean);
+              return {
+                label: parts.join(", ") || trimmed,
+                latitude: r.latitude,
+                longitude: r.longitude
+              };
+            } catch (err) {
+              console.log("[Geocode] reverse failed", err);
+              return {
+                label: trimmed,
+                latitude: r.latitude,
+                longitude: r.longitude
+              };
+            }
+          })
+        );
+
         setAddressSuggestions(suggestions);
       } catch {
         setAddressSuggestions([]);
