@@ -244,7 +244,7 @@ export function BrechoFormScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaView className="flex-1 bg-[#F3F4F6]" edges={["top", "left", "right"]}>
+      <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <View className="bg-white/90 border-b border-gray-200">
         <View className="flex-row items-center justify-between p-4">
           <Pressable className="w-8 h-8 items-center justify-center" onPress={() => navigation.goBack()}>
@@ -255,7 +255,8 @@ export function BrechoFormScreen() {
         </View>
       </View>
 
-      <ScrollView className="flex-1 p-4" contentContainerStyle={{ paddingBottom: 24 }}>
+      <View className="flex-1 bg-[#F3F4F6]">
+        <ScrollView className="flex-1 p-4" contentContainerStyle={{ paddingBottom: 24 }}>
         <View className="bg-white p-4 rounded-xl shadow-sm mb-4">
           <Text className="text-lg font-bold mb-4">Informações Gerais</Text>
           <View className="space-y-4">
@@ -422,7 +423,8 @@ export function BrechoFormScreen() {
             )}
           </Pressable>
         </View>
-      </ScrollView>
+        </ScrollView>
+      </View>
       </SafeAreaView>
     </GestureHandlerRootView>
   );
