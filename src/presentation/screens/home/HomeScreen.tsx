@@ -10,7 +10,10 @@ import {
   Easing,
   Alert,
   Linking,
-  AppState
+  AppState,
+  LayoutAnimation,
+  Platform,
+  UIManager
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SectionTitle } from "../../components/SectionTitle";
@@ -31,6 +34,10 @@ import { getAccessTokenSync } from "../../../storage/authStorage";
 
 const DEFAULT_COORDS = { lat: -23.5561782, lng: -46.6375468 };
 
+if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
 export function HomeScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { getFeaturedThriftStoresUseCase, getNearbyPaginatedUseCase, getGuideContentUseCase } =
@@ -44,6 +51,7 @@ export function HomeScreen() {
   const [guidesLoading, setGuidesLoading] = useState(true);
   const [hasFetched, setHasFetched] = useState(false);
   const [activeFilter, setActiveFilter] = useState("Próximo a mim");
+  const [filteredList, setFilteredList] = useState<ThriftStore[]>([]);
   const [locationLabel, setLocationLabel] = useState("São Paulo, SP");
   const [neighborhoods, setNeighborhoods] = useState<string[]>(["Próximo a mim"]);
   const [offline, setOffline] = useState(false);
@@ -68,6 +76,7 @@ export function HomeScreen() {
   );
 
   const shimmer = useRef(new Animated.Value(0)).current;
+  const filterAnim = useRef(new Animated.Value(1)).current;
 
   const startShimmer = useCallback(() => {
     Animated.loop(
@@ -106,7 +115,11 @@ export function HomeScreen() {
 
     const recompute = () => {
       if (featuredDoneRef.current && nearbyDoneRef.current) {
-        const combined = [...featuredRef, ...nearbyRef];
+        const unique = new Map<string, ThriftStore>();
+        [...featuredRef, ...nearbyRef].forEach((s) => {
+          if (s?.id) unique.set(s.id, s);
+        });
+        const combined = Array.from(unique.values());
         setAllStores(combined);
         const hoods = new Set<string>();
         combined.forEach((s) => {
@@ -239,6 +252,29 @@ export function HomeScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    const list =
+      activeFilter === "Próximo a mim"
+        ? nearby
+        : allStores.filter((s) => s.neighborhood === activeFilter);
+    setFilteredList(list);
+    filterAnim.setValue(0);
+    Animated.timing(filterAnim, {
+      toValue: 1,
+      duration: 180,
+      easing: Easing.out(Easing.ease),
+      useNativeDriver: true
+    }).start();
+  }, [activeFilter, nearby, allStores]);
+
+  useEffect(() => {
+    if (!neighborhoods.includes(activeFilter)) {
+      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      setActiveFilter("Próximo a mim");
+    }
+  }, [neighborhoods, activeFilter]);
+
   const renderShimmer = () => (
     <ScrollView className="flex-1 bg-[#F3F4F6]" contentContainerStyle={{ padding: 16 }}>
       <Animated.View
@@ -360,14 +396,14 @@ export function HomeScreen() {
                     <Pressable
                       className="bg-[#B55D05] px-4 py-2 rounded-full shadow-lg mb-3"
                       onPress={() =>
-                        navigation.navigate("categoryStores", {
-                          type: "nearby",
-                          title: "Brechós próximos",
-                          lat: (coords ?? DEFAULT_COORDS).lat,
-                          lng: (coords ?? DEFAULT_COORDS).lng
-                        })
-                      }
-                    >
+                      navigation.navigate("categoryStores", {
+                        type: "nearby",
+                        title: "Brechós próximos",
+                        lat: (coords ?? DEFAULT_COORDS).lat,
+                        lng: (coords ?? DEFAULT_COORDS).lng
+                      })
+                    }
+                  >
                       <Text className="text-sm font-bold text-white">Ver lista</Text>
                     </Pressable>
                   </View>
@@ -392,7 +428,10 @@ export function HomeScreen() {
                         className={`flex-row items-center gap-1.5 py-2 px-3 rounded-full ${
                           active ? "bg-[#B55D05]" : "bg-gray-200"
                         }`}
-                        onPress={() => setActiveFilter(label)}
+                        onPress={() => {
+                          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                          setActiveFilter(label);
+                        }}
                       >
                         {isFirst ? (
                           <Ionicons name="navigate" size={16} color={active ? "white" : "#374151"} />
@@ -419,27 +458,25 @@ export function HomeScreen() {
                   />
                 ))
               ) : (
-                (() => {
-                  const list =
-                    activeFilter === "Próximo a mim"
-                      ? nearby
-                      : allStores.filter((s) => s.neighborhood === activeFilter);
-                  if (!list.length) {
-                    return (
-                      <Text className="text-sm text-gray-500 mt-2">
-                        Nenhum brechó encontrado para este filtro.
-                      </Text>
-                    );
-                  }
-                  return list.map((store, idx, arr) => (
-                    <View key={`${store.id}-${idx}`} style={{ marginBottom: idx === arr.length - 1 ? 0 : 8 }}>
-                      <NearbyThriftListItem
-                        store={store}
-                        onPress={() => navigation.navigate("thriftDetail", { id: store.id })}
-                      />
-                    </View>
-                  ));
-                })()
+                <Animated.View
+                  style={{
+                    opacity: filterAnim,
+                    transform: [{ translateY: filterAnim.interpolate({ inputRange: [0, 1], outputRange: [12, 0] }) }]
+                  }}
+                >
+                  {filteredList.length === 0 ? (
+                    <Text className="text-sm text-gray-500 mt-2">Nenhum brechó encontrado para este filtro.</Text>
+                  ) : (
+                    filteredList.map((store, idx, arr) => (
+                      <View key={`${store.id}-${idx}`} style={{ marginBottom: idx === arr.length - 1 ? 0 : 8 }}>
+                        <NearbyThriftListItem
+                          store={store}
+                          onPress={() => navigation.navigate("thriftDetail", { id: store.id })}
+                        />
+                      </View>
+                    ))
+                  )}
+                </Animated.View>
               )}
             </View>
             <View className="mt-6 items-center">

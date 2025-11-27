@@ -80,7 +80,9 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
   }
 
   const heroImage = store.coverImageUrl ?? store.imageUrl;
-  const galleryImages = (store.galleryUrls ?? []).map((uri) => ({ uri }));
+  const baseGallery = (store.galleryUrls?.filter(Boolean) ?? []) as string[];
+  const resolvedGallery = baseGallery.length > 0 ? baseGallery : heroImage ? [heroImage] : [];
+  const galleryImages = resolvedGallery.map((uri) => ({ uri }));
 
   return (
     <SafeAreaView className="flex-1 bg-[#F3F4F6]" edges={["left", "right", "bottom"]}>
@@ -163,7 +165,7 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
                 />
               ) : (
                 <View className="flex-1 items-center justify-center">
-                  <Text className="text-[#6B7280]">Mapa indisponível</Text>
+                  <Text className="text-[#6B7280]">Localização indisponível</Text>
                 </View>
               )}
             </Pressable>
@@ -183,27 +185,55 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
             <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
               <Text className="font-bold text-[#374151] mb-2">Galeria de Fotos</Text>
               <View className="flex-row flex-wrap gap-2">
-                {(store.galleryUrls ?? []).slice(0, 6).map((url, index) => (
+                {resolvedGallery.slice(0, 6).map((url, index) => (
                   <Pressable
                     key={`${url}-${index}`}
                     onPress={() => {
                       setViewerIndex(index);
                       setViewerVisible(true);
                     }}
+                    style={{ width: "30%" }}
                   >
-                    <Image source={{ uri: url }} className="w-[30%] h-24 rounded-lg" />
+                    <Image
+                      source={{ uri: url }}
+                      className="h-24 rounded-lg"
+                      style={{ width: "100%" }}
+                    />
                   </Pressable>
                 ))}
               </View>
             </View>
 
-            <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
-              <Text className="font-bold text-[#374151] mb-2">Redes Sociais</Text>
-              <View className="flex-row items-center gap-2">
-                <Ionicons name="logo-instagram" size={18} color={theme.colors.highlight} />
-                <Text className="text-sm text-gray-500">{store.socialHandle ?? "@seuBrecho"}</Text>
-              </View>
-            </View>
+            {(() => {
+              const igRaw = (store.social?.instagram ?? store.socialHandle ?? "").trim();
+              const igHandle = igRaw.replace(/^@/, "");
+              const hasInstagram = igHandle.length > 0;
+              const hasAnySocial = hasInstagram || Boolean(store.social?.facebook || store.social?.whatsapp || store.social?.website);
+              if (!hasAnySocial) return null;
+
+              return (
+                <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
+                  <Text className="font-bold text-[#374151] mb-2">Redes Sociais</Text>
+                  {hasInstagram ? (
+                    <Pressable
+                      className="flex-row items-center gap-2"
+                      onPress={() => {
+                        const appUrl = `instagram://user?username=${igHandle}`;
+                        const webUrl = `https://www.instagram.com/${igHandle}`;
+                        Linking.canOpenURL(appUrl)
+                          .then((canOpen) => (canOpen ? Linking.openURL(appUrl) : Linking.openURL(webUrl)))
+                          .catch(() => Linking.openURL(webUrl));
+                      }}
+                      accessibilityRole="link"
+                      accessibilityLabel="Abrir Instagram"
+                    >
+                      <Ionicons name="logo-instagram" size={18} color={theme.colors.highlight} />
+                      <Text className="text-sm text-gray-500 underline">@{igHandle}</Text>
+                    </Pressable>
+                  ) : null}
+                </View>
+              );
+            })()}
 
             <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
               <Text className="font-bold text-[#374151] mb-2">Categorias</Text>

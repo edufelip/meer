@@ -18,6 +18,14 @@ export function NearbyThriftListItem({ store, onPress, style }: NearbyThriftList
       ? `${store.distanceKm.toFixed(1)} km`
       : undefined;
 
+  const imageUri = store.coverImageUrl || store.imageUrl || store.galleryUrls?.[0];
+  const initials = store.name
+    .split(" ")
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <Pressable
       className="bg-white rounded-xl shadow-sm p-3 flex-row items-center"
@@ -25,7 +33,16 @@ export function NearbyThriftListItem({ store, onPress, style }: NearbyThriftList
       accessibilityRole="button"
       style={style}
     >
-      <Image source={{ uri: store.imageUrl }} className="w-16 h-16 rounded-lg mr-2" />
+      {imageUri ? (
+        <Image source={{ uri: imageUri }} className="w-16 h-16 rounded-lg mr-2" />
+      ) : (
+        <View
+          className="w-16 h-16 rounded-lg mr-2 items-center justify-center"
+          style={{ backgroundColor: `${theme.colors.highlight}22` }}
+        >
+          <Text className="font-bold text-[#374151]">{initials}</Text>
+        </View>
+      )}
       <View className="flex-1">
         <Text className="font-bold text-[#374151]">{store.name}</Text>
         <Text className="text-sm text-[#6B7280]" numberOfLines={1}>

@@ -134,28 +134,30 @@ export function SearchScreen() {
         contentContainerStyle={{ paddingBottom: 24 }}
         ListHeaderComponent={
           <>
-            <View className="py-4 px-4">
-              <Text className="text-lg font-bold mb-3 text-[#374151]">Sugestões de busca</Text>
-              <View className="flex-row flex-wrap gap-2">
-                {suggestionChips.map((label) => (
-                  <Pressable
-                    key={label}
-                    className="py-2 px-4 rounded-full bg-gray-200"
-                    onPress={() => {
-                      setQuery(label);
-                      runSearch(label);
-                    }}
-                  >
-                    <Text className="text-sm font-semibold text-gray-700">{label}</Text>
-                  </Pressable>
-                ))}
+            {!hasSearched && (
+              <View className="py-4 px-4">
+                <Text className="text-lg font-bold mb-3 text-[#374151]">Sugestões de busca</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {suggestionChips.map((label) => (
+                    <Pressable
+                      key={label}
+                      className="py-2 px-4 rounded-full bg-gray-200"
+                      onPress={() => {
+                        setQuery(label);
+                        runSearch(label);
+                      }}
+                    >
+                      <Text className="text-sm font-semibold text-gray-700">{label}</Text>
+                    </Pressable>
+                  ))}
+                </View>
               </View>
-            </View>
+            )}
 
-            <View className="py-4 px-4">
-              <View className="flex-row justify-between items-center mb-3">
-                <Text className="text-lg font-bold text-[#374151]">Pesquisas Recentes</Text>
-                {recents.length > 0 ? (
+            {recents.length > 0 && (
+              <View className="py-4 px-4">
+                <View className="flex-row justify-between items-center mb-3">
+                  <Text className="text-lg font-bold text-[#374151]">Pesquisas Recentes</Text>
                   <Pressable
                     onPress={async () => {
                       await clearHistory();
@@ -165,9 +167,9 @@ export function SearchScreen() {
                   >
                     <Text className="text-sm font-semibold text-[#B55D05]">Limpar</Text>
                   </Pressable>
-                ) : null}
+                </View>
               </View>
-            </View>
+            )}
           </>
         }
         data={filteredRecents}
@@ -195,23 +197,12 @@ export function SearchScreen() {
             </Pressable>
           </View>
         )}
-        ListEmptyComponent={
-          <View className="px-4">
-            <Text className="text-[#6B7280]">Nenhuma busca recente.</Text>
-          </View>
-        }
+        ListEmptyComponent={null}
         ListFooterComponent={
           <View className="px-4 pt-6 gap-3">
             {error ? (
-              <View className="bg-red-50 border border-red-200 rounded-lg p-3">
-                <Text className="text-red-700 text-sm mb-2">{error}</Text>
-                <Pressable
-                  className="self-start px-3 py-2 rounded bg-red-600"
-                  onPress={() => runSearch(query || recents[0] || "")}
-                  disabled={!query && recents.length === 0}
-                >
-                  <Text className="text-white text-sm font-semibold">Tentar novamente</Text>
-                </Pressable>
+              <View className="bg-red-50 border border-red-200 rounded-lg p-3 items-center justify-center">
+                <Text className="text-red-700 text-sm text-center">{error}</Text>
               </View>
             ) : null}
             {loading ? (
@@ -235,7 +226,7 @@ export function SearchScreen() {
                   style={{ marginBottom: 8 }}
                 />
               ))
-            ) : hasSearched ? (
+            ) : hasSearched && !error ? (
               <Text className="text-[#6B7280]">Nenhum resultado para "{query}".</Text>
             ) : null}
           </View>
