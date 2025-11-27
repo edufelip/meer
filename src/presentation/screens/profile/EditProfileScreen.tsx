@@ -393,14 +393,14 @@ export function EditProfileScreen() {
         <TouchableWithoutFeedback onPress={() => setShowDeleteModal(false)}>
           <View className="flex-1 bg-black/40" />
         </TouchableWithoutFeedback>
-        <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-4 pb-8 shadow-2xl space-y-1">
+        <View className="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl p-4 pb-8 shadow-2xl">
           <View className="flex-row justify-between items-center">
             <Text className="text-lg font-bold text-[#1F2937]">Excluir conta</Text>
             <Pressable onPress={() => setShowDeleteModal(false)}>
               <Ionicons name="close" size={20} color="#6B7280" />
             </Pressable>
           </View>
-          <Text className="text-sm text-[#6B7280]">
+          <Text className="text-sm text-[#6B7280] mt-1">
             Esta ação é permanente. Digite seu e-mail para confirmar a exclusão da conta.
           </Text>
           <TextInput
@@ -409,12 +409,12 @@ export function EditProfileScreen() {
             placeholder={email ?? "seuemail@dominio.com"}
             autoCapitalize="none"
             keyboardType="email-address"
-            className="w-full p-3 bg-white border border-gray-300 rounded-lg"
+            className="w-full p-3 bg-white border border-gray-300 rounded-lg mt-1"
           />
           <Pressable
             disabled={!email || deleteEmailInput.trim().toLowerCase() !== (email ?? "").toLowerCase()}
             onPress={handleDeleteAccount}
-            className={`items-center justify-center p-3 rounded-lg ${
+            className={`items-center justify-center p-3 rounded-lg mt-1 ${
               !email || deleteEmailInput.trim().toLowerCase() !== (email ?? "").toLowerCase()
                 ? "bg-gray-300"
                 : "bg-red-600"
@@ -430,7 +430,7 @@ export function EditProfileScreen() {
               Excluir conta
             </Text>
           </Pressable>
-          <Pressable className="items-center py-2" onPress={() => setShowDeleteModal(false)}>
+          <Pressable className="items-center py-2 mt-1" onPress={() => setShowDeleteModal(false)}>
             <Text className="text-sm text-[#6B7280]">Cancelar</Text>
           </Pressable>
         </View>
