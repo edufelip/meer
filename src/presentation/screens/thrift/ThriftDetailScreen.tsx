@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Image,
   ImageBackground,
@@ -7,8 +7,9 @@ import {
   Text,
   View,
   Pressable,
-  ActivityIndicator,
-  Linking
+  Linking,
+  Animated,
+  Easing
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -36,6 +37,22 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
   const [favorite, setFavorite] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const shimmer = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(shimmer, {
+        toValue: 1,
+        duration: 1200,
+        easing: Easing.linear,
+        useNativeDriver: true
+      })
+    ).start();
+  }, [shimmer]);
+
+  const shimmerStyle = {
+    opacity: shimmer.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.5, 1, 0.5] })
+  };
 
   const openMaps = () => {
     if (!store?.latitude || !store?.longitude) return;
@@ -70,10 +87,37 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
 
   if (loading || !store) {
     return (
-      <SafeAreaView className="flex-1 bg-[#F3F4F6]">
-        <StatusBar barStyle="dark-content" />
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color={theme.colors.highlight} />
+      <SafeAreaView className="flex-1 bg-[#F3F4F6]" edges={["left", "right", "bottom"]}>
+        <StatusBar barStyle="light-content" translucent />
+        <Animated.View className="h-64 bg-[#E5E7EB]" style={shimmerStyle} />
+        <View className="bg-white rounded-t-2xl -mt-4 p-4 space-y-4">
+          {[1, 2, 3, 4, 5].map((key) => (
+            <Animated.View
+              key={key}
+              style={[
+                {
+                  height: key === 1 ? 20 : 14,
+                  borderRadius: 8,
+                  backgroundColor: "#E5E7EB",
+                  width: key === 1 ? "70%" : key % 2 === 0 ? "85%" : "60%"
+                },
+                shimmerStyle
+              ]}
+            />
+          ))}
+          {[1, 2, 3].map((key) => (
+            <Animated.View
+              key={`card-${key}`}
+              style={[
+                {
+                  height: 72,
+                  borderRadius: 12,
+                  backgroundColor: "#E5E7EB"
+                },
+                shimmerStyle
+              ]}
+            />
+          ))}
         </View>
       </SafeAreaView>
     );
