@@ -71,6 +71,7 @@ export function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const coordsRef = useRef<{ lat: number; lng: number }>(DEFAULT_COORDS);
   const lastFetchRef = useRef(0);
+  const permissionGrantedRef = useRef(false);
   const appState = useRef(AppState.currentState);
   const locationResolved = useRef(false);
   const loadCacheInFlight = useRef(false);
@@ -302,6 +303,7 @@ export function HomeScreen() {
           const req = await Location.requestForegroundPermissionsAsync();
           finalStatus = req.status;
         }
+        permissionGrantedRef.current = finalStatus === "granted";
         if (finalStatus !== "granted") {
           if (!canAskAgain && askPermission) {
             Alert.alert(
@@ -441,7 +443,10 @@ export function HomeScreen() {
             </View>
             <Pressable
               className="flex-row items-center"
-              onPress={() => requestLocation(true)}
+              onPress={() => {
+                if (permissionGrantedRef.current) return;
+                requestLocation(true);
+              }}
               accessibilityRole="button"
               accessibilityLabel="Atualizar localização"
             >
