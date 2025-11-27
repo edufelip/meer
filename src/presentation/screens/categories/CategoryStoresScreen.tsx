@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -6,7 +6,9 @@ import {
   Pressable,
   StatusBar,
   Text,
-  View
+  View,
+  Animated,
+  Easing
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -52,6 +54,22 @@ export function CategoryStoresScreen() {
   const isError = query.isError;
   const hasNext = query.hasNextPage;
   const isFetchingNextPage = query.isFetchingNextPage;
+
+  const shimmer = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(shimmer, {
+        toValue: 1,
+        duration: 1200,
+        easing: Easing.linear,
+        useNativeDriver: true
+      })
+    ).start();
+  }, [shimmer]);
+
+  const shimmerStyle = {
+    opacity: shimmer.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.5, 1, 0.5] })
+  };
 
   const handleToggleFavorite = useCallback(
     async (store: ThriftStore) => {
@@ -131,10 +149,31 @@ export function CategoryStoresScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
+      <SafeAreaView className="flex-1 bg-[#F3F4F6]" edges={["top", "left", "right"]}>
         <StatusBar barStyle="dark-content" />
-        <View className="flex-1 items-center justify-center bg-[#F3F4F6]">
-          <ActivityIndicator size="large" color={theme.colors.highlight} />
+        <View className="bg-white px-4 py-4 border-b border-gray-100">
+          <View className="flex-row items-center">
+            <Pressable className="h-10 w-10 items-center justify-center" onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={22} color={theme.colors.highlight} />
+            </Pressable>
+            <Text className="flex-1 text-center text-xl font-bold text-[#374151] pr-10">{title}</Text>
+          </View>
+        </View>
+        <View className="px-4 py-4 gap-12">
+          {[1, 2, 3, 4].map((key) => (
+            <Animated.View
+              key={key}
+              style={[
+                {
+                  height: 110,
+                  borderRadius: 12,
+                  backgroundColor: "#E5E7EB",
+                  opacity: 0.9
+                },
+                shimmerStyle
+              ]}
+            />
+          ))}
         </View>
       </SafeAreaView>
     );
