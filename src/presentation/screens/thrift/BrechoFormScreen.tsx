@@ -206,6 +206,7 @@ export function BrechoFormScreen() {
     const timer = setTimeout(async () => {
       try {
         const results = await Location.geocodeAsync(trimmed);
+        console.log("[Geocode] results", results);
         const suggestions = results.slice(0, 3).map((r) => {
           const parts = [r.street ?? r.name, r.streetNumber, r.subregion ?? r.district, r.region, r.country].filter(
             Boolean
