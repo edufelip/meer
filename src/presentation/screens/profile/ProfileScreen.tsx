@@ -192,15 +192,6 @@ export function ProfileScreen() {
           </View>
         )}
 
-        <View className="px-4 pb-6">
-          <View className="bg-white rounded-lg shadow-sm">
-            <Pressable className="flex-row items-center justify-between p-4" onPress={logout}>
-              <Text className="text-red-500">Sair</Text>
-              <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
-            </Pressable>
-          </View>
-        </View>
-
       </ScrollView>
     </SafeAreaView>
   );
