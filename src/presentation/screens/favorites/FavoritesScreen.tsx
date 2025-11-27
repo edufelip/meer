@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { ActivityIndicator, FlatList, StatusBar, Text, View } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Animated, FlatList, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
@@ -8,21 +8,78 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const STORAGE_KEY = "favorites";
+
+async function readCachedFavorites(): Promise<ThriftStore[]> {
+  try {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as ThriftStore[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function areDifferent(a: ThriftStore[], b: ThriftStore[]): boolean {
+  if (a.length !== b.length) return true;
+  const idsA = a.map((s) => s.id).sort();
+  const idsB = b.map((s) => s.id).sort();
+  return idsA.some((id, idx) => id !== idsB[idx]);
+}
 
 export function FavoritesScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { getFavoriteThriftStoresUseCase } = useDependencies();
   const [favorites, setFavorites] = useState<ThriftStore[]>([]);
   const [loading, setLoading] = useState(true);
+  const shimmer = useRef(new Animated.Value(0)).current;
+  const favoritesRef = useRef<ThriftStore[]>([]);
+
+  const updateFavorites = (list: ThriftStore[]) => {
+    favoritesRef.current = list;
+    setFavorites(list);
+  };
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.timing(shimmer, {
+        toValue: 1,
+        duration: 1200,
+        useNativeDriver: true
+      })
+    ).start();
+  }, [shimmer]);
+
+  const shimmerStyle = {
+    opacity: shimmer.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.6, 1, 0.6] })
+  };
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
       (async () => {
-        const stores = await getFavoriteThriftStoresUseCase.execute();
-        if (active) {
-          setFavorites(stores);
+        setLoading(true);
+        // 1) Try cached first for instant paint
+        const cached = await readCachedFavorites();
+        if (active && cached.length > 0) {
+          updateFavorites(cached);
           setLoading(false);
+        }
+
+        // 2) Fetch remote in background and update only if different
+        try {
+          const remote = await getFavoriteThriftStoresUseCase.execute();
+          if (active) {
+            if (areDifferent(remote, favoritesRef.current)) {
+              updateFavorites(remote);
+            }
+            setLoading(false);
+          }
+        } catch {
+          if (active) setLoading(false);
         }
       })();
       return () => {
@@ -37,9 +94,19 @@ export function FavoritesScreen() {
       <View className="bg-white px-4 py-4 border-b border-gray-100">
         <Text className="text-xl font-bold text-[#1F2937]">Favoritos</Text>
       </View>
-      {loading ? (
-        <View className="flex-1 items-center justify-center bg-[#F3F4F6]">
-          <ActivityIndicator size="large" color="#B55D05" />
+      {loading && favorites.length === 0 ? (
+        <View className="flex-1 bg-[#F3F4F6] px-4 py-6">
+          {[...Array(4)].map((_, idx) => (
+            <View key={idx} className="bg-white rounded-2xl mb-4 overflow-hidden">
+              <Animated.View style={[{ height: 160, backgroundColor: "#E5E7EB" }, shimmerStyle]} />
+              <View className="p-4">
+                <Animated.View style={[{ height: 18, backgroundColor: "#E5E7EB", borderRadius: 6 }, shimmerStyle]} />
+                <Animated.View
+                  style={[{ height: 14, backgroundColor: "#E5E7EB", borderRadius: 6, marginTop: 10 }, shimmerStyle]}
+                />
+              </View>
+            </View>
+          ))}
         </View>
       ) : favorites.length === 0 ? (
         <View className="flex-1 items-center justify-center bg-[#F3F4F6] px-6">
