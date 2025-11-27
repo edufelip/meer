@@ -32,8 +32,19 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import NetInfo from "@react-native-community/netinfo";
 import { getAccessTokenSync } from "../../../storage/authStorage";
+import {
+  loadHomeCache,
+  saveHomeCache,
+  type HomeCache
+} from "../../../data/datasources/impl/AsyncStorageHomeCache";
 
 const DEFAULT_COORDS = { lat: -23.5561782, lng: -46.6375468 };
+const HOME_TTL = 24 * 60 * 60 * 1000; // 24h strict
+
+const bucketFor = (coords: { lat: number; lng: number }) => {
+  const r = (v: number) => Math.round(v * 100) / 100;
+  return `loc_${r(coords.lat)}_${r(coords.lng)}`;
+};
 
 if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -99,6 +110,54 @@ export function HomeScreen() {
     opacity: shimmer.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.5, 1, 0.5] })
   };
 
+  const updateCombined = useCallback((featuredList: ThriftStore[], nearbyList: ThriftStore[]) => {
+    const unique = new Map<string, ThriftStore>();
+    [...featuredList, ...nearbyList].forEach((s) => {
+      if (s?.id) unique.set(s.id, s);
+    });
+    const combined = Array.from(unique.values());
+    setAllStores(combined);
+    const hoods = new Set<string>();
+    combined.forEach((s) => {
+      if (s.neighborhood) hoods.add(s.neighborhood);
+    });
+    setNeighborhoods(["Próximo a mim", ...Array.from(hoods)]);
+  }, []);
+
+  const applyCache = useCallback((cache: HomeCache) => {
+    const f = cache.featured ?? [];
+    const n = cache.nearby ?? [];
+    const c = cache.contents ?? [];
+    setFeatured(f);
+    setNearby(n);
+    setGuides(c);
+    updateCombined(f, n);
+    lastFetchRef.current = cache.fetchedAt;
+    setFeaturedLoading(false);
+    setNearbyLoading(false);
+    setGuidesLoading(false);
+    setHasFetched(true);
+    hasFetchedOnce.current = true;
+  }, [updateCombined]);
+
+  const loadCacheAndFetch = useCallback(
+    async (options?: { force?: boolean }) => {
+      const bucket = bucketFor(coordsRef.current ?? DEFAULT_COORDS);
+      const cached = await loadHomeCache(bucket);
+      const now = Date.now();
+      const stale = !cached || now - cached.fetchedAt > HOME_TTL;
+
+      if (cached) {
+        applyCache(cached);
+      }
+
+      if (stale || options?.force) {
+        void fetchData({ force: true, forceFeatured: true, silent: !!cached });
+      }
+    },
+    [applyCache, fetchData]
+  );
+
   const fetchData = useCallback(
     async (opts?: { force?: boolean; forceFeatured?: boolean; silent?: boolean }) => {
       if (!locationResolved.current || !getAccessTokenSync()) return;
@@ -116,24 +175,19 @@ export function HomeScreen() {
       }
 
       const currentCoords = coordsRef.current ?? DEFAULT_COORDS;
+      const bucket = bucketFor(currentCoords);
       const featuredRef: ThriftStore[] = [];
       const nearbyRef: ThriftStore[] = [];
+      let guidesData: GuideContent[] = [];
+      let featuredOk = false;
+      let nearbyOk = false;
+      let guidesOk = false;
       featuredDoneRef.current = false;
       nearbyDoneRef.current = false;
 
       const recompute = () => {
         if (featuredDoneRef.current && nearbyDoneRef.current) {
-          const unique = new Map<string, ThriftStore>();
-          [...featuredRef, ...nearbyRef].forEach((s) => {
-            if (s?.id) unique.set(s.id, s);
-          });
-          const combined = Array.from(unique.values());
-          setAllStores(combined);
-          const hoods = new Set<string>();
-          combined.forEach((s) => {
-            if (s.neighborhood) hoods.add(s.neighborhood);
-          });
-          setNeighborhoods(["Próximo a mim", ...Array.from(hoods)]);
+          updateCombined(featuredRef, nearbyRef);
         }
       };
 
@@ -154,6 +208,7 @@ export function HomeScreen() {
           onUpdated: (fresh) => applyFeatured(fresh ?? [], true)
         })
         .then((data) => {
+          featuredOk = true;
           applyFeatured(data ?? []);
           setFeaturedLoading(false);
         })
@@ -171,6 +226,7 @@ export function HomeScreen() {
           nearbyRef.splice(0, nearbyRef.length, ...items);
           setNearby(items.slice(0, 10));
           setNearbyLoading(false);
+          nearbyOk = true;
           nearbyDoneRef.current = true;
           recompute();
         })
@@ -183,17 +239,30 @@ export function HomeScreen() {
 
       const guidesPromise = getGuideContentUseCase
         .execute(10)
-        .then((res) => setGuides(res ?? []))
+        .then((res) => {
+          guidesData = res ?? [];
+          guidesOk = true;
+          setGuides(guidesData);
+        })
         .catch(() => setGuides([]))
         .finally(() => setGuidesLoading(false));
 
       await Promise.allSettled([featuredPromise, nearbyPromise, guidesPromise]);
+
+      if (featuredOk && nearbyOk && guidesOk) {
+        void saveHomeCache(bucket, {
+          featured: featuredRef,
+          nearby: nearbyRef,
+          contents: guidesData,
+          fetchedAt: Date.now()
+        });
+      }
       hasFetchedOnce.current = true;
       setHasFetched(true);
       lastFetchRef.current = Date.now();
       isFetching.current = false;
     },
-    [getFeaturedThriftStoresUseCase, getNearbyPaginatedUseCase, getGuideContentUseCase]
+    [getFeaturedThriftStoresUseCase, getNearbyPaginatedUseCase, getGuideContentUseCase, updateCombined]
   );
 
   useEffect(() => {
@@ -201,7 +270,12 @@ export function HomeScreen() {
       const connected = !!state.isConnected;
       setOffline(!connected);
       if (connected && locationResolved.current) {
-        fetchData();
+        const now = Date.now();
+        if (!hasFetchedOnce.current) {
+          void loadCacheAndFetch();
+        } else if (now - lastFetchRef.current > HOME_TTL) {
+          void fetchData({ force: true, silent: true });
+        }
       }
     });
 
@@ -211,7 +285,7 @@ export function HomeScreen() {
       unsubscribeNet();
       unsubscribeAppState.remove();
     };
-  }, [fetchData, handleAppStateChange]);
+  }, [fetchData, handleAppStateChange, loadCacheAndFetch]);
 
   const requestLocation = useCallback(
     async (askPermission: boolean) => {
@@ -239,7 +313,7 @@ export function HomeScreen() {
           coordsRef.current = DEFAULT_COORDS;
           setCoords(DEFAULT_COORDS);
           locationResolved.current = true;
-          fetchData();
+          await loadCacheAndFetch();
           return;
         }
 
@@ -247,24 +321,24 @@ export function HomeScreen() {
           accuracy: Location.Accuracy.Balanced
         });
         const [place] = await Location.reverseGeocodeAsync(position.coords);
-          if (place) {
-            const city = place.subregion ?? place.city ?? place.region ?? "Sua região";
-            const country = place.isoCountryCode ?? "";
-            setLocationLabel(country ? `${city}, ${country}` : city);
-          }
-          const c = { lat: position.coords.latitude, lng: position.coords.longitude };
-          coordsRef.current = c;
-          setCoords(c);
-          locationResolved.current = true;
-          fetchData(); // refetch with new coords
-        } catch {
-          coordsRef.current = DEFAULT_COORDS;
-          setCoords(DEFAULT_COORDS);
-          locationResolved.current = true;
-          fetchData();
+        if (place) {
+          const city = place.subregion ?? place.city ?? place.region ?? "Sua região";
+          const country = place.isoCountryCode ?? "";
+          setLocationLabel(country ? `${city}, ${country}` : city);
         }
-      },
-      [fetchData]
+        const c = { lat: position.coords.latitude, lng: position.coords.longitude };
+        coordsRef.current = c;
+        setCoords(c);
+        locationResolved.current = true;
+        await loadCacheAndFetch();
+      } catch {
+        coordsRef.current = DEFAULT_COORDS;
+        setCoords(DEFAULT_COORDS);
+        locationResolved.current = true;
+        await loadCacheAndFetch();
+      }
+    },
+    [loadCacheAndFetch]
   );
 
   useEffect(() => {
@@ -275,9 +349,9 @@ export function HomeScreen() {
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchData({ force: true, forceFeatured: true, silent: true });
+    await loadCacheAndFetch({ force: true });
     setRefreshing(false);
-  }, [fetchData]);
+  }, [loadCacheAndFetch]);
 
   useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
