@@ -3,7 +3,7 @@ import type { ThriftStoreRemoteDataSource } from "../ThriftStoreRemoteDataSource
 import { api } from "../../../api/client";
 
 export class HttpThriftStoreRemoteDataSource implements ThriftStoreRemoteDataSource {
-  async getFeatured(params?: { lat?: number; lng?: number }): Promise<ThriftStore[]> {
+  async getFeatured(params?: { lat?: number; lng?: number; forceRefresh?: boolean }): Promise<ThriftStore[]> {
     const res = await api.get<ThriftStore[]>("/featured", {
       params: { lat: params?.lat, lng: params?.lng }
     });

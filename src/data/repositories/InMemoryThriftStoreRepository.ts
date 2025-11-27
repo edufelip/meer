@@ -112,11 +112,16 @@ const favorites: ThriftStore[] = [
 ];
 
 export class InMemoryThriftStoreRepository implements ThriftStoreRepository {
-  async getFeatured(): Promise<ThriftStore[]> {
+  async getFeatured(_params?: { lat?: number; lng?: number }): Promise<ThriftStore[]> {
     return featured;
   }
 
-  async getNearby(): Promise<{ items: ThriftStore[]; page: number; hasNext: boolean }> {
+  async getNearby(_params?: {
+    lat?: number;
+    lng?: number;
+    page?: number;
+    pageSize?: number;
+  }): Promise<{ items: ThriftStore[]; page: number; hasNext: boolean }> {
     return { items: nearby, page: 1, hasNext: false };
   }
 
@@ -127,5 +132,26 @@ export class InMemoryThriftStoreRepository implements ThriftStoreRepository {
   async getById(id: ThriftStore["id"]): Promise<ThriftStore | null> {
     const all = [...featured, ...nearby, ...favorites];
     return all.find((s) => s.id === id) ?? null;
+  }
+
+  async search(query: string): Promise<ThriftStore[]> {
+    const q = query.toLowerCase();
+    return [...featured, ...nearby, ...favorites].filter((s) => s.name.toLowerCase().includes(q));
+  }
+
+  async listByCategory(): Promise<{ items: ThriftStore[]; page: number; hasNext: boolean }> {
+    return { items: [], page: 1, hasNext: false };
+  }
+
+  async listNearbyPaginated(): Promise<{ items: ThriftStore[]; page: number; hasNext: boolean }> {
+    return { items: nearby, page: 1, hasNext: false };
+  }
+
+  async createStore(): Promise<ThriftStore> {
+    throw new Error("InMemory repository does not support createStore");
+  }
+
+  async updateStore(): Promise<ThriftStore> {
+    throw new Error("InMemory repository does not support updateStore");
   }
 }

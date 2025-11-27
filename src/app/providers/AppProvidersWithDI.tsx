@@ -7,6 +7,7 @@ import { HttpCategoryRemoteDataSource } from "../../data/datasources/impl/HttpCa
 import { AsyncStorageCategoryLocalDataSource } from "../../data/datasources/impl/AsyncStorageCategoryLocalDataSource";
 import { HttpProfileRemoteDataSource } from "../../data/datasources/impl/HttpProfileRemoteDataSource";
 import { AsyncStorageProfileLocalDataSource } from "../../data/datasources/impl/AsyncStorageProfileLocalDataSource";
+import { AsyncStorageFeaturedLocalDataSource } from "../../data/datasources/impl/AsyncStorageFeaturedLocalDataSource";
 import { ThriftStoreRepositoryJson } from "../../data/repositories/ThriftStoreRepositoryJson";
 import { GuideContentRepositoryJson } from "../../data/repositories/GuideContentRepositoryJson";
 import { CategoryRepositoryJson } from "../../data/repositories/CategoryRepositoryJson";
@@ -85,12 +86,13 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const guideContentRemote = new HttpGuideContentRemoteDataSource();
     const categoryRemote = new HttpCategoryRemoteDataSource();
     const categoryLocal = new AsyncStorageCategoryLocalDataSource();
+    const featuredLocal = new AsyncStorageFeaturedLocalDataSource();
     const profileRemote = new HttpProfileRemoteDataSource();
     const profileLocal = new AsyncStorageProfileLocalDataSource();
     const favoriteRepository = new FavoriteRepositoryHybrid(favoriteRemote);
     const feedbackRepository = new FeedbackRepositoryImpl(feedbackRemote);
 
-    const thriftStoreRepository = new ThriftStoreRepositoryJson(thriftStoreRemote);
+    const thriftStoreRepository = new ThriftStoreRepositoryJson(thriftStoreRemote, featuredLocal);
     const guideContentRepository = new GuideContentRepositoryJson(guideContentRemote);
     const categoryRepository = new CategoryRepositoryJson(categoryRemote, categoryLocal);
     const profileRepository = new ProfileRepositoryJson(profileRemote, profileLocal);

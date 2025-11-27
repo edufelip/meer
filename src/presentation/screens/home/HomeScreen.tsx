@@ -13,7 +13,8 @@ import {
   AppState,
   LayoutAnimation,
   Platform,
-  UIManager
+  UIManager,
+  RefreshControl
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { SectionTitle } from "../../components/SectionTitle";
@@ -56,6 +57,7 @@ export function HomeScreen() {
   const [neighborhoods, setNeighborhoods] = useState<string[]>(["Próximo a mim"]);
   const [offline, setOffline] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
   const coordsRef = useRef<{ lat: number; lng: number }>(DEFAULT_COORDS);
   const lastFetchRef = useRef(0);
   const appState = useRef(AppState.currentState);
@@ -97,83 +99,102 @@ export function HomeScreen() {
     opacity: shimmer.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.5, 1, 0.5] })
   };
 
-  const fetchData = useCallback(async () => {
-    if (!locationResolved.current || !getAccessTokenSync() || isFetching.current) return;
-    const now = Date.now();
-    if (now - lastFetchRef.current < 2500) return; // throttle repeated triggers
-
-    isFetching.current = true;
-    setFeaturedLoading(true);
-    setNearbyLoading(true);
-    setGuidesLoading(true);
-
-    const currentCoords = coordsRef.current ?? DEFAULT_COORDS;
-    const featuredRef: ThriftStore[] = [];
-    const nearbyRef: ThriftStore[] = [];
-    featuredDoneRef.current = false;
-    nearbyDoneRef.current = false;
-
-    const recompute = () => {
-      if (featuredDoneRef.current && nearbyDoneRef.current) {
-        const unique = new Map<string, ThriftStore>();
-        [...featuredRef, ...nearbyRef].forEach((s) => {
-          if (s?.id) unique.set(s.id, s);
-        });
-        const combined = Array.from(unique.values());
-        setAllStores(combined);
-        const hoods = new Set<string>();
-        combined.forEach((s) => {
-          if (s.neighborhood) hoods.add(s.neighborhood);
-        });
-        setNeighborhoods(["Próximo a mim", ...Array.from(hoods)]);
+  const fetchData = useCallback(
+    async (opts?: { force?: boolean; forceFeatured?: boolean; silent?: boolean }) => {
+      if (!locationResolved.current || !getAccessTokenSync()) return;
+      const now = Date.now();
+      if (!opts?.force) {
+        if (isFetching.current) return;
+        if (now - lastFetchRef.current < 2500) return; // throttle repeated triggers
       }
-    };
 
-    const featuredPromise = getFeaturedThriftStoresUseCase
-      .execute(currentCoords)
-      .then((data) => {
+      isFetching.current = true;
+      if (!opts?.silent) {
+        setFeaturedLoading(true);
+        setNearbyLoading(true);
+        setGuidesLoading(true);
+      }
+
+      const currentCoords = coordsRef.current ?? DEFAULT_COORDS;
+      const featuredRef: ThriftStore[] = [];
+      const nearbyRef: ThriftStore[] = [];
+      featuredDoneRef.current = false;
+      nearbyDoneRef.current = false;
+
+      const recompute = () => {
+        if (featuredDoneRef.current && nearbyDoneRef.current) {
+          const unique = new Map<string, ThriftStore>();
+          [...featuredRef, ...nearbyRef].forEach((s) => {
+            if (s?.id) unique.set(s.id, s);
+          });
+          const combined = Array.from(unique.values());
+          setAllStores(combined);
+          const hoods = new Set<string>();
+          combined.forEach((s) => {
+            if (s.neighborhood) hoods.add(s.neighborhood);
+          });
+          setNeighborhoods(["Próximo a mim", ...Array.from(hoods)]);
+        }
+      };
+
+      const applyFeatured = (data: ThriftStore[], animate = false) => {
         featuredRef.splice(0, featuredRef.length, ...(data ?? []));
+        if (animate) {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        }
         setFeatured(data ?? []);
-        setFeaturedLoading(false);
         featuredDoneRef.current = true;
         recompute();
-      })
-      .catch(() => {
-        setFeatured([]);
-        setFeaturedLoading(false);
-        featuredDoneRef.current = true;
-        recompute();
-      });
+      };
 
-    const nearbyPromise = getNearbyPaginatedUseCase
-      .execute({ page: 1, pageSize: 10, lat: currentCoords.lat, lng: currentCoords.lng })
-      .then((res) => {
-        const items = res.items ?? [];
-        nearbyRef.splice(0, nearbyRef.length, ...items);
-        setNearby(items.slice(0, 10));
-        setNearbyLoading(false);
-        nearbyDoneRef.current = true;
-        recompute();
-      })
-      .catch(() => {
-        setNearby([]);
-        setNearbyLoading(false);
-        nearbyDoneRef.current = true;
-        recompute();
-      });
+      const featuredPromise = getFeaturedThriftStoresUseCase
+        .execute({
+          ...currentCoords,
+          forceRefresh: opts?.forceFeatured,
+          onUpdated: (fresh) => applyFeatured(fresh ?? [], true)
+        })
+        .then((data) => {
+          applyFeatured(data ?? []);
+          setFeaturedLoading(false);
+        })
+        .catch(() => {
+          setFeatured([]);
+          setFeaturedLoading(false);
+          featuredDoneRef.current = true;
+          recompute();
+        });
 
-    const guidesPromise = getGuideContentUseCase
-      .execute(10)
-      .then((res) => setGuides(res ?? []))
-      .catch(() => setGuides([]))
-      .finally(() => setGuidesLoading(false));
+      const nearbyPromise = getNearbyPaginatedUseCase
+        .execute({ page: 1, pageSize: 10, lat: currentCoords.lat, lng: currentCoords.lng })
+        .then((res) => {
+          const items = res.items ?? [];
+          nearbyRef.splice(0, nearbyRef.length, ...items);
+          setNearby(items.slice(0, 10));
+          setNearbyLoading(false);
+          nearbyDoneRef.current = true;
+          recompute();
+        })
+        .catch(() => {
+          setNearby([]);
+          setNearbyLoading(false);
+          nearbyDoneRef.current = true;
+          recompute();
+        });
 
-    await Promise.allSettled([featuredPromise, nearbyPromise, guidesPromise]);
-    hasFetchedOnce.current = true;
-    setHasFetched(true);
-    lastFetchRef.current = Date.now();
-    isFetching.current = false;
-  }, [getFeaturedThriftStoresUseCase, getNearbyPaginatedUseCase, getGuideContentUseCase]);
+      const guidesPromise = getGuideContentUseCase
+        .execute(10)
+        .then((res) => setGuides(res ?? []))
+        .catch(() => setGuides([]))
+        .finally(() => setGuidesLoading(false));
+
+      await Promise.allSettled([featuredPromise, nearbyPromise, guidesPromise]);
+      hasFetchedOnce.current = true;
+      setHasFetched(true);
+      lastFetchRef.current = Date.now();
+      isFetching.current = false;
+    },
+    [getFeaturedThriftStoresUseCase, getNearbyPaginatedUseCase, getGuideContentUseCase]
+  );
 
   useEffect(() => {
     const unsubscribeNet = NetInfo.addEventListener((state) => {
@@ -251,6 +272,12 @@ export function HomeScreen() {
     // intentionally no deps to avoid re-request loops
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await fetchData({ force: true, forceFeatured: true, silent: true });
+    setRefreshing(false);
+  }, [fetchData]);
 
   useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -361,6 +388,7 @@ export function HomeScreen() {
           className="flex-1 bg-[#F3F4F6]"
           contentInsetAdjustmentBehavior="automatic"
           contentContainerStyle={{ paddingBottom: 24 }}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           <View className="bg-white py-4">
             <SectionTitle title="Brechós em destaque" />

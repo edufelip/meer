@@ -8,7 +8,12 @@ export class GetFeaturedThriftStoresUseCase {
     this.repository = repository;
   }
 
-  execute(params?: { lat?: number; lng?: number }): Promise<ThriftStore[]> {
+  execute(params?: {
+    lat?: number;
+    lng?: number;
+    forceRefresh?: boolean;
+    onUpdated?: (data: ThriftStore[]) => void;
+  }): Promise<ThriftStore[]> {
     return this.repository.getFeatured(params);
   }
 }

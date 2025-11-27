@@ -1,7 +1,7 @@
 import type { ThriftStore, ThriftStoreId } from "../../domain/entities/ThriftStore";
 
 export interface ThriftStoreRemoteDataSource {
-  getFeatured(params?: { lat?: number; lng?: number }): Promise<ThriftStore[]>;
+  getFeatured(params?: { lat?: number; lng?: number; forceRefresh?: boolean }): Promise<ThriftStore[]>;
   getNearby(params?: {
     lat?: number;
     lng?: number;

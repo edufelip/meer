@@ -1,7 +1,12 @@
 import type { ThriftStore, ThriftStoreId } from "../entities/ThriftStore";
 
 export interface ThriftStoreRepository {
-  getFeatured(params?: { lat?: number; lng?: number }): Promise<ThriftStore[]>;
+  getFeatured(params?: {
+    lat?: number;
+    lng?: number;
+    forceRefresh?: boolean;
+    onUpdated?: (data: ThriftStore[]) => void;
+  }): Promise<ThriftStore[]>;
   getNearby(params?: {
     lat?: number;
     lng?: number;
