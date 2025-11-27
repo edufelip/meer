@@ -418,7 +418,7 @@ export function EditProfileScreen() {
                 placeholder={email ?? "seuemail@dominio.com"}
                 autoCapitalize="none"
                 keyboardType="email-address"
-                className="w-full p-3 bg-white border border-gray-300 rounded-lg"
+                className="w-full p-3 bg-white border border-gray-300 rounded-lg mt-2 mb-2"
               />
 
               <Pressable
