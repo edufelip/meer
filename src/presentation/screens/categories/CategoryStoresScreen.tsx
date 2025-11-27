@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -39,6 +39,7 @@ export function CategoryStoresScreen() {
   const { categoryId, title, type, lat, lng } = route.params as RouteParams;
   const { getStoresByCategoryUseCase, getNearbyPaginatedUseCase, toggleFavoriteThriftStoreUseCase } =
     useDependencies();
+  const queryClient = useQueryClient();
 
   const query = useInfiniteQuery({
     queryKey: ["category-stores", categoryId ?? "nearby"],
@@ -73,14 +74,32 @@ export function CategoryStoresScreen() {
 
   const handleToggleFavorite = useCallback(
     async (store: ThriftStore) => {
+      // optimistic update
+      const queryKey = ["category-stores", categoryId ?? "nearby"];
+      const prevData = queryClient.getQueryData(queryKey);
+
+      queryClient.setQueryData(queryKey, (old: any) => {
+        if (!old) return old;
+        return {
+          ...old,
+          pages: old.pages.map((p: any) => ({
+            ...p,
+            items: p.items.map((it: ThriftStore) =>
+              it.id === store.id ? { ...it, isFavorite: !it.isFavorite } : it
+            )
+          }))
+        };
+      });
+
       try {
         await toggleFavoriteThriftStoreUseCase.execute(store);
-        query.refetch();
       } catch (e) {
         console.log("favorite toggle error", e);
+        // rollback
+        queryClient.setQueryData(queryKey, prevData);
       }
     },
-    [toggleFavoriteThriftStoreUseCase, query]
+    [toggleFavoriteThriftStoreUseCase, queryClient, categoryId]
   );
 
   const renderItem = ({ item }: { item: ThriftStore }) => (
