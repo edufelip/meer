@@ -396,7 +396,7 @@ export function EditProfileScreen() {
         </TouchableWithoutFeedback>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
-          keyboardVerticalOffset={32}
+          keyboardVerticalOffset={0}
           className="absolute bottom-0 left-0 right-0"
         >
           <View className="bg-white rounded-t-2xl p-4 pb-8 shadow-2xl">
