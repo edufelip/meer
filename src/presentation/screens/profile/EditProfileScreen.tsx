@@ -11,7 +11,9 @@ import {
   Alert,
   Modal,
   TouchableWithoutFeedback,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  ActivityIndicator,
+  Keyboard
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -197,11 +199,15 @@ export function EditProfileScreen() {
   };
 
   const handleDeleteAccount = async () => {
+    Keyboard.dismiss();
+    setIsDeleting(true);
     try {
       await deleteAccountUseCase.execute(deleteEmailInput.trim());
       await logout();
     } catch (e) {
       Alert.alert("Erro", "Não foi possível excluir a conta agora. Tente novamente.");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -430,15 +436,25 @@ export function EditProfileScreen() {
                     : "bg-red-600"
                 }`}
               >
-                <Text
-                  className={`font-bold ${
-                    !email || deleteEmailInput.trim().toLowerCase() !== (email ?? "").toLowerCase()
-                      ? "text-gray-500"
-                      : "text-white"
-                  }`}
-                >
-                  Excluir conta
-                </Text>
+                {isDeleting ? (
+                  <ActivityIndicator
+                    color={
+                      !email || deleteEmailInput.trim().toLowerCase() !== (email ?? "").toLowerCase()
+                        ? "#6B7280"
+                        : "#FFFFFF"
+                    }
+                  />
+                ) : (
+                  <Text
+                    className={`font-bold ${
+                      !email || deleteEmailInput.trim().toLowerCase() !== (email ?? "").toLowerCase()
+                        ? "text-gray-500"
+                        : "text-white"
+                    }`}
+                  >
+                    Excluir conta
+                  </Text>
+                )}
               </Pressable>
 
               <Pressable className="items-center py-2" onPress={() => setShowDeleteModal(false)}>
