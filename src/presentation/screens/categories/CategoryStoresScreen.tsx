@@ -62,6 +62,7 @@ export function CategoryStoresScreen() {
   const isError = query.isError;
   const hasNext = query.hasNextPage;
   const isFetchingNextPage = query.isFetchingNextPage;
+  const isRefreshing = query.isRefetching;
 
   const shimmer = useRef(new Animated.Value(0)).current;
   useEffect(() => {
@@ -257,14 +258,16 @@ export function CategoryStoresScreen() {
         <FlatList
           data={stores}
           keyExtractor={(item) => item.id}
-        contentContainerStyle={{ padding: 16, gap: 6, paddingBottom: 24 }}
-        ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
+          contentContainerStyle={{ padding: 16, gap: 6, paddingBottom: 24 }}
+          ItemSeparatorComponent={() => <View style={{ height: 6 }} />}
           renderItem={renderItem}
           onEndReached={() => hasNext && query.fetchNextPage()}
           onEndReachedThreshold={0.6}
           ListFooterComponent={hasNext ? <ListFooter /> : null}
           showsVerticalScrollIndicator={false}
           className="bg-[#F3F4F6]"
+          refreshing={Boolean(isRefreshing)}
+          onRefresh={() => query.refetch()}
         />
       </View>
     </SafeAreaView>
