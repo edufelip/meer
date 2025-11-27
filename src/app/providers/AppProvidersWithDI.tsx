@@ -20,6 +20,7 @@ import { GetThriftStoreByIdUseCase } from "../../domain/usecases/GetThriftStoreB
 import { GetStoresByCategoryUseCase } from "../../domain/usecases/GetStoresByCategoryUseCase";
 import { SearchThriftStoresUseCase } from "../../domain/usecases/SearchThriftStoresUseCase";
 import { GetProfileUseCase } from "../../domain/usecases/GetProfileUseCase";
+import { GetCachedProfileUseCase } from "../../domain/usecases/GetCachedProfileUseCase";
 import { UpdateProfileUseCase } from "../../domain/usecases/UpdateProfileUseCase";
 import { FavoriteRepositoryHybrid } from "../../data/repositories/FavoriteRepositoryHybrid";
 import { HttpFavoriteRemoteDataSource } from "../../data/datasources/impl/HttpFavoriteRemoteDataSource";
@@ -49,6 +50,7 @@ interface Dependencies {
   getStoresByCategoryUseCase: GetStoresByCategoryUseCase;
   getNearbyPaginatedUseCase: GetNearbyPaginatedUseCase;
   getProfileUseCase: GetProfileUseCase;
+  getCachedProfileUseCase: GetCachedProfileUseCase;
   updateProfileUseCase: UpdateProfileUseCase;
   deleteAccountUseCase: DeleteAccountUseCase;
   createOrUpdateStoreUseCase: CreateOrUpdateStoreUseCase;
@@ -102,6 +104,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const getStoresByCategoryUseCase = new GetStoresByCategoryUseCase(thriftStoreRepository);
     const getNearbyPaginatedUseCase = new GetNearbyPaginatedUseCase(thriftStoreRepository);
     const getProfileUseCase = new GetProfileUseCase(profileRepository);
+    const getCachedProfileUseCase = new GetCachedProfileUseCase(profileRepository);
     const updateProfileUseCase = new UpdateProfileUseCase(profileRepository);
     const deleteAccountUseCase = new DeleteAccountUseCase(profileRepository);
     const createOrUpdateStoreUseCase = new CreateOrUpdateStoreUseCase(thriftStoreRepository);
@@ -123,6 +126,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
       getStoresByCategoryUseCase,
       getNearbyPaginatedUseCase,
       getProfileUseCase,
+      getCachedProfileUseCase,
       updateProfileUseCase,
       deleteAccountUseCase,
       createOrUpdateStoreUseCase,

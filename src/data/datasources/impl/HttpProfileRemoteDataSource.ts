@@ -3,11 +3,20 @@ import type { User } from "../../../domain/entities/User";
 import type { ProfileRemoteDataSource } from "../ProfileRemoteDataSource";
 
 type ProfilePayload = User & { bio?: string; notifyNewStores: boolean; notifyPromos: boolean; ownedThriftStore?: any };
+type ProfileEnvelope = { user: ProfilePayload };
 
 export class HttpProfileRemoteDataSource implements ProfileRemoteDataSource {
   async getProfile(): Promise<ProfilePayload> {
-    const res = await api.get<ProfilePayload>("/profile");
-    return res.data;
+    // Backend endpoint that returns the authenticated user's profile data.
+    const res = await api.get<ProfileEnvelope | ProfilePayload>("/auth/me");
+    const body: any = res.data;
+    const profile = (body?.user ?? body) as ProfilePayload;
+    return {
+      ...profile,
+      id: profile.id ? String(profile.id) : profile.id,
+      notifyNewStores: profile.notifyNewStores ?? false,
+      notifyPromos: profile.notifyPromos ?? false
+    };
   }
 
   async updateProfile(

@@ -1,46 +1,78 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Image, Pressable, ScrollView, StatusBar, Text, View } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Image, Pressable, ScrollView, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { User } from "../../../domain/entities/User";
 import { theme } from "../../../shared/theme";
 import { useLogout } from "../../../hooks/useLogout";
+import { getTokens } from "../../../storage/authStorage";
+import { Buffer } from "buffer";
 
 export function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const { getProfileUseCase, getGuideContentUseCase } = useDependencies();
+  const { getCachedProfileUseCase } = useDependencies();
   const logout = useLogout();
   const [user, setUser] = useState<(User & { bio?: string; notifyNewStores: boolean; notifyPromos: boolean }) | null>(
     null
   );
-  const [loading, setLoading] = useState(true);
   const [hasArticles, setHasArticles] = useState(false);
 
+  const decodeJwtPayload = (token: string | null | undefined) => {
+    if (!token) return null;
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    try {
+      const payload = JSON.parse(Buffer.from(parts[1], "base64").toString("utf-8"));
+      return payload;
+    } catch {
+      return null;
+    }
+  };
+
+  const loadCachedProfile = useCallback(async () => {
+    const cached = await getCachedProfileUseCase.execute();
+    if (cached) {
+      setUser(cached);
+      setHasArticles(Boolean(cached.ownedThriftStore && (cached as any).articlesCount > 0));
+      return;
+    }
+
+    // Fallback: derive minimal profile from JWT payload if cache is missing
+    const { token } = await getTokens();
+    const payload = decodeJwtPayload(token);
+    if (payload?.sub && payload?.name && payload?.email) {
+      setUser({
+        id: String(payload.sub),
+        name: payload.name,
+        email: payload.email,
+        avatarUrl: payload.avatarUrl,
+        ownedThriftStore: payload.ownedThriftStore ?? null,
+        bio: payload.bio,
+        notifyNewStores: payload.notifyNewStores ?? false,
+        notifyPromos: payload.notifyPromos ?? false
+      });
+    } else {
+      setUser(null);
+      setHasArticles(false);
+    }
+  }, [getCachedProfileUseCase]);
+
+  // Load once on mount
   useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      const maybeUser = await getProfileUseCase.execute();
-      if (isMounted) {
-        setUser(maybeUser);
-      }
-      if (maybeUser?.ownedThriftStore) {
-        const articles = await getGuideContentUseCase.execute();
-        if (isMounted) {
-          setHasArticles(articles.some((a) => a.storeId === maybeUser.ownedThriftStore?.id));
-        }
-      } else if (isMounted) {
-        setHasArticles(false);
-      }
-      if (isMounted) setLoading(false);
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, [getProfileUseCase, getGuideContentUseCase]);
+    loadCachedProfile();
+  }, [loadCachedProfile]);
+
+  // Refresh cached data when screen regains focus (no network call, just storage)
+  useFocusEffect(
+    useCallback(() => {
+      loadCachedProfile();
+      return () => {};
+    }, [loadCachedProfile])
+  );
 
   const displayUser = user;
 
@@ -51,16 +83,11 @@ export function ProfileScreen() {
         <Text className="text-center text-lg font-bold text-[#1F2937]">Perfil</Text>
       </View>
 
-      {loading ? (
-        <View className="flex-1 items-center justify-center bg-[#F3F4F6]">
-          <ActivityIndicator size="large" color={theme.colors.highlight} />
-        </View>
-      ) : (
-        <ScrollView
-          className="flex-1 bg-[#F3F4F6]"
-          contentInsetAdjustmentBehavior="automatic"
-          contentContainerStyle={{ paddingBottom: 24 }}
-        >
+      <ScrollView
+        className="flex-1 bg-[#F3F4F6]"
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{ paddingBottom: 24 }}
+      >
         <View className="bg-white">
           <View className="flex-col items-center p-6 space-y-4">
             <View className="relative">
@@ -174,8 +201,7 @@ export function ProfileScreen() {
           </View>
         </View>
 
-        </ScrollView>
-      )}
+      </ScrollView>
     </SafeAreaView>
   );
 }

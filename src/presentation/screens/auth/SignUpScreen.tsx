@@ -18,9 +18,12 @@ import { isValidEmail, validatePassword, passwordsMatch } from "../../../domain/
 import { useSignup } from "../../../hooks/useSignup";
 import { saveTokens } from "../../../storage/authStorage";
 import { primeApiToken } from "../../../api/client";
+import { cacheProfile } from "../../../storage/profileCache";
+import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 
 export function SignUpScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { getProfileUseCase } = useDependencies();
   const signupMutation = useSignup();
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -177,7 +180,18 @@ export function SignUpScreen() {
                       password
                     });
                     await saveTokens(auth.token, auth.refreshToken);
+                    await cacheProfile({
+                      id: auth.user.id,
+                      name: auth.user.name,
+                      email: auth.user.email
+                    });
                     primeApiToken(auth.token);
+                    try {
+                      const fullProfile = await getProfileUseCase.execute();
+                      await cacheProfile(fullProfile as any);
+                    } catch {
+                      // ignore
+                    }
                     navigation.navigate("tabs");
                   } catch {
                     setError("Não foi possível criar a conta. Tente novamente.");

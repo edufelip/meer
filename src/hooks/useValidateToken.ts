@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { validateToken } from "../api/auth";
+import { validateToken, type ProfileDto } from "../api/auth";
+import { cacheProfile } from "../storage/profileCache";
 
 export function useValidateToken(enabled: boolean) {
   return useQuery({
@@ -11,6 +12,9 @@ export function useValidateToken(enabled: boolean) {
     cacheTime: 0,
     refetchOnMount: false,
     refetchOnReconnect: false,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
+    onSuccess: async (profile: ProfileDto) => {
+      await cacheProfile(profile);
+    }
   });
 }

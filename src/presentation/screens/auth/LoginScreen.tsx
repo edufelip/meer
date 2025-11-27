@@ -25,9 +25,12 @@ import { useLoginWithGoogle } from "../../../hooks/useLoginWithGoogle";
 import { theme } from "../../../shared/theme";
 import { saveTokens } from "../../../storage/authStorage";
 import { primeApiToken } from "../../../api/client";
+import { cacheProfile } from "../../../storage/profileCache";
+import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 
 export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { getProfileUseCase } = useDependencies();
   const loginMutation = useLogin();
   const googleMutation = useLoginWithGoogle();
   const appleMutation = useLoginWithApple();
@@ -77,7 +80,18 @@ export function LoginScreen() {
         client: platformClient
       });
       await saveTokens(authResult.token, authResult.refreshToken);
+      await cacheProfile({
+        id: authResult.user.id,
+        name: authResult.user.name,
+        email: authResult.user.email
+      });
       primeApiToken(authResult.token);
+      try {
+        const fullProfile = await getProfileUseCase.execute();
+        await cacheProfile(fullProfile as any);
+      } catch {
+        // ignore
+      }
       navigation.navigate("tabs");
     } catch (err) {
       setError("Não foi possível entrar com Google. Tente novamente.");
@@ -139,7 +153,18 @@ export function LoginScreen() {
                         client: "ios"
                       });
                       await saveTokens(auth.token, auth.refreshToken);
+                      await cacheProfile({
+                        id: auth.user.id,
+                        name: auth.user.name,
+                        email: auth.user.email
+                      });
                       primeApiToken(auth.token);
+                      try {
+                        const fullProfile = await getProfileUseCase.execute();
+                        await cacheProfile(fullProfile as any);
+                      } catch {
+                        // ignore fetch failure; cached minimal profile will be used
+                      }
                       navigation.navigate("tabs");
                     }
                   } catch (e: any) {
@@ -229,7 +254,18 @@ export function LoginScreen() {
                     setLoading(true);
                     const auth = await loginMutation.mutateAsync({ email: email.trim(), password });
                     await saveTokens(auth.token, auth.refreshToken);
+                    await cacheProfile({
+                      id: auth.user.id,
+                      name: auth.user.name,
+                      email: auth.user.email
+                    });
                     primeApiToken(auth.token);
+                    try {
+                      const fullProfile = await getProfileUseCase.execute();
+                      await cacheProfile(fullProfile as any);
+                    } catch {
+                      // ignore
+                    }
                     navigation.navigate("tabs");
                   } catch (e) {
                     setError("Não foi possível entrar. Verifique suas credenciais.");

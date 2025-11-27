@@ -21,6 +21,20 @@ export interface AuthResponse {
   };
 }
 
+export interface ProfileDto {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  bio?: string;
+  notifyNewStores: boolean;
+  notifyPromos: boolean;
+  ownedThriftStore?: import("../domain/entities/ThriftStore").ThriftStore | null;
+}
+export interface ProfileEnvelope {
+  user: ProfileDto;
+}
+
 export interface SocialLoginPayload {
   provider: "google" | "apple";
   idToken?: string;
@@ -38,9 +52,16 @@ export async function signup(payload: SignupPayload): Promise<AuthResponse> {
   return res.data;
 }
 
-export async function validateToken(): Promise<AuthResponse["user"]> {
-  const res = await api.get<AuthResponse>("/auth/me");
-  return res.data.user;
+export async function validateToken(): Promise<ProfileDto> {
+  const res = await api.get<ProfileEnvelope | ProfileDto>("/auth/me");
+  const body: any = res.data;
+  const profile = (body?.user ?? body) as ProfileDto;
+  return {
+    ...profile,
+    id: profile.id?.toString?.() ?? String(profile.id),
+    notifyNewStores: profile.notifyNewStores ?? false,
+    notifyPromos: profile.notifyPromos ?? false
+  };
 }
 
 export async function loginWithGoogle(payload: SocialLoginPayload): Promise<AuthResponse> {

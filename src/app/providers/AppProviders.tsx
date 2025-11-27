@@ -16,6 +16,7 @@ export function AppProviders(props: PropsWithChildren) {
     <DependenciesProvider>
       <QueryClientProvider client={queryClient}>
         <AuthBootstrap>{children}</AuthBootstrap>
+        <FirebaseBootstrap />
         <FavoriteSyncBootstrap />
       </QueryClientProvider>
     </DependenciesProvider>
@@ -28,6 +29,8 @@ function FirebaseBootstrap() {
 
   useEffect(() => {
     (async () => {
+      const { token } = await getTokens();
+      if (!token) return;
       try {
         const profile = await getProfileUseCase.execute();
         if (profile?.id) setUserId(profile.id);
