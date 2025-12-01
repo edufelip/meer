@@ -148,7 +148,7 @@ export function FavoritesScreen() {
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" />
       <View className="bg-white px-4 py-4 border-b border-gray-100">
-        <Text className="text-xl font-bold text-[#1F2937]">Favoritos</Text>
+        <Text className="text-center text-lg font-bold text-[#1F2937]">Favoritos</Text>
       </View>
 
       {loading && favorites.length === 0 ? (

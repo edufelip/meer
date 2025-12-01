@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, LayoutAnimation, Platform, Pressable, StatusBar, Text, UIManager, View } from "react-native";
+import { ActivityIndicator, FlatList, LayoutAnimation, Platform, StatusBar, Text, UIManager, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import type { Category } from "../../../domain/entities/Category";
 import { CategoryCard, getCategoryDisplayName } from "../../components/CategoryCard";
-import { theme } from "../../../shared/theme";
 
 export function CategoriesScreen() {
   const { getCategoriesUseCase, getCachedCategoriesUseCase } = useDependencies();
@@ -63,13 +61,8 @@ export function CategoriesScreen() {
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <StatusBar barStyle="dark-content" />
-      <View className="bg-white">
-        <View className="flex-row items-center p-4">
-          <Pressable className="h-10 w-10 items-center justify-center" onPress={() => {}}>
-            <Ionicons name="arrow-back" size={22} color={theme.colors.highlight} />
-          </Pressable>
-          <Text className="flex-1 text-center text-xl font-bold text-black pr-10">Categorias</Text>
-        </View>
+      <View className="bg-white px-4 py-4 border-b border-gray-100">
+        <Text className="text-center text-lg font-bold text-[#1F2937]">Categorias</Text>
       </View>
 
       {loading ? (
