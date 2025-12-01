@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -40,8 +40,8 @@ export function CategoryStoresScreen() {
     useDependencies();
   const queryClient = useQueryClient();
   const listRef = useRef<FlatList<any>>(null);
-  const cacheKey = ["category-stores", categoryId ?? "nearby"];
-  const scrollKey = `${type ?? "nearby"}-${categoryId ?? "nearby"}`;
+  const cacheKey = useMemo(() => ["category-stores", categoryId ?? "nearby"], [categoryId]);
+  const scrollKey = useMemo(() => `${type ?? "nearby"}-${categoryId ?? "nearby"}`, [type, categoryId]);
   const savedOffsetRef = useRef(0);
 
   const query = useInfiniteQuery({
@@ -51,11 +51,19 @@ export function CategoryStoresScreen() {
         ? getNearbyPaginatedUseCase.execute({ page: pageParam, pageSize: PAGE_SIZE, lat, lng })
         : getStoresByCategoryUseCase.execute({ categoryId: categoryId!, page: pageParam, pageSize: PAGE_SIZE }),
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
-    refetchOnMount: false,
+    refetchOnMount: "always",
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
-    staleTime: 5 * 60 * 1000
+    staleTime: 5 * 60 * 1000,
+    cacheTime: 0
   });
+
+  // Clear cached data for this category when leaving the screen, so revisiting shows loading.
+  useEffect(() => {
+    return () => {
+      queryClient.removeQueries({ queryKey: cacheKey });
+    };
+  }, [queryClient, cacheKey]);
 
   const stores = query.data?.pages.flatMap((p) => p.items) ?? [];
   const isLoading = query.isLoading;
@@ -245,7 +253,12 @@ export function CategoryStoresScreen() {
       <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
         <StatusBar barStyle="dark-content" />
         <View className="bg-white px-4 py-4 border-b border-gray-100">
-          <Text className="text-xl font-bold text-[#1F2937]">{title}</Text>
+          <View className="flex-row items-center">
+            <Pressable className="h-10 w-10 items-center justify-center" onPress={() => navigation.goBack()}>
+              <Ionicons name="arrow-back" size={22} color={theme.colors.highlight} />
+            </Pressable>
+            <Text className="flex-1 text-center text-xl font-bold text-[#374151] pr-10">{title}</Text>
+          </View>
         </View>
         <View className="flex-1 items-center justify-center bg-[#F3F4F6] px-6">
           <Text className="text-lg font-bold text-[#374151] mb-2">Nada por aqui</Text>

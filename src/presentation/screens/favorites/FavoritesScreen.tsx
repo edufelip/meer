@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Animated, FlatList, RefreshControl, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -139,6 +139,24 @@ export function FavoritesScreen() {
       active = false;
     };
   }, [fetchRemote]);
+
+  // Refresh view from cache whenever the tab regains focus (no network call).
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
+      (async () => {
+        const cached = await readCachedFavorites();
+        if (!active) return;
+        if (cached.items.length > 0) {
+          updateFavorites(cached.items);
+          fetchedAtRef.current = cached.fetchedAt;
+        }
+      })();
+      return () => {
+        active = false;
+      };
+    }, [])
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
