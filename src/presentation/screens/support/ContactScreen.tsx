@@ -1,12 +1,69 @@
-import React from "react";
-import { ScrollView, StatusBar, Text, TextInput, View, Pressable } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { ScrollView, StatusBar, Text, TextInput, View, Pressable, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { theme } from "../../../shared/theme";
+import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 
 export function ContactScreen() {
   const navigation = useNavigation();
+  const { sendSupportMessageUseCase, getCachedProfileUseCase } = useDependencies();
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const hasPrefilled = useRef(false);
+
+  useEffect(() => {
+    if (hasPrefilled.current) return;
+    (async () => {
+      try {
+        const profile = await getCachedProfileUseCase.execute();
+        if (profile) {
+          setName((prev) => prev || profile.name || "");
+          setEmail((prev) => prev || profile.email || "");
+          hasPrefilled.current = true;
+        }
+      } catch {
+        // ignore preload failures
+      }
+    })();
+  }, [getCachedProfileUseCase]);
+
+  const validate = () => {
+    if (!name.trim()) return "Informe seu nome.";
+    const emailTrimmed = email.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailTrimmed)) return "Digite um e-mail válido.";
+    if (message.trim().length < 10) return "Mensagem precisa ter pelo menos 10 caracteres.";
+    return null;
+  };
+
+  const handleSubmit = async () => {
+    setError(null);
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await sendSupportMessageUseCase.execute({
+        name: name.trim(),
+        email: email.trim(),
+        message: message.trim()
+      });
+      setMessage("");
+      Alert.alert("Enviado", "Recebemos sua mensagem. Retornaremos em breve!");
+    } catch {
+      setError("Não foi possível enviar sua mensagem. Tente novamente.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right", "bottom"]}>
@@ -65,6 +122,9 @@ export function ContactScreen() {
                   placeholder="Digite seu nome"
                   className="w-full rounded-lg border border-gray-300 px-4 py-3"
                   placeholderTextColor="#9CA3AF"
+                  value={name}
+                  onChangeText={setName}
+                  autoCapitalize="words"
                 />
               </View>
               <View className="mt-2">
@@ -75,6 +135,8 @@ export function ContactScreen() {
                   className="w-full rounded-lg border border-gray-300 px-4 py-3"
                   autoCapitalize="none"
                   placeholderTextColor="#9CA3AF"
+                  value={email}
+                  onChangeText={setEmail}
                 />
               </View>
               <View className="mt-2">
@@ -86,10 +148,19 @@ export function ContactScreen() {
                   textAlignVertical="top"
                   className="w-full rounded-lg border border-gray-300 px-4 py-3"
                   placeholderTextColor="#9CA3AF"
+                  value={message}
+                  onChangeText={setMessage}
                 />
               </View>
-              <Pressable className="w-full bg-[#B55D05] rounded-lg py-3 px-4 items-center mt-6">
-                <Text className="text-white font-bold">Enviar Mensagem</Text>
+              {error ? <Text className="text-red-600 text-sm">{error}</Text> : null}
+              <Pressable
+                className={`w-full rounded-lg py-3 px-4 items-center mt-4 ${
+                  loading ? "bg-[#B55D05]/60" : "bg-[#B55D05]"
+                }`}
+                onPress={handleSubmit}
+                disabled={loading}
+              >
+                {loading ? <ActivityIndicator color="#fff" /> : <Text className="text-white font-bold">Enviar Mensagem</Text>}
               </Pressable>
             </View>
           </View>

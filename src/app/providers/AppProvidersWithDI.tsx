@@ -38,6 +38,9 @@ import { UpsertFeedbackUseCase } from "../../domain/usecases/UpsertFeedbackUseCa
 import { DeleteMyFeedbackUseCase } from "../../domain/usecases/DeleteMyFeedbackUseCase";
 import { DeleteAccountUseCase } from "../../domain/usecases/DeleteAccountUseCase";
 import { CreateOrUpdateStoreUseCase } from "../../domain/usecases/CreateOrUpdateStoreUseCase";
+import { HttpSupportRemoteDataSource } from "../../data/datasources/impl/HttpSupportRemoteDataSource";
+import { SupportRepositoryImpl } from "../../data/repositories/SupportRepositoryImpl";
+import { SendSupportMessageUseCase } from "../../domain/usecases/SendSupportMessageUseCase";
 
 interface Dependencies {
   getCurrentUserUseCase: GetCurrentUserUseCase;
@@ -62,6 +65,7 @@ interface Dependencies {
   getMyFeedbackUseCase: GetMyFeedbackUseCase;
   upsertFeedbackUseCase: UpsertFeedbackUseCase;
   deleteMyFeedbackUseCase: DeleteMyFeedbackUseCase;
+  sendSupportMessageUseCase: SendSupportMessageUseCase;
 }
 
 const DependenciesContext = createContext<Dependencies | undefined>(undefined);
@@ -83,6 +87,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const thriftStoreRemote = new HttpThriftStoreRemoteDataSource();
     const favoriteRemote = new HttpFavoriteRemoteDataSource();
     const feedbackRemote = new HttpFeedbackRemoteDataSource();
+    const supportRemote = new HttpSupportRemoteDataSource();
     const guideContentRemote = new HttpGuideContentRemoteDataSource();
     const categoryRemote = new HttpCategoryRemoteDataSource();
     const categoryLocal = new AsyncStorageCategoryLocalDataSource();
@@ -91,6 +96,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const profileLocal = new AsyncStorageProfileLocalDataSource();
     const favoriteRepository = new FavoriteRepositoryHybrid(favoriteRemote);
     const feedbackRepository = new FeedbackRepositoryImpl(feedbackRemote);
+    const supportRepository = new SupportRepositoryImpl(supportRemote);
 
     const thriftStoreRepository = new ThriftStoreRepositoryJson(thriftStoreRemote, featuredLocal);
     const guideContentRepository = new GuideContentRepositoryJson(guideContentRemote);
@@ -118,6 +124,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const getMyFeedbackUseCase = new GetMyFeedbackUseCase(feedbackRepository);
     const upsertFeedbackUseCase = new UpsertFeedbackUseCase(feedbackRepository);
     const deleteMyFeedbackUseCase = new DeleteMyFeedbackUseCase(feedbackRepository);
+    const sendSupportMessageUseCase = new SendSupportMessageUseCase(supportRepository);
 
     return {
       getCurrentUserUseCase,
@@ -141,7 +148,8 @@ export function DependenciesProvider(props: PropsWithChildren) {
       favoriteRepository,
       getMyFeedbackUseCase,
       upsertFeedbackUseCase,
-      deleteMyFeedbackUseCase
+      deleteMyFeedbackUseCase,
+      sendSupportMessageUseCase
     };
   }, []);
 
