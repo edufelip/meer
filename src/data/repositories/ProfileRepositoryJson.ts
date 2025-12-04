@@ -34,4 +34,8 @@ export class ProfileRepositoryJson implements ProfileRepository {
     await this.remote.deleteAccount(email);
     await this.local.clearProfile?.();
   }
+
+  requestAvatarUploadSlot(contentType?: string): Promise<{ uploadUrl: string; fileKey: string; contentType: string }> {
+    return this.remote.requestAvatarUploadSlot(contentType);
+  }
 }

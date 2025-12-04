@@ -7,7 +7,6 @@ type ProfilePayload =
     notifyNewStores?: boolean;
     notifyPromos?: boolean;
     avatarUrl?: string;
-    avatarFile?: { uri: string; name?: string; type?: string };
   };
 
 export class UpdateProfileUseCase {

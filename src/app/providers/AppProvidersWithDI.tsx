@@ -41,6 +41,7 @@ import { CreateOrUpdateStoreUseCase } from "../../domain/usecases/CreateOrUpdate
 import { HttpSupportRemoteDataSource } from "../../data/datasources/impl/HttpSupportRemoteDataSource";
 import { SupportRepositoryImpl } from "../../data/repositories/SupportRepositoryImpl";
 import { SendSupportMessageUseCase } from "../../domain/usecases/SendSupportMessageUseCase";
+import { RequestAvatarUploadSlotUseCase } from "../../domain/usecases/RequestAvatarUploadSlotUseCase";
 import { RequestStorePhotoUploadsUseCase } from "../../domain/usecases/RequestStorePhotoUploadsUseCase";
 import { ConfirmStorePhotosUseCase } from "../../domain/usecases/ConfirmStorePhotosUseCase";
 
@@ -65,6 +66,7 @@ interface Dependencies {
   createOrUpdateStoreUseCase: CreateOrUpdateStoreUseCase;
   requestStorePhotoUploadsUseCase: RequestStorePhotoUploadsUseCase;
   confirmStorePhotosUseCase: ConfirmStorePhotosUseCase;
+  requestAvatarUploadSlotUseCase: RequestAvatarUploadSlotUseCase;
   favoriteRepository: FavoriteRepository;
   getMyFeedbackUseCase: GetMyFeedbackUseCase;
   upsertFeedbackUseCase: UpsertFeedbackUseCase;
@@ -124,6 +126,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const getCachedProfileUseCase = new GetCachedProfileUseCase(profileRepository);
     const updateProfileUseCase = new UpdateProfileUseCase(profileRepository);
     const deleteAccountUseCase = new DeleteAccountUseCase(profileRepository);
+    const requestAvatarUploadSlotUseCase = new RequestAvatarUploadSlotUseCase(profileRepository);
     const createOrUpdateStoreUseCase = new CreateOrUpdateStoreUseCase(thriftStoreRepository);
     const requestStorePhotoUploadsUseCase = new RequestStorePhotoUploadsUseCase(thriftStoreRepository);
     const confirmStorePhotosUseCase = new ConfirmStorePhotosUseCase(thriftStoreRepository);
@@ -150,6 +153,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
       getCachedProfileUseCase,
       updateProfileUseCase,
       deleteAccountUseCase,
+      requestAvatarUploadSlotUseCase,
       createOrUpdateStoreUseCase,
       requestStorePhotoUploadsUseCase,
       confirmStorePhotosUseCase,

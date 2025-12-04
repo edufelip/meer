@@ -36,8 +36,8 @@ export function ProfileScreen() {
     if (cached) {
       setUser(cached);
       setHasArticles(Boolean(cached.ownedThriftStore && (cached as any).articlesCount > 0));
-      // If we don't have the owned store yet, fetch fresh to update the cache.
-      if (!cached.ownedThriftStore) {
+      // If critical fields are missing (owned store or avatar), fetch a fresh profile to hydrate them.
+      if (!cached.ownedThriftStore || !cached.avatarUrl) {
         try {
           const fresh = await getProfileUseCase.execute();
           setUser(fresh);

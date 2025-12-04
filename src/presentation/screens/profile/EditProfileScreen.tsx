@@ -25,12 +25,14 @@ import type { RouteProp } from "@react-navigation/native";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImagePicker from "expo-image-picker";
+import * as ImageManipulator from "expo-image-manipulator";
+import { uploadAsync } from "expo-file-system/legacy";
 import { useLogout } from "../../../hooks/useLogout";
 
 export function EditProfileScreen() {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "editProfile">>();
-  const { getProfileUseCase, updateProfileUseCase, deleteAccountUseCase } = useDependencies();
+  const { getProfileUseCase, updateProfileUseCase, deleteAccountUseCase, requestAvatarUploadSlotUseCase } = useDependencies();
   const logout = useLogout();
   const goBackSafe = () => {
     if (navigation.canGoBack()) {
@@ -112,7 +114,7 @@ export function EditProfileScreen() {
     if (bio.trim() !== initialProfile.bio) diff.bio = bio.trim();
     if (notifyNewStores !== initialProfile.notifyNewStores) diff.notifyNewStores = notifyNewStores;
     if (notifyPromos !== initialProfile.notifyPromos) diff.notifyPromos = notifyPromos;
-    if (stagedAvatarUri) diff.avatarFile = true; // marker
+    if (stagedAvatarUri) diff.avatarChanged = true; // marker
     return diff;
   }, [name, bio, notifyNewStores, notifyPromos, stagedAvatarUri, initialProfile]);
 
@@ -132,11 +134,28 @@ export function EditProfileScreen() {
     if (notifyNewStores !== initialProfile.notifyNewStores) payload.notifyNewStores = notifyNewStores;
     if (notifyPromos !== initialProfile.notifyPromos) payload.notifyPromos = notifyPromos;
 
+    // Avatar upload flow via GCS slot
     if (stagedAvatarUri) {
       const filename = stagedAvatarUri.split("/").pop() ?? "avatar.jpg";
-      const ext = filename.split(".").pop();
-      const type = ext ? `image/${ext === "jpg" ? "jpeg" : ext}` : "image/jpeg";
-      payload.avatarFile = { uri: stagedAvatarUri, name: filename, type };
+      const ext = (filename.split(".").pop() ?? "jpg").toLowerCase();
+      const contentType =
+        ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
+
+      // Compress avatar to ~512px square, quality 0.7
+      const compressed = await ImageManipulator.manipulateAsync(
+        stagedAvatarUri,
+        [{ resize: { width: 512, height: 512 } }],
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+      );
+
+      const slot = await requestAvatarUploadSlotUseCase.execute(contentType);
+      await uploadAsync(slot.uploadUrl, compressed.uri, {
+        httpMethod: "PUT",
+        headers: { "Content-Type": slot.contentType || "image/jpeg" }
+      });
+      // Use upload URL without query as public URL fallback
+      const publicUrl = slot.uploadUrl.split("?")[0];
+      payload.avatarUrl = publicUrl;
     }
 
     if (Object.keys(payload).length === 0) {
