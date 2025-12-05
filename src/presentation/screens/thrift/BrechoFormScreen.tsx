@@ -403,15 +403,23 @@ export function BrechoFormScreen() {
     return () => clearTimeout(timer);
   }, [address, geocodeEnabled]);
 
+  const [selectedPhotoKey, setSelectedPhotoKey] = useState<string | null>(null);
+
+  const photoKey = (p: UiPhoto) => (p.state === "existing" ? p.photoId : p.tempId);
+
   const renderPhotoItem = ({ item, drag, isActive, index }: RenderItemParams<UiPhoto>) => {
     if (item.markedForDelete) return null;
     const isCover = index === 0;
+    const key = photoKey(item);
+    const isSelected = selectedPhotoKey === key;
+
     return (
       <TouchableOpacity
         onLongPress={drag}
         delayLongPress={120}
         disabled={isActive}
         activeOpacity={0.9}
+        onPress={() => setSelectedPhotoKey((prev) => (prev === key ? null : key))}
         style={{ marginRight: 12 }}
       >
         <View className="relative">
@@ -421,12 +429,18 @@ export function BrechoFormScreen() {
             </View>
           )}
           <Image source={{ uri: item.state === "existing" ? item.url : item.uri }} className="h-24 w-24 rounded-lg" resizeMode="cover" />
-          <TouchableOpacity
-            onPress={() => handleDeletePhoto(item)}
-            className="absolute inset-0 bg-black/35 items-center justify-center rounded-lg"
-          >
-            <Ionicons name="close" size={22} color="white" />
-          </TouchableOpacity>
+          {isSelected ? (
+            <TouchableOpacity
+              activeOpacity={0.8}
+              onPress={() => {
+                handleDeletePhoto(item);
+                setSelectedPhotoKey(null);
+              }}
+              className="absolute inset-0 bg-black/35 items-center justify-center rounded-lg"
+            >
+              <Ionicons name="close" size={22} color="white" />
+            </TouchableOpacity>
+          ) : null}
         </View>
       </TouchableOpacity>
     );
