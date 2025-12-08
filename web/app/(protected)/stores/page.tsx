@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { ThriftStore, PageResponse } from "@/types";
+import type { ThriftStore, PageResponse } from "@/types/index";
 import Link from "next/link";
 
 export default function StoresPage() {

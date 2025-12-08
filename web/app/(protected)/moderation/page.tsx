@@ -24,7 +24,7 @@ export default function ModerationPage() {
   const { data, isLoading, error } = useQuery({
     queryKey: ["supportContacts", page],
     queryFn: () => api.get<PageResponse<Contact>>(`/dashboard/support/contacts?page=${page}&pageSize=20`),
-    keepPreviousData: true
+    placeholderData: (prev) => prev
   });
 
   const items = data?.items ?? [];

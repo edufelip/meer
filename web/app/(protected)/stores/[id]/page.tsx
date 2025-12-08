@@ -3,7 +3,7 @@ import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { ThriftStore } from "@/types";
+import type { ThriftStore } from "@/types/index";
 import Image from "next/image";
 
 export default function StoreDetailPage() {
@@ -132,7 +132,7 @@ export default function StoreDetailPage() {
   );
 }
 
-function Field({ label, value }: { label: string; value?: string }) {
+function Field({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
       <p className="text-xs uppercase text-[#9CA3AF] font-semibold">{label}</p>

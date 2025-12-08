@@ -1,9 +1,9 @@
 "use client";
 import React from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { User } from "@/types";
+import type { User } from "@/types/index";
 import Link from "next/link";
 
 export default function UserDetailPage() {
