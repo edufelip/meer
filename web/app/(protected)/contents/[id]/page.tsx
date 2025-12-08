@@ -3,7 +3,7 @@ import React from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import type { GuideContent } from "@/types";
+import type { GuideContent } from "@/types/index";
 import Image from "next/image";
 
 export default function ContentDetailPage() {
