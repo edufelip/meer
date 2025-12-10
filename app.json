@@ -9,6 +9,7 @@
     "scheme": "meer",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "appConfig": "./app.config.js",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.edufelip.meer",
@@ -16,7 +17,7 @@
     },
     "android": {
       "package": "com.edufelip.meer",
-      "googleServicesFile": "./google-services.json",
+      "googleServicesFile": "./config/google-services.json",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
@@ -45,6 +46,11 @@
     ],
     "experiments": {
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "ac66eaa0-2006-4371-8b97-10ce159f01d2"
+      }
     }
   }
 }
