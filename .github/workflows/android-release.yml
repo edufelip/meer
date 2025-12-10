@@ -15,8 +15,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+      - name: Debug current dir
+        run: |
+          pwd
+          ls
+        working-directory: .
       - name: Install JS deps
-        run: npm install --no-audit --no-fund
+        run: |
+          npm install --no-audit --no-fund
         working-directory: .
       - name: Check node and npm
         run: |
