@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 18
       - name: Install JS deps
-        run: npm ci
+        run: npm install --no-audit --no-fund
         working-directory: .
       - uses: actions/setup-java@v4
         with:
