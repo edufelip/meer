@@ -12,12 +12,24 @@ jobs:
         working-directory: android
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: yarn
+          cache-dependency-path: yarn.lock
+      - name: Install JS deps
+        run: yarn install --frozen-lockfile
+        working-directory: .
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: 17
       - name: Set CI version code
         run: echo "CI_VERSION_CODE=${{ github.run_number }}" >> $GITHUB_ENV
+      - name: Write google-services.json
+        run: |
+          mkdir -p app
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 -d > app/google-services.json
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: wrapper

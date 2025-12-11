@@ -42,8 +42,8 @@ jobs:
 
       - name: Write google-services.json
         run: |
-          mkdir -p android/app
-          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 -d > android/app/google-services.json
+          mkdir -p app
+          echo "${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}" | base64 -d > app/google-services.json
 
       - name: Build release bundle
         uses: gradle/gradle-build-action@v2
