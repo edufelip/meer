@@ -12,11 +12,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+          cache: yarn
+          cache-dependency-path: yarn.lock
       - name: Install JS deps
-        run: npm ci
-      - name: Generate ios folder (Expo prebuild)
-        run: |
-          npx expo prebuild --platform ios --clean
+        run: yarn install --frozen-lockfile
+        working-directory: .
       - name: Install pods
         run: |
           cd ios

@@ -79,3 +79,5 @@ jobs:
           packageName: com.edufelip.meer
           releaseFiles: android/app/build/outputs/bundle/release/app-release.aab
           track: internal
+          status: draft
+          # status: completed
