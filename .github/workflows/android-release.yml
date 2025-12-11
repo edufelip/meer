@@ -54,6 +54,18 @@ jobs:
             clean
             bundleRelease
 
+      - name: Sign bundle with jarsigner
+        env:
+          STOREPASS: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEYPASS: ${{ secrets.ANDROID_KEY_ALIAS_PASSWORD }}
+        run: |
+          jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 \
+            -keystore app/meer-release-key.jks \
+            -storepass "$STOREPASS" \
+            -keypass "$KEYPASS" \
+            app/build/outputs/bundle/release/app-release.aab \
+            ${{ secrets.ANDROID_KEY_ALIAS }}
+
       - name: Upload bundle artifact
         uses: actions/upload-artifact@v4
         with:
