@@ -9,6 +9,11 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Write .env
+        run: |
+          cat <<'EOF' > .env
+          ${{ secrets.ENV_FILE }}
+          EOF
       - uses: actions/setup-node@v4
         with:
           node-version: 24
