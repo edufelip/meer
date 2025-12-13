@@ -1,10 +1,11 @@
 import { clearToken, getRefreshToken, getToken, setRefreshToken, setToken } from "./auth";
 
 // API base: prefer explicit backend URL; fallback to proxy /api.
+// Prefer same-origin proxy to avoid CORS in the browser; env URLs are fallbacks.
 const BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  process.env.EXPO_PUBLIC_API_BASE_URL ||
   process.env.NEXT_PUBLIC_API_PROXY ||
+  process.env.EXPO_PUBLIC_API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
   "/api";
 const APP_PACKAGE = process.env.NEXT_PUBLIC_APP_PACKAGE || process.env.EXPO_PUBLIC_APP_PACKAGE || "com.edufelip.meer";
 
