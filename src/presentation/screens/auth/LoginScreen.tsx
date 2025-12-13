@@ -14,7 +14,8 @@ import {
   ScrollView,
   Text,
   TextInput,
-  View
+  View,
+  Alert
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { primeApiToken } from "../../../api/client";
@@ -270,7 +271,15 @@ export function LoginScreen() {
                       // ignore
                     }
                     navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
-                  } catch {
+                  } catch (err: any) {
+                    const isNetworkError =
+                      (err?.isAxiosError && !err?.response) ||
+                      (typeof err?.message === "string" && err.message.toLowerCase().includes("network"));
+                    if (isNetworkError) {
+                      Alert.alert("Sem conexão", "Não foi possível conectar. Verifique sua internet e tente novamente.");
+                      setError("Sem conexão com a internet.");
+                      return;
+                    }
                     setError("Não foi possível entrar. Verifique suas credenciais.");
                   } finally {
                     setLoading(false);

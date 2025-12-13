@@ -54,6 +54,7 @@ export function EditProfileScreen() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteEmailInput, setDeleteEmailInput] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [initialProfile, setInitialProfile] = useState({
     name: preloaded?.name ?? "",
     bio: preloaded?.bio ?? "",
@@ -119,52 +120,60 @@ export function EditProfileScreen() {
   }, [name, bio, notifyNewStores, notifyPromos, stagedAvatarUri, initialProfile]);
 
   const handleSave = async () => {
+    setIsSaving(true);
     if (!(canSave && Object.keys(changes).length > 0)) {
       Alert.alert("Verifique os campos", "Nome é obrigatório e bio deve ter no máximo 200 caracteres.");
+      setIsSaving(false);
       return;
     }
-    await Promise.all([
-      AsyncStorage.setItem(STORAGE_NOTIFY_STORES, String(notifyNewStores)),
-      AsyncStorage.setItem(STORAGE_NOTIFY_PROMOS, String(notifyPromos))
-    ]);
+    try {
+      await Promise.all([
+        AsyncStorage.setItem(STORAGE_NOTIFY_STORES, String(notifyNewStores)),
+        AsyncStorage.setItem(STORAGE_NOTIFY_PROMOS, String(notifyPromos))
+      ]);
 
-    const payload: any = {};
-    if (name.trim() !== initialProfile.name) payload.name = name.trim();
-    if (bio.trim() !== initialProfile.bio) payload.bio = bio.trim();
-    if (notifyNewStores !== initialProfile.notifyNewStores) payload.notifyNewStores = notifyNewStores;
-    if (notifyPromos !== initialProfile.notifyPromos) payload.notifyPromos = notifyPromos;
+      const payload: any = {};
+      if (name.trim() !== initialProfile.name) payload.name = name.trim();
+      if (bio.trim() !== initialProfile.bio) payload.bio = bio.trim();
+      if (notifyNewStores !== initialProfile.notifyNewStores) payload.notifyNewStores = notifyNewStores;
+      if (notifyPromos !== initialProfile.notifyPromos) payload.notifyPromos = notifyPromos;
 
-    // Avatar upload flow via GCS slot
-    if (stagedAvatarUri) {
-      const filename = stagedAvatarUri.split("/").pop() ?? "avatar.jpg";
-      const ext = (filename.split(".").pop() ?? "jpg").toLowerCase();
-      const contentType =
-        ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
+      // Avatar upload flow via GCS slot
+      if (stagedAvatarUri) {
+        const filename = stagedAvatarUri.split("/").pop() ?? "avatar.jpg";
+        const ext = (filename.split(".").pop() ?? "jpg").toLowerCase();
+        const contentType =
+          ext === "png" ? "image/png" : ext === "webp" ? "image/webp" : "image/jpeg";
 
-      // Compress avatar to ~512px square, quality 0.7
-      const compressed = await ImageManipulator.manipulateAsync(
-        stagedAvatarUri,
-        [{ resize: { width: 512, height: 512 } }],
-        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-      );
+        // Compress avatar to ~512px square, quality 0.7
+        const compressed = await ImageManipulator.manipulateAsync(
+          stagedAvatarUri,
+          [{ resize: { width: 512, height: 512 } }],
+          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+        );
 
-      const slot = await requestAvatarUploadSlotUseCase.execute(contentType);
-      await uploadAsync(slot.uploadUrl, compressed.uri, {
-        httpMethod: "PUT",
-        headers: { "Content-Type": slot.contentType || "image/jpeg" }
-      });
-      // Use upload URL without query as public URL fallback
-      const publicUrl = slot.uploadUrl.split("?")[0];
-      payload.avatarUrl = publicUrl;
-    }
+        const slot = await requestAvatarUploadSlotUseCase.execute(contentType);
+        await uploadAsync(slot.uploadUrl, compressed.uri, {
+          httpMethod: "PUT",
+          headers: { "Content-Type": slot.contentType || "image/jpeg" }
+        });
+        // Use upload URL without query as public URL fallback
+        const publicUrl = slot.uploadUrl.split("?")[0];
+        payload.avatarUrl = publicUrl;
+      }
 
-    if (Object.keys(payload).length === 0) {
+      if (Object.keys(payload).length === 0) {
+        goBackSafe();
+        return;
+      }
+
+      await updateProfileUseCase.execute(payload);
       goBackSafe();
-      return;
+    } catch (err) {
+      Alert.alert("Erro", "Não foi possível salvar as alterações. Tente novamente.");
+    } finally {
+      setIsSaving(false);
     }
-
-    await updateProfileUseCase.execute(payload);
-    goBackSafe();
   };
 
   const pickImageFromCamera = async () => {
@@ -484,6 +493,21 @@ export function EditProfileScreen() {
           </View>
         </KeyboardAvoidingView>
       </Modal>
+      {isSaving ? (
+        <View
+          pointerEvents="auto"
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.2)",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 50
+          }}
+        >
+          <ActivityIndicator size="large" color="#B55D05" />
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }

@@ -91,9 +91,23 @@ api.interceptors.request.use(
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     };
 
+    // Remove undefined / null header values that React Native's fetch can't serialize
+    const cleaned = Object.entries(merged).reduce<Record<string, any>>((acc, [key, value]) => {
+      if (value === undefined || value === null) return acc;
+      acc[key] = value;
+      return acc;
+    }, {});
+
+    // Ensure JSON requests carry an explicit content type unless the caller already set one
+    const isFormData = typeof FormData !== "undefined" && config.data instanceof FormData;
+    const hasContentType = cleaned["Content-Type"] ?? cleaned["content-type"];
+    if (!isFormData && config.data && typeof config.data === "object" && !hasContentType) {
+      cleaned["Content-Type"] = "application/json";
+    }
+
     // AxiosRequestHeaders can be AxiosHeaders (class) or a plain object; casting through unknown keeps TS happy
     // Cast to any to appease AxiosHeader type which can be a class instance
-    config.headers = merged as any;
+    config.headers = cleaned as any;
 
     console.log(
       `[API][REQUEST] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`,

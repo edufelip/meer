@@ -20,11 +20,16 @@ async function request<T>(path: string, options: RequestInit = {}, attempt = 0):
   }
 
   const token = getToken();
+  const providedHeaders =
+    options.headers instanceof Headers ? Object.fromEntries(options.headers.entries()) : options.headers ?? {};
+  const hasBody = options.body !== undefined && options.body !== null;
+  const isFormData = typeof FormData !== "undefined" && options.body instanceof FormData;
+  const hasContentTypeHeader = Object.keys(providedHeaders).some((key) => key.toLowerCase() === "content-type");
   const headers: HeadersInit = {
     Accept: "application/json",
-    "Content-Type": "application/json",
+    ...(hasBody && !isFormData && !hasContentTypeHeader ? { "Content-Type": "application/json" } : {}),
     "X-App-Package": APP_PACKAGE,
-    ...(options.headers || {})
+    ...providedHeaders
   };
   if (token) {
     (headers as any).Authorization = `Bearer ${token}`;

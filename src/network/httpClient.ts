@@ -31,14 +31,21 @@ export async function request<TResponse = unknown, TBody = unknown>(options: Req
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    const hasBody = body !== undefined && body !== null;
+    const isFormData = typeof FormData !== "undefined" && body instanceof FormData;
+    const hasContentTypeHeader = Object.keys(headers).some((key) => key.toLowerCase() === "content-type");
+    const resolvedBody = !hasBody ? undefined : isFormData ? (body as any) : JSON.stringify(body);
+
+    const resolvedHeaders: Record<string, string> = {
+      Accept: "application/json",
+      ...(hasBody && !isFormData && !hasContentTypeHeader ? { "Content-Type": "application/json" } : {}),
+      ...headers
+    };
+
     const response = await fetch(`${API_BASE_URL}${path}`, {
       method,
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-        ...headers
-      },
-      body: body ? JSON.stringify(body) : undefined,
+      headers: resolvedHeaders,
+      body: resolvedBody,
       signal: controller.signal
     });
 

@@ -25,9 +25,14 @@ export class HttpProfileRemoteDataSource implements ProfileRemoteDataSource {
       notifyNewStores?: boolean;
       notifyPromos?: boolean;
       avatarUrl?: string;
+      photoUrl?: string;
     }
   ): Promise<ProfilePayload> {
-    const res = await api.patch<ProfilePayload>("/profile", payload);
+    const body: any = { ...payload };
+
+    const res = await api.patch<ProfilePayload>("/profile", body, {
+      headers: { "Content-Type": "application/json" }
+    });
     return res.data;
   }
 

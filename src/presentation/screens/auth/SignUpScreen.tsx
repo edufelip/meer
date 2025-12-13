@@ -8,7 +8,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -196,7 +197,15 @@ export function SignUpScreen() {
                       // ignore
                     }
                     navigation.reset({ index: 0, routes: [{ name: "tabs" }] });
-                  } catch {
+                  } catch (err: any) {
+                    const isNetworkError =
+                      (err?.isAxiosError && !err?.response) ||
+                      (typeof err?.message === "string" && err.message.toLowerCase().includes("network"));
+                    if (isNetworkError) {
+                      Alert.alert("Sem conexão", "Não foi possível conectar. Verifique sua internet e tente novamente.");
+                      setError("Sem conexão com a internet.");
+                      return;
+                    }
                     setError("Não foi possível criar a conta. Tente novamente.");
                   } finally {
                     setLoading(false);
