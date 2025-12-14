@@ -19,7 +19,7 @@
 
 /* Begin PBXFileReference section */
 		0F3F17C154B34FDEB3FBCDB2 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Meer/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		13B07F961A680F5B00A75B9A /* GuiadoBrech.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuiadoBrech.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		13B07F961A680F5B00A75B9A /* GuiaBrecho.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuiaBrecho.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Meer/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = Meer/Info.plist; sourceTree = "<group>"; };
 		194BB7A312A64F8398748060 /* GoogleService-Info.plist */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 4; includeInIndex = 0; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "Meer/GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -103,7 +103,7 @@
 		83CBBA001A601CBA00E9B192 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				13B07F961A680F5B00A75B9A /* GuiadoBrech.app */,
+				13B07F961A680F5B00A75B9A /* GuiaBrecho.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -158,7 +158,7 @@
 			);
 			name = Meer;
 			productName = Meer;
-			productReference = 13B07F961A680F5B00A75B9A /* GuiadoBrech.app */;
+			productReference = 13B07F961A680F5B00A75B9A /* GuiaBrecho.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -432,7 +432,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.edufelip.meer;
-				PRODUCT_NAME = GuiadoBrech;
+				PRODUCT_NAME = GuiaBrecho;
 				SWIFT_OBJC_BRIDGING_HEADER = "Meer/Meer-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -466,7 +466,7 @@
 				);
 				OTHER_SWIFT_FLAGS = "$(inherited) -D EXPO_CONFIGURATION_RELEASE";
 				PRODUCT_BUNDLE_IDENTIFIER = com.edufelip.meer;
-				PRODUCT_NAME = GuiadoBrech;
+				PRODUCT_NAME = GuiaBrecho;
 				SWIFT_OBJC_BRIDGING_HEADER = "Meer/Meer-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
