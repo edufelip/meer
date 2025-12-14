@@ -1,6 +1,5 @@
 ﻿"use client";
 import React, { useEffect, useState } from "react";
-import { TopBar } from "@/components/TopBar";
 import "../globals.css";
 import { ReactQueryProvider } from "../providers";
 import { api } from "@/lib/api";
@@ -34,10 +33,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   return (
     <ReactQueryProvider>
-      <div className="min-h-screen bg-[#F3F4F6] text-[#374151]">
-        <TopBar title="Admin" />
-        <main className="max-w-6xl mx-auto px-6 py-6">{children}</main>
-      </div>
+      <main className="min-h-screen w-full bg-[#0f1a13] text-white">{children}</main>
     </ReactQueryProvider>
   );
 }

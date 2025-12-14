@@ -1,34 +1,41 @@
-import Link from "next/link";
-import type { Route } from "next";
+import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
+import { DashboardHero } from "@/components/dashboard/DashboardHero";
+import { ShortcutGrid, type ShortcutItem } from "@/components/dashboard/ShortcutGrid";
+import { DashboardSidebar, type SidebarItem } from "@/components/dashboard/Sidebar";
+import { dashboardIcons } from "@/components/dashboard/icons";
+
+const sidebarItems: SidebarItem[] = [
+  { label: "Visão Geral", href: "/dashboard", icon: "dashboard", active: true },
+  { label: "Usuários", href: "/users", icon: "users" },
+  { label: "Brechós", href: "/stores", icon: "stores" },
+  { label: "Aprovações", href: "/moderation", icon: "approvals", badge: "3" },
+  { label: "Configurações", href: "/dashboard", icon: "settings" }
+];
+
+const shortcuts: ShortcutItem[] = [
+  { title: "Brechós", description: "Listar e moderar brechós", href: "/stores", icon: dashboardIcons.stores },
+  { title: "Conteúdos", description: "Publicações dos brechós", href: "/contents", icon: dashboardIcons.contents },
+  { title: "Usuários", description: "Gerenciar contas e privilégios", href: "/users", icon: dashboardIcons.users },
+  { title: "Moderação", description: "Fila de denúncias e revisões", href: "/moderation", icon: dashboardIcons.moderation },
+  { title: "Categorias", description: "Gerenciar categorias", href: "/categories", icon: dashboardIcons.categories }
+];
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-6 text-center">
-      <div>
-        <h1 className="text-2xl font-bold text-[#374151]">Resumo</h1>
-        <p className="text-[#6B7280]">
-          Escolha uma seção para gerenciar brechós, conteúdos, usuários ou moderação.
-        </p>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto">
-        <Card title="Brechós" description="Listar e moderar brechós" href="/stores" />
-        <Card title="Conteúdos" description="Publicações dos brechós" href="/contents" />
-        <Card title="Usuários" description="Gerenciar contas e privilégios" href="/users" />
-        <Card title="Moderação" description="Fila de denúncias e revisões" href="/moderation" />
-        <Card title="Categorias" description="Gerenciar categorias" href="/categories" />
+    <div className="min-h-screen w-full bg-gradient-to-br from-brand-forest via-brand-surface to-[#0c1c12] text-white">
+      <div className="grid min-h-screen w-full gap-6 p-4 sm:p-6 lg:grid-cols-[280px,1fr] lg:p-10">
+        <DashboardSidebar items={sidebarItems} />
+        <section className="flex flex-col gap-8 lg:gap-12">
+          <DashboardHeader notifications={3} />
+          <div className="flex flex-col gap-8 lg:gap-12">
+            <DashboardHero
+              title="Resumo"
+              description="Escolha uma seção para gerenciar brechós, conteúdos, usuários ou moderação."
+            />
+            <ShortcutGrid items={shortcuts} />
+          </div>
+        </section>
       </div>
     </div>
-  );
-}
-
-function Card({ title, description, href }: { title: string; description: string; href: Route }) {
-  return (
-    <Link
-      href={href}
-      className="block rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm hover:shadow transition-shadow"
-    >
-      <div className="text-lg font-semibold text-[#374151]">{title}</div>
-      <div className="text-sm text-[#6B7280] mt-1">{description}</div>
-    </Link>
   );
 }

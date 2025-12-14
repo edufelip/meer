@@ -5,6 +5,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { User } from "@/types/index";
 import Link from "next/link";
+import { GlassCard } from "@/components/dashboard/GlassCard";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { Pill } from "@/components/dashboard/Pill";
 
 export default function UserDetailPage() {
   const params = useParams<{ id: string }>();
@@ -38,39 +41,46 @@ export default function UserDetailPage() {
   if (error || !data) return <div className="p-4 text-red-600">Erro ao carregar usuário.</div>;
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#374151]">{data.name}</h1>
-          <p className="text-sm text-[#6B7280]">{data.email}</p>
-        </div>
-        <button
-          onClick={onDelete}
-          disabled={deleteMutation.isPending}
-          className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-600 text-sm"
-        >
-          {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
-        </button>
-      </div>
+    <div className="flex min-h-screen w-full flex-col gap-6 p-4 sm:p-6 lg:p-10 text-white">
+      <PageHeader
+        title={data.name}
+        subtitle={data.email}
+        actions={
+          <button
+            onClick={onDelete}
+            disabled={deleteMutation.isPending}
+            className="rounded-xl border border-red-400/50 bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 hover:bg-red-500/30 disabled:opacity-50"
+          >
+            {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+          </button>
+        }
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white border border-gray-200 rounded-xl p-4">
-        <Field label="ID" value={data.id} />
-        <Field label="Email" value={data.email} />
-        <Field label="Papel" value={data.role ?? "-"} />
-        <Field label="Bio" value={data.bio ?? undefined} />
-        <Field label="Avatar" value={data.avatarUrl ?? undefined} />
-        <Field label="Notificar novos brechós" value={fmtBool(data.notifyNewStores)} />
-        <Field label="Notificar promoções" value={fmtBool(data.notifyPromos)} />
-        <Field label="Criado em" value={data.createdAt ? new Date(data.createdAt).toLocaleString() : undefined} />
-      </div>
+      <GlassCard>
+        <div className="flex flex-wrap items-center gap-3">
+          <Pill>ID {data.id}</Pill>
+          {data.role ? <Pill className="bg-brand-primary/20 text-brand-primary">{data.role}</Pill> : null}
+          {data.notifyNewStores ? <Pill>Notificar novos brechós</Pill> : null}
+          {data.notifyPromos ? <Pill>Notificar promoções</Pill> : null}
+        </div>
+      </GlassCard>
+
+      <GlassCard>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Field label="Email" value={data.email} />
+          <Field label="Bio" value={data.bio ?? undefined} />
+          <Field label="Avatar" value={data.avatarUrl ?? undefined} />
+          <Field label="Criado em" value={data.createdAt ? new Date(data.createdAt).toLocaleString() : undefined} />
+        </div>
+      </GlassCard>
 
       {data.ownedThriftStore && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-2">
-          <p className="text-sm font-semibold text-[#374151]">Brechó do usuário</p>
-          <Link href={`/stores/${data.ownedThriftStore.id}`} className="text-[#B55D05] hover:underline">
+        <GlassCard className="space-y-3">
+          <p className="text-sm font-semibold text-white">Brechó do usuário</p>
+          <Link href={`/stores/${data.ownedThriftStore.id}`} className="text-brand-primary hover:underline">
             {data.ownedThriftStore.name}
           </Link>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <Field label="ID" value={data.ownedThriftStore.id} />
             <Field
               label="Criado em"
@@ -81,12 +91,9 @@ export default function UserDetailPage() {
               }
             />
             <Field label="Endereço" value={data.ownedThriftStore.addressLine ?? undefined} />
-            <Field
-              label="Categorias"
-              value={(data.ownedThriftStore.categories || []).join(", ") || undefined}
-            />
+            <Field label="Categorias" value={(data.ownedThriftStore.categories || []).join(", ") || undefined} />
           </div>
-        </div>
+        </GlassCard>
       )}
     </div>
   );
@@ -95,8 +102,8 @@ export default function UserDetailPage() {
 function Field({ label, value }: { label: string; value?: string }) {
   return (
     <div>
-      <p className="text-xs uppercase text-[#9CA3AF] font-semibold">{label}</p>
-      <p className="text-sm text-[#374151] mt-1">{value || "-"}</p>
+      <p className="text-xs uppercase tracking-wide text-white/50">{label}</p>
+      <p className="mt-1 text-sm text-white">{value || "-"}</p>
     </div>
   );
 }

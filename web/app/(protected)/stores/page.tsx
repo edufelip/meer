@@ -4,6 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { ThriftStore, PageResponse } from "@/types/index";
 import Link from "next/link";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { GlassCard } from "@/components/dashboard/GlassCard";
+import { EmptyStateRow } from "@/components/dashboard/EmptyStateRow";
 
 export default function StoresPage() {
   const [page, setPage] = useState(0);
@@ -27,48 +30,53 @@ export default function StoresPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h1 className="text-2xl font-bold text-[#374151]">Brechós</h1>
-        <div className="flex items-center gap-2">
-          <input
-            value={searchInput}
-            onChange={(e) => {
-              setSearchInput(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                submitSearch();
-              }
-            }}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-            placeholder="Buscar por nome, endereço ou dono"
-          />
-          <button
-            onClick={submitSearch}
-            className="px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm"
-          >
-            Buscar
-          </button>
-          <select
-            value={sort}
-            onChange={(e) => {
-              setPage(0);
-              setSort(e.target.value as "newest" | "oldest");
-            }}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white"
-          >
-            <option value="newest">Mais recentes</option>
-            <option value="oldest">Mais antigos</option>
-          </select>
-        </div>
-      </div>
+    <div className="flex min-h-screen w-full flex-col gap-6 p-4 sm:p-6 lg:p-10">
+      <PageHeader
+        title="Brechós"
+        subtitle="Listar e moderar brechós cadastrados na plataforma."
+        actions={
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  submitSearch();
+                }
+              }}
+              className="w-64 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+              placeholder="Buscar por nome, endereço ou dono"
+            />
+            <select
+              value={sort}
+              onChange={(e) => {
+                setPage(0);
+                setSort(e.target.value as "newest" | "oldest");
+              }}
+              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+            >
+              <option className="text-black" value="newest">
+                Mais recentes
+              </option>
+              <option className="text-black" value="oldest">
+                Mais antigos
+              </option>
+            </select>
+            <button
+              onClick={submitSearch}
+              className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-brand-forest transition hover:scale-[1.01] hover:bg-white"
+            >
+              Buscar
+            </button>
+          </div>
+        }
+      />
 
-      <div className="bg-white border border-gray-200 rounded-xl">
-        <table className="w-full text-left">
+      <GlassCard className="overflow-hidden">
+        <table className="w-full text-left text-sm text-white/90">
           <thead>
-            <tr className="text-sm text-[#6B7280] border-b border-gray-200">
+            <tr className="text-xs uppercase tracking-wide text-white/60">
               <th className="py-3 px-4">ID</th>
               <th className="py-3 px-4">Nome</th>
               <th className="py-3 px-4">Endereço</th>
@@ -85,41 +93,37 @@ export default function StoresPage() {
             )}
             {error && (
               <tr>
-                <td className="py-3 px-4 text-red-600" colSpan={3}>
+                <td className="py-3 px-4 text-red-300" colSpan={3}>
                   Erro ao carregar brechós
                 </td>
               </tr>
             )}
             {!isLoading && !error && items.length === 0 && (
-              <tr>
-                <td className="py-3 px-4 text-[#6B7280]" colSpan={3}>
-                  Nenhum brechó encontrado.
-                </td>
-              </tr>
+              <EmptyStateRow colSpan={4} title="Nenhum brechó encontrado" description="Tente ajustar o termo de busca." />
             )}
             {items.map((s) => (
-              <tr key={s.id} className="border-b border-gray-100">
-                <td className="py-3 px-4 text-xs text-[#6B7280]">{s.id}</td>
-                <td className="py-3 px-4 font-semibold text-[#374151]">
-                  <Link href={`/stores/${s.id}`} className="text-[#B55D05] hover:underline">
+              <tr key={s.id} className="border-t border-white/5 hover:bg-white/5">
+                <td className="py-3 px-4 text-xs text-white/60">{s.id}</td>
+                <td className="py-3 px-4 font-semibold text-white">
+                  <Link href={`/stores/${s.id}`} className="text-brand-primary hover:underline">
                     {s.name}
                   </Link>
                 </td>
-                <td className="py-3 px-4 text-[#6B7280]">{s.addressLine ?? "-"}</td>
-                <td className="py-3 px-4 text-[#6B7280]">
+                <td className="py-3 px-4 text-white/70">{s.addressLine ?? "-"}</td>
+                <td className="py-3 px-4 text-white/70">
                   {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : "-"}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      </div>
+      </GlassCard>
 
-      <div className="flex items-center justify-between text-sm text-[#374151]">
+      <div className="flex items-center justify-between text-sm text-white">
         <button
           disabled={page === 0}
           onClick={() => setPage((p) => Math.max(0, p - 1))}
-          className="px-3 py-2 rounded-lg border border-gray-300 bg-white disabled:opacity-50"
+          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
         >
           Anterior
         </button>
@@ -129,7 +133,7 @@ export default function StoresPage() {
         <button
           disabled={!data?.hasNext}
           onClick={() => setPage((p) => p + 1)}
-          className="px-3 py-2 rounded-lg border border-gray-300 bg-white disabled:opacity-50"
+          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
         >
           Próxima
         </button>

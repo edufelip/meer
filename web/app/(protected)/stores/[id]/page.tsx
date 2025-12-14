@@ -5,6 +5,9 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import type { ThriftStore } from "@/types/index";
 import Image from "next/image";
+import { GlassCard } from "@/components/dashboard/GlassCard";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { Pill } from "@/components/dashboard/Pill";
 
 export default function StoreDetailPage() {
   const params = useParams<{ id: string }>();
@@ -51,82 +54,95 @@ export default function StoreDetailPage() {
   });
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-[#374151]">{data.name}</h1>
-          {data.tagline && <p className="text-sm text-[#6B7280]">{data.tagline}</p>}
-          <p className="text-sm text-[#6B7280]">{data.addressLine || "Sem endereço"}</p>
-        </div>
-        <button
-          onClick={onDelete}
-          className="px-3 py-2 rounded-lg border border-red-200 bg-red-50 text-red-600 text-sm"
-          disabled={deleteMutation.isPending}
-        >
-          {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
-        </button>
-      </div>
+    <div className="flex min-h-screen w-full flex-col gap-6 p-4 sm:p-6 lg:p-10 text-white">
+      <PageHeader
+        title={data.name}
+        subtitle={data.tagline || data.addressLine || "Detalhes do brechó"}
+        actions={
+          <button
+            onClick={onDelete}
+            className="rounded-xl border border-red-400/50 bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 hover:bg-red-500/30 disabled:opacity-50"
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+          </button>
+        }
+      />
 
       {data.coverImageUrl && (
-        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
+        <GlassCard className="overflow-hidden p-0">
           <Image
             src={data.coverImageUrl}
             alt="Cover"
             width={1200}
-            height={600}
-            className="w-full h-64 object-cover"
+            height={520}
+            className="h-64 w-full object-cover sm:h-80"
           />
-        </div>
+        </GlassCard>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-white border border-gray-200 rounded-xl p-4">
-        <Field label="Descrição" value={data.description} />
-        <Field label="Bairro" value={data.neighborhood} />
-        <Field label="Telefone" value={data.phone} />
-        <Field label="Whatsapp" value={data.whatsapp} />
-        <Field label="Email" value={data.email} />
-        <Field label="Instagram" value={data.instagram} />
-        <Field label="Facebook" value={data.facebook ?? undefined} />
-        <Field label="Website" value={data.website} />
-        <Field label="Horário" value={data.openingHours} />
-        <Field label="Categorias" value={(data.categories || []).join(", ") || undefined} />
-        <Field
-          label="Coordenadas"
-          value={
-            data.latitude != null && data.longitude != null ? `${data.latitude}, ${data.longitude}` : undefined
-          }
-        />
-        <Field label="Avaliação" value={data.rating != null ? `${data.rating} (${data.reviewCount ?? 0})` : undefined} />
-        <Field label="Badge" value={data.badgeLabel ?? undefined} />
-        <Field label="Favorito" value={data.isFavorite != null ? (data.isFavorite ? "Sim" : "Não") : undefined} />
-        <Field
-          label="Criado em"
-          value={data.createdAt ? new Date(data.createdAt).toLocaleString() : undefined}
-        />
-      </div>
+      <GlassCard>
+        <div className="flex flex-wrap items-center gap-3">
+          <Pill>{data.addressLine || "Sem endereço"}</Pill>
+          {data.badgeLabel ? <Pill className="bg-brand-primary/20 text-brand-primary">{data.badgeLabel}</Pill> : null}
+          {data.isFavorite != null ? (
+            <Pill className={data.isFavorite ? "text-brand-primary" : "text-white/70"}>
+              {data.isFavorite ? "Favorito" : "Não favorito"}
+            </Pill>
+          ) : null}
+          {data.rating != null ? (
+            <Pill>
+              Avaliação {data.rating} ({data.reviewCount ?? 0})
+            </Pill>
+          ) : null}
+        </div>
+      </GlassCard>
+
+      <GlassCard>
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <Field label="Descrição" value={data.description} />
+          <Field label="Bairro" value={data.neighborhood} />
+          <Field label="Telefone" value={data.phone} />
+          <Field label="Whatsapp" value={data.whatsapp} />
+          <Field label="Email" value={data.email} />
+          <Field label="Instagram" value={data.instagram} />
+          <Field label="Facebook" value={data.facebook ?? undefined} />
+          <Field label="Website" value={data.website} />
+          <Field label="Horário" value={data.openingHours} />
+          <Field label="Categorias" value={(data.categories || []).join(", ") || undefined} />
+          <Field
+            label="Coordenadas"
+            value={
+              data.latitude != null && data.longitude != null ? `${data.latitude}, ${data.longitude}` : undefined
+            }
+          />
+          <Field
+            label="Criado em"
+            value={data.createdAt ? new Date(data.createdAt).toLocaleString() : undefined}
+          />
+        </div>
+      </GlassCard>
 
       {images.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4 space-y-3">
-          <p className="text-sm font-semibold text-[#374151]">Imagens</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <GlassCard className="space-y-4">
+          <p className="text-sm font-semibold text-white">Imagens</p>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
             {images.map((img) => (
-              <div key={img.id} className="relative">
+              <div key={img.id} className="relative overflow-hidden rounded-xl border border-white/10">
                 <Image
                   src={img.url}
                   alt={`Imagem ${img.id}`}
                   width={400}
                   height={300}
-                  className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                  className="h-32 w-full object-cover"
                 />
                 {img.isCover && (
-                  <span className="absolute top-2 left-2 bg-black/70 text-white text-xs px-2 py-1 rounded">
-                    Capa
-                  </span>
+                  <span className="absolute left-2 top-2 rounded bg-black/70 px-2 py-1 text-xs text-white">Capa</span>
                 )}
               </div>
             ))}
           </div>
-        </div>
+        </GlassCard>
       )}
     </div>
   );
@@ -135,8 +151,8 @@ export default function StoreDetailPage() {
 function Field({ label, value }: { label: string; value?: string | null }) {
   return (
     <div>
-      <p className="text-xs uppercase text-[#9CA3AF] font-semibold">{label}</p>
-      <p className="text-sm text-[#374151] mt-1">{value || "-"}</p>
+      <p className="text-xs uppercase tracking-wide text-white/50">{label}</p>
+      <p className="mt-1 text-sm text-white">{value || "-"}</p>
     </div>
   );
 }

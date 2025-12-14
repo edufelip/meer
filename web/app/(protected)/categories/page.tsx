@@ -2,6 +2,9 @@
 import React, { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+import { PageHeader } from "@/components/dashboard/PageHeader";
+import { GlassCard } from "@/components/dashboard/GlassCard";
+import { EmptyStateRow } from "@/components/dashboard/EmptyStateRow";
 
 type Category = { id: string; nameStringId: string; imageResId: string; createdAt?: string };
 type PageResponse<T> = { items: T[]; page: number; hasNext: boolean };
@@ -71,59 +74,62 @@ export default function CategoriesPage() {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-[#374151]">Categorias</h1>
-        <form onSubmit={onSubmit} className="flex items-center gap-2">
+    <div className="flex min-h-screen w-full flex-col gap-6 p-4 sm:p-6 lg:p-10 text-white">
+      <PageHeader title="Categorias" subtitle="Crie e edite categorias utilizadas pelos apps." />
+
+      <GlassCard>
+        <form onSubmit={onSubmit} className="grid grid-cols-1 gap-3 md:grid-cols-[1fr,1fr,1fr,auto]">
           <input
             value={idInput}
             onChange={(e) => setIdInput(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
             placeholder="ID (ex: casa)"
             required
           />
           <input
             value={nameStringIdInput}
             onChange={(e) => setNameStringIdInput(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
             placeholder="nameStringId (ex: brecho_de_casa)"
             required
           />
           <input
             value={imageResIdInput}
             onChange={(e) => setImageResIdInput(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+            className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
             placeholder="imageResId (ex: brecho-categories-house)"
             required
           />
-          <button
-            type="submit"
-            disabled={upsertMutation.isPending}
-            className="px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm"
-          >
-            {upsertMutation.isPending ? "Salvando..." : editId ? "Atualizar" : "Adicionar"}
-          </button>
-          {editId && (
+          <div className="flex items-center gap-2">
             <button
-              type="button"
-              onClick={() => {
-                setEditId(null);
-                setIdInput("");
-                setNameStringIdInput("");
-                setImageResIdInput("");
-              }}
-              className="px-3 py-2 rounded-lg border border-gray-200 bg-gray-50 text-sm"
+              type="submit"
+              disabled={upsertMutation.isPending}
+              className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-brand-forest transition hover:scale-[1.01] hover:bg-white disabled:opacity-60"
             >
-              Cancelar
+              {upsertMutation.isPending ? "Salvando..." : editId ? "Atualizar" : "Adicionar"}
             </button>
-          )}
+            {editId && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditId(null);
+                  setIdInput("");
+                  setNameStringIdInput("");
+                  setImageResIdInput("");
+                }}
+                className="rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm text-white transition hover:bg-white/20"
+              >
+                Cancelar
+              </button>
+            )}
+          </div>
         </form>
-      </div>
+      </GlassCard>
 
-      <div className="bg-white border border-gray-200 rounded-xl">
-        <table className="w-full text-left">
+      <GlassCard className="overflow-hidden">
+        <table className="w-full text-left text-sm text-white/90">
           <thead>
-            <tr className="text-sm text-[#6B7280] border-b border-gray-200">
+            <tr className="text-xs uppercase tracking-wide text-white/60">
               <th className="py-3 px-4">ID</th>
               <th className="py-3 px-4">nameStringId</th>
               <th className="py-3 px-4">imageResId</th>
@@ -141,36 +147,36 @@ export default function CategoriesPage() {
             )}
             {error && (
               <tr>
-                <td className="py-3 px-4 text-red-600" colSpan={4}>
+                <td className="py-3 px-4 text-red-300" colSpan={4}>
                   Erro ao carregar categorias
                 </td>
               </tr>
             )}
             {!isLoading && !error && items.length === 0 && (
-              <tr>
-                <td className="py-3 px-4 text-[#6B7280]" colSpan={4}>
-                  Nenhuma categoria encontrada.
-                </td>
-              </tr>
+              <EmptyStateRow
+                colSpan={5}
+                title="Nenhuma categoria encontrada"
+                description="Inclua a primeira categoria usando o formulário acima."
+              />
             )}
             {items.map((cat) => (
-              <tr key={cat.id} className="border-b border-gray-100">
-                <td className="py-3 px-4 text-xs text-[#6B7280]">{cat.id}</td>
-                <td className="py-3 px-4 text-[#374151] font-semibold">{cat.nameStringId}</td>
-                <td className="py-3 px-4 text-[#6B7280]">{cat.imageResId}</td>
-                <td className="py-3 px-4 text-[#6B7280]">
+              <tr key={cat.id} className="border-t border-white/5 hover:bg-white/5">
+                <td className="py-3 px-4 text-xs text-white/60">{cat.id}</td>
+                <td className="py-3 px-4 text-white font-semibold">{cat.nameStringId}</td>
+                <td className="py-3 px-4 text-white/70">{cat.imageResId}</td>
+                <td className="py-3 px-4 text-white/70">
                   {cat.createdAt ? new Date(cat.createdAt).toLocaleDateString() : "-"}
                 </td>
                 <td className="py-3 px-4 flex gap-2">
                   <button
                     onClick={() => startEdit(cat)}
-                    className="px-2 py-1 rounded border border-gray-300 text-sm bg-white"
+                    className="rounded-lg border border-white/10 bg-white/10 px-3 py-1 text-xs text-white transition hover:bg-white/20"
                   >
                     Editar
                   </button>
                   <button
                     onClick={() => onDelete(cat.id)}
-                    className="px-2 py-1 rounded border border-red-200 text-sm bg-red-50 text-red-600"
+                    className="rounded-lg border border-red-400/50 bg-red-500/20 px-3 py-1 text-xs font-semibold text-red-100 hover:bg-red-500/30"
                   >
                     Apagar
                   </button>
@@ -179,13 +185,13 @@ export default function CategoriesPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </GlassCard>
 
-      <div className="flex items-center justify-between text-sm text-[#374151]">
+      <div className="flex items-center justify-between text-sm text-white">
         <button
           disabled={page === 0}
           onClick={() => setPage((p) => Math.max(0, p - 1))}
-          className="px-3 py-2 rounded-lg border border-gray-300 bg-white disabled:opacity-50"
+          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
         >
           Anterior
         </button>
@@ -195,7 +201,7 @@ export default function CategoriesPage() {
         <button
           disabled={!data?.hasNext}
           onClick={() => setPage((p) => p + 1)}
-          className="px-3 py-2 rounded-lg border border-gray-300 bg-white disabled:opacity-50"
+          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
         >
           Próxima
         </button>
