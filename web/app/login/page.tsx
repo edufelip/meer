@@ -85,7 +85,7 @@ export default function LoginPage() {
         className="bg-white shadow rounded-xl px-8 py-10 w-full max-w-md space-y-4"
       >
         <div className="text-center mb-2">
-          <h1 className="text-2xl font-bold text-[#374151]">Meer Admin</h1>
+          <h1 className="text-2xl font-bold text-[#374151]">Guia Brechó Admin</h1>
           <p className="text-sm text-[#6B7280]">Acesse com sua conta de administrador</p>
         </div>
         <div className="space-y-2">
