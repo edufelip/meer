@@ -450,7 +450,7 @@ export default function StoreDetailPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full flex-col gap-6 p-4 sm:p-6 lg:p-10 text-white">
+    <div className="flex min-h-screen w-full flex-col gap-6 p-4 sm:p-6 lg:p-10 text-textDark">
       <PageHeader
         title={isCreate ? "Novo brechó" : data?.name || "Brechó"}
         subtitle={
@@ -613,10 +613,10 @@ export default function StoreDetailPage() {
           <GlassCard className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-lg font-semibold text-white">Fotos</p>
-                <p className="text-sm text-white/70">Máximo 10 fotos. JPEG ou WEBP até 2MB.</p>
+                <p className="text-lg font-semibold text-textDark">Fotos</p>
+                <p className="text-sm text-textSubtle">Máximo 10 fotos. JPEG ou WEBP até 2MB.</p>
               </div>
-              <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10">
+              <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-textDark hover:bg-white/70">
                 Adicionar fotos
                 <input
                   type="file"
@@ -636,7 +636,7 @@ export default function StoreDetailPage() {
 
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
               {photoDrafts.map((photo, index) => (
-                <div key={photo.localId} className="group relative overflow-hidden rounded-xl border border-white/10">
+                <div key={photo.localId} className="group relative overflow-hidden rounded-xl border border-black/10">
                   {photo.url ? (
                     <Image src={photo.url} alt={`Foto ${index + 1}`} width={400} height={300} className="h-32 w-full object-cover" />
                   ) : (
@@ -845,20 +845,20 @@ function AddressSuggestions({
   }
   if (!loading && suggestions.length === 0) return null;
   return (
-    <div className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border border-white/10 bg-brand-forest/95 shadow-xl backdrop-blur">
+    <div className="absolute left-0 right-0 top-full z-20 mt-1 overflow-hidden rounded-xl border border-black/10 bg-white shadow-xl">
       {loading ? (
-        <p className="px-3 py-2 text-xs text-white/70">Buscando sugestões...</p>
+        <p className="px-3 py-2 text-xs text-textSubtle">Buscando sugestões...</p>
       ) : (
         suggestions.map((s) => (
           <button
             key={s.id}
             type="button"
             onClick={() => onSelect(s)}
-            className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm text-white hover:bg-white/10"
+            className="flex w-full flex-col items-start gap-0.5 px-3 py-2 text-left text-sm text-textDark hover:bg-black/5"
           >
             <span className="font-semibold">{s.label}</span>
-            <span className="text-xs text-white/70">{s.placeName}</span>
-            {s.neighborhood ? <span className="text-[11px] text-white/60">Bairro: {s.neighborhood}</span> : null}
+            <span className="text-xs text-textSubtle">{s.placeName}</span>
+            {s.neighborhood ? <span className="text-[11px] text-textSubtle">Bairro: {s.neighborhood}</span> : null}
           </button>
         ))
       )}
@@ -883,7 +883,7 @@ function LabeledInput({
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
-      <span className="text-white/70">{label}</span>
+      <span className="text-textSubtle">{label}</span>
       <input
         value={value}
         onChange={(e) => (disabled || readOnly || !onChange ? undefined : onChange(e.target.value))}
@@ -891,7 +891,7 @@ function LabeledInput({
         readOnly={readOnly}
         disabled={disabled}
         className={clsx(
-          "rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40",
+          "rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-textDark placeholder:text-textSubtle/80 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40",
           disabled || readOnly ? "cursor-not-allowed opacity-70 focus:ring-0" : ""
         )}
       />
@@ -912,12 +912,12 @@ function LabeledTextArea({
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
-      <span className="text-white/70">{label}</span>
+      <span className="text-textSubtle">{label}</span>
       <textarea
         value={value}
         rows={rows}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+        className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-textDark placeholder:text-textSubtle/80 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
       />
     </label>
   );

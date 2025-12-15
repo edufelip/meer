@@ -36,5 +36,5 @@ export default function HomeRedirectPage() {
   }, [router]);
 
   // Keep the layout background while we decide where to send the user
-  return <div className="min-h-screen bg-gradient-to-br from-brand-forest via-brand-surface to-brand-card" aria-busy="true" />;
+  return <div className="min-h-screen bg-background" aria-busy="true" />;
 }

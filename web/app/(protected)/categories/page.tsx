@@ -187,11 +187,11 @@ export default function CategoriesPage() {
         </table>
       </GlassCard>
 
-      <div className="flex items-center justify-between text-sm text-white">
+      <div className="flex items-center justify-between text-sm text-textDark">
         <button
           disabled={page === 0}
           onClick={() => setPage((p) => Math.max(0, p - 1))}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
+          className="rounded-xl border border-black/10 bg-white px-4 py-2 disabled:opacity-40"
         >
           Anterior
         </button>
@@ -201,7 +201,7 @@ export default function CategoriesPage() {
         <button
           disabled={!data?.hasNext}
           onClick={() => setPage((p) => p + 1)}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
+          className="rounded-xl border border-black/10 bg-white px-4 py-2 disabled:opacity-40"
         >
           Próxima
         </button>

@@ -38,7 +38,7 @@ export default function StoresPage() {
           <div className="flex flex-wrap items-center gap-3">
             <Link
               href="/stores/new"
-              className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:scale-[1.01] hover:bg-white/20"
+              className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-textDark transition hover:scale-[1.01] hover:bg-black/5"
             >
               Novo brechó
             </Link>
@@ -51,7 +51,7 @@ export default function StoresPage() {
                   submitSearch();
                 }
               }}
-              className="w-64 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+              className="w-64 rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-textDark placeholder:text-textSubtle/70 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
               placeholder="Buscar por nome, endereço ou dono"
             />
             <select
@@ -60,7 +60,7 @@ export default function StoresPage() {
                 setPage(0);
                 setSort(e.target.value as "newest" | "oldest");
               }}
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+              className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-textDark focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
             >
               <option className="text-black" value="newest">
                 Mais recentes
@@ -80,7 +80,7 @@ export default function StoresPage() {
       />
 
       <GlassCard className="overflow-hidden">
-        <table className="w-full text-left text-sm text-white/90">
+        <table className="w-full text-left text-sm text-textDark">
           <thead>
             <tr className="text-xs uppercase tracking-wide text-white/60">
               <th className="py-3 px-4">ID</th>
@@ -108,15 +108,15 @@ export default function StoresPage() {
               <EmptyStateRow colSpan={4} title="Nenhum brechó encontrado" description="Tente ajustar o termo de busca." />
             )}
             {items.map((s) => (
-              <tr key={s.id} className="border-t border-white/5 hover:bg-white/5">
-                <td className="py-3 px-4 text-xs text-white/60">{s.id}</td>
-                <td className="py-3 px-4 font-semibold text-white">
+              <tr key={s.id} className="border-t border-black/5 hover:bg-black/5">
+                <td className="py-3 px-4 text-xs text-white">{s.id}</td>
+                <td className="py-3 px-4 font-semibold text-textDark">
                   <Link href={`/stores/${s.id}`} className="text-brand-primary hover:underline">
                     {s.name}
                   </Link>
                 </td>
-                <td className="py-3 px-4 text-white/70">{s.addressLine ?? "-"}</td>
-                <td className="py-3 px-4 text-white/70">
+                <td className="py-3 px-4 text-white">{s.addressLine ?? "-"}</td>
+                <td className="py-3 px-4 text-white">
                   {s.createdAt ? new Date(s.createdAt).toLocaleDateString() : "-"}
                 </td>
               </tr>
@@ -125,11 +125,11 @@ export default function StoresPage() {
         </table>
       </GlassCard>
 
-      <div className="flex items-center justify-between text-sm text-white">
+      <div className="flex items-center justify-between text-sm text-textDark">
         <button
           disabled={page === 0}
           onClick={() => setPage((p) => Math.max(0, p - 1))}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
+          className="rounded-xl border border-black/10 bg-white px-4 py-2 disabled:opacity-40"
         >
           Anterior
         </button>
@@ -139,7 +139,7 @@ export default function StoresPage() {
         <button
           disabled={!data?.hasNext}
           onClick={() => setPage((p) => p + 1)}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
+          className="rounded-xl border border-black/10 bg-white px-4 py-2 disabled:opacity-40"
         >
           Próxima
         </button>

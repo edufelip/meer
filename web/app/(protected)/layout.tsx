@@ -33,7 +33,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   return (
     <ReactQueryProvider>
-      <main className="min-h-screen w-full bg-brand-forest text-white">{children}</main>
+      <main className="min-h-screen w-full bg-background text-textDark">{children}</main>
     </ReactQueryProvider>
   );
 }

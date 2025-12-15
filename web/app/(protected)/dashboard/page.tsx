@@ -22,7 +22,7 @@ const shortcuts: ShortcutItem[] = [
 
 export default function DashboardPage() {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-brand-forest via-brand-surface to-brand-card text-white">
+    <div className="min-h-screen w-full bg-background text-textDark">
       <div className="grid min-h-screen w-full gap-6 p-4 sm:p-6 lg:grid-cols-[280px,1fr] lg:p-10">
         <DashboardSidebar items={sidebarItems} />
         <section className="flex flex-col gap-8 lg:gap-12">

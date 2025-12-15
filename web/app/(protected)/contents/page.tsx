@@ -36,6 +36,12 @@ export default function ContentsPage() {
         subtitle="Publicações enviadas pelos brechós."
         actions={
           <div className="flex flex-wrap items-center gap-3">
+            <Link
+              href="/contents/new"
+              className="rounded-xl border border-black/10 bg-white px-4 py-2 text-sm font-semibold text-textDark transition hover:scale-[1.01] hover:bg-black/5"
+            >
+              Novo conteúdo
+            </Link>
             <input
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
@@ -45,7 +51,7 @@ export default function ContentsPage() {
                   submitSearch();
                 }
               }}
-              className="w-64 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+              className="w-64 rounded-xl border border-black/10 bg-white px-4 py-2.5 text-sm text-textDark placeholder:text-textSubtle/70 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
               placeholder="Buscar por título ou loja"
             />
             <select
@@ -54,7 +60,7 @@ export default function ContentsPage() {
                 setPage(0);
                 setSort(e.target.value as "newest" | "oldest");
               }}
-              className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+              className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-textDark focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
             >
               <option className="text-black" value="newest">
                 Mais recentes
@@ -74,7 +80,7 @@ export default function ContentsPage() {
       />
 
       <GlassCard className="overflow-hidden">
-        <table className="w-full text-left text-sm text-white/90">
+        <table className="w-full text-left text-sm text-textDark">
           <thead>
             <tr className="text-xs uppercase tracking-wide text-white/60">
               <th className="py-3 px-4">ID</th>
@@ -102,15 +108,15 @@ export default function ContentsPage() {
               <EmptyStateRow colSpan={4} title="Nenhum conteúdo encontrado" description="Altere o filtro ou verifique se há posts novos." />
             )}
             {items.map((c) => (
-              <tr key={c.id} className="border-t border-white/5 hover:bg-white/5">
-                <td className="py-3 px-4 text-xs text-white/60">{c.id}</td>
-                <td className="py-3 px-4 font-semibold text-white">
+              <tr key={c.id} className="border-t border-black/5 hover:bg-black/5">
+                <td className="py-3 px-4 text-xs text-white">{c.id}</td>
+                <td className="py-3 px-4 font-semibold text-textDark">
                   <Link href={`/contents/${c.id}`} className="text-brand-primary hover:underline">
                     {c.title}
                   </Link>
                 </td>
-                <td className="py-3 px-4 text-white/70">{c.thriftStoreName ?? c.thriftStoreId}</td>
-                <td className="py-3 px-4 text-white/70">
+                <td className="py-3 px-4 text-white">{c.thriftStoreName ?? c.thriftStoreId}</td>
+                <td className="py-3 px-4 text-white">
                   {c.createdAt ? new Date(c.createdAt).toLocaleDateString() : "-"}
                 </td>
               </tr>
@@ -119,11 +125,11 @@ export default function ContentsPage() {
         </table>
       </GlassCard>
 
-      <div className="flex items-center justify-between text-sm text-white">
+      <div className="flex items-center justify-between text-sm text-textDark">
         <button
           disabled={page === 0}
           onClick={() => setPage((p) => Math.max(0, p - 1))}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
+          className="rounded-xl border border-black/10 bg-white px-4 py-2 disabled:opacity-40"
         >
           Anterior
         </button>
@@ -133,7 +139,7 @@ export default function ContentsPage() {
         <button
           disabled={!data?.hasNext}
           onClick={() => setPage((p) => p + 1)}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
+          className="rounded-xl border border-black/10 bg-white px-4 py-2 disabled:opacity-40"
         >
           Próxima
         </button>

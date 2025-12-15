@@ -33,11 +33,11 @@ export default function ModerationPage() {
   const items = data?.items ?? [];
 
   return (
-    <div className="flex min-h-screen w-full flex-col gap-6 p-4 sm:p-6 lg:p-10 text-white">
+    <div className="flex min-h-screen w-full flex-col gap-6 p-4 sm:p-6 lg:p-10 text-textDark">
       <PageHeader title="Moderação" subtitle="Fila de contatos e solicitações do público." />
 
       <GlassCard className="overflow-hidden">
-        <table className="w-full text-left text-sm text-white/90">
+        <table className="w-full text-left text-sm text-textDark">
           <thead>
             <tr className="text-xs uppercase tracking-wide text-white/60">
               <th className="py-3 px-4">ID</th>
@@ -66,16 +66,20 @@ export default function ModerationPage() {
               <EmptyStateRow colSpan={5} title="Nenhum contato encontrado" description="Ainda não há mensagens para revisar." />
             )}
             {items.map((c) => (
-              <tr key={c.id} className="border-t border-white/5 hover:bg-white/5">
-                <td className="py-3 px-4 text-xs text-white/60">
+              <tr key={c.id} className="border-t border-black/5 hover:bg-black/5">
+                <td className="py-3 px-4 text-xs text-white">
                   <Link href={`/moderation/${c.id}`} className="text-brand-primary hover:underline">
                     {c.id}
                   </Link>
                 </td>
-                <td className="py-3 px-4 font-semibold text-white">{c.name}</td>
-                <td className="py-3 px-4 text-white/70">{c.email}</td>
-                <td className="py-3 px-4 text-white/90">{c.message}</td>
-                <td className="py-3 px-4 text-white/70">
+                <td className="py-3 px-4 font-semibold">
+                  <Link href={`/moderation/${c.id}`} className="text-highlight hover:underline">
+                    {c.name}
+                  </Link>
+                </td>
+                <td className="py-3 px-4 text-white">{c.email}</td>
+                <td className="py-3 px-4 text-white">{c.message}</td>
+                <td className="py-3 px-4 text-white">
                   {c.createdAt ? new Date(c.createdAt).toLocaleString() : "-"}
                 </td>
               </tr>
@@ -84,11 +88,11 @@ export default function ModerationPage() {
         </table>
       </GlassCard>
 
-      <div className="flex items-center justify-between text-sm text-white">
+      <div className="flex items-center justify-between text-sm text-textDark">
         <button
           disabled={page === 0}
           onClick={() => setPage((p) => Math.max(0, p - 1))}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
+          className="rounded-xl border border-black/10 bg-white px-4 py-2 disabled:opacity-40"
         >
           Anterior
         </button>
@@ -98,7 +102,7 @@ export default function ModerationPage() {
         <button
           disabled={!data?.hasNext}
           onClick={() => setPage((p) => p + 1)}
-          className="rounded-xl border border-white/10 bg-white/10 px-4 py-2 disabled:opacity-40"
+          className="rounded-xl border border-black/10 bg-white px-4 py-2 disabled:opacity-40"
         >
           Próxima
         </button>
