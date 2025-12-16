@@ -228,13 +228,14 @@ export default function UserDetailPage() {
           {avatarStatus ? <p className="text-sm text-brand-muted">{avatarStatus}</p> : null}
 
           <div className="flex flex-col gap-4 w-full max-w-3xl mx-auto">
-            <LabeledInput label="Nome *" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
+            <LabeledInput label="Nome *" value={form.name} onChange={(v) => setForm({ ...form, name: v })} maxLength={120} />
             <LabeledInput
               label="Email *"
               type="email"
               value={form.email}
               onChange={(v) => setForm({ ...form, email: v })}
               disabled={!isCreate}
+              maxLength={320}
             />
             {isCreate && (
               <LabeledInput
@@ -249,6 +250,7 @@ export default function UserDetailPage() {
               value={form.bio}
               onChange={(v) => setForm({ ...form, bio: v.slice(0, 200) })}
               rows={3}
+              maxLength={200}
             />
 
             <div className="space-y-2">
@@ -310,7 +312,8 @@ function LabeledInput({
   onChange,
   placeholder,
   type = "text",
-  disabled
+  disabled,
+  maxLength
 }: {
   label: string;
   value: string;
@@ -318,6 +321,7 @@ function LabeledInput({
   placeholder?: string;
   type?: string;
   disabled?: boolean;
+  maxLength?: number;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
@@ -328,6 +332,7 @@ function LabeledInput({
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        maxLength={maxLength}
         className={clsx(
           "rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40",
           disabled ? "cursor-not-allowed opacity-70 focus:ring-0" : ""

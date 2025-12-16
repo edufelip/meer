@@ -82,6 +82,7 @@ export default function CategoriesPage() {
           <input
             value={idInput}
             onChange={(e) => setIdInput(e.target.value)}
+            maxLength={120}
             className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
             placeholder="ID (ex: casa)"
             required
@@ -89,6 +90,7 @@ export default function CategoriesPage() {
           <input
             value={nameStringIdInput}
             onChange={(e) => setNameStringIdInput(e.target.value)}
+            maxLength={120}
             className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
             placeholder="nameStringId (ex: brecho_de_casa)"
             required
@@ -96,6 +98,7 @@ export default function CategoriesPage() {
           <input
             value={imageResIdInput}
             onChange={(e) => setImageResIdInput(e.target.value)}
+            maxLength={240}
             className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
             placeholder="imageResId (ex: brecho-categories-house)"
             required

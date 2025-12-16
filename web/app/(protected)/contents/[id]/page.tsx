@@ -213,12 +213,13 @@ export default function ContentDetailPage() {
 
         <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <LabeledInput label="Título *" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
+            <LabeledInput label="Título *" value={form.title} onChange={(v) => setForm({ ...form, title: v })} maxLength={160} />
             <LabeledInput
               label="Loja (storeId) *"
               value={form.storeId}
               onChange={(v) => setForm({ ...form, storeId: v })}
               placeholder="UUID da loja"
+              maxLength={64}
             />
           </div>
 
@@ -228,12 +229,14 @@ export default function ContentDetailPage() {
               value={form.categoryLabel}
               onChange={(v) => setForm({ ...form, categoryLabel: v })}
               placeholder="general"
+              maxLength={160}
             />
             <LabeledInput
               label="Tipo (opcional)"
               value={form.type}
               onChange={(v) => setForm({ ...form, type: v })}
               placeholder="article"
+              maxLength={160}
             />
           </div>
 
@@ -275,6 +278,7 @@ export default function ContentDetailPage() {
             value={form.description}
             onChange={(v) => setForm({ ...form, description: v })}
             rows={5}
+            maxLength={2000}
           />
         </div>
       </GlassCard>
@@ -287,13 +291,15 @@ function LabeledInput({
   value,
   onChange,
   placeholder,
-  type = "text"
+  type = "text",
+  maxLength
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   placeholder?: string;
   type?: string;
+  maxLength?: number;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
@@ -301,6 +307,7 @@ function LabeledInput({
       <input
         value={value}
         type={type}
+        maxLength={maxLength}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"

@@ -289,6 +289,10 @@ export default function StoreDetailPage() {
     // social handled separately
 
     const newCategories = normalizeCategories(form.categories);
+    if (newCategories.length > 10) {
+      setFormError("Máximo de 10 categorias.");
+      return;
+    }
     const currentCategories = normalizeCategories((current?.categories ?? []).join(","));
     if (newCategories.join(",") !== currentCategories.join(",")) {
       payload.categories = newCategories;
@@ -496,24 +500,27 @@ export default function StoreDetailPage() {
             {formMessage ? <p className="text-sm text-white/80">{formMessage}</p> : null}
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <LabeledInput label="Nome *" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
+              <LabeledInput label="Nome *" value={form.name} onChange={(v) => setForm({ ...form, name: v })} maxLength={120} />
               <LabeledInput
                 label="Tagline"
                 value={form.tagline}
                 onChange={(v) => setForm({ ...form, tagline: v })}
                 placeholder="Frase curta"
+                maxLength={280}
               />
               <LabeledTextArea
                 label="Descrição"
                 value={form.description}
                 onChange={(v) => setForm({ ...form, description: v })}
                 rows={4}
+                maxLength={2000}
               />
               <LabeledInput
                 label="Horário de funcionamento"
                 value={form.openingHours}
                 onChange={(v) => setForm({ ...form, openingHours: v })}
                 placeholder="Ex: Seg-Sáb 10h-18h"
+                maxLength={256}
               />
               <div className="relative">
                 <LabeledInput
@@ -531,6 +538,7 @@ export default function StoreDetailPage() {
                     });
                   }}
                   placeholder="Rua, número, cidade"
+                  maxLength={512}
                 />
                 <AddressSuggestions
                   loading={addressLoading}
@@ -552,36 +560,41 @@ export default function StoreDetailPage() {
                   }}
                 />
               </div>
-              <LabeledInput label="Bairro" value={form.neighborhood} readOnly disabled />
-              <LabeledInput label="Telefone" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+              <LabeledInput label="Bairro" value={form.neighborhood} readOnly disabled maxLength={120} />
+              <LabeledInput label="Telefone" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} maxLength={32} />
               <LabeledInput
                 label="Whatsapp"
                 value={form.whatsapp}
                 onChange={(v) => setForm({ ...form, whatsapp: v })}
+                maxLength={32}
               />
-              <LabeledInput label="Email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
+              <LabeledInput label="Email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} maxLength={320} />
               <LabeledInput
                 label="Instagram"
                 value={form.instagram}
                 onChange={(v) => setForm({ ...form, instagram: v })}
                 placeholder="@usuario"
+                maxLength={320}
               />
               <LabeledInput
                 label="Facebook"
                 value={form.facebook}
                 onChange={(v) => setForm({ ...form, facebook: v })}
+                maxLength={320}
               />
               <LabeledInput
                 label="Website"
                 value={form.website}
                 onChange={(v) => setForm({ ...form, website: v })}
                 placeholder="https://"
+                maxLength={320}
               />
               <LabeledInput
                 label="Categorias (separadas por vírgula)"
                 value={form.categories}
                 onChange={(v) => setForm({ ...form, categories: v })}
                 placeholder="vintage, jeans, acessórios"
+                maxLength={512}
               />
               <div className="grid grid-cols-2 gap-3">
                 <LabeledInput
@@ -864,7 +877,8 @@ function LabeledInput({
   onChange,
   placeholder,
   disabled,
-  readOnly
+  readOnly,
+  maxLength
 }: {
   label: string;
   value: string;
@@ -872,12 +886,14 @@ function LabeledInput({
   placeholder?: string;
   disabled?: boolean;
   readOnly?: boolean;
+  maxLength?: number;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
       <span className="text-white/70">{label}</span>
       <input
         value={value}
+        maxLength={maxLength}
         onChange={(e) => (disabled || readOnly || !onChange ? undefined : onChange(e.target.value))}
         placeholder={placeholder}
         readOnly={readOnly}
@@ -895,12 +911,14 @@ function LabeledTextArea({
   label,
   value,
   onChange,
-  rows = 3
+  rows = 3,
+  maxLength
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   rows?: number;
+  maxLength?: number;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
@@ -908,6 +926,7 @@ function LabeledTextArea({
       <textarea
         value={value}
         rows={rows}
+        maxLength={maxLength}
         onChange={(e) => onChange(e.target.value)}
         className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
       />
