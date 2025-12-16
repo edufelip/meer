@@ -211,36 +211,36 @@ export default function ContentDetailPage() {
         {errorMsg ? <p className="text-sm text-red-300">{errorMsg}</p> : null}
         {status ? <p className="text-sm text-brand-muted">{status}</p> : null}
 
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <LabeledInput label="Título *" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
-          <LabeledInput
-            label="Loja (storeId) *"
-            value={form.storeId}
-            onChange={(v) => setForm({ ...form, storeId: v })}
-            placeholder="UUID da loja"
-          />
-          <LabeledTextArea
-            label="Descrição *"
-            value={form.description}
-            onChange={(v) => setForm({ ...form, description: v })}
-            rows={4}
-          />
-          <LabeledInput
-            label="Categoria (opcional)"
-            value={form.categoryLabel}
-            onChange={(v) => setForm({ ...form, categoryLabel: v })}
-            placeholder="general"
-          />
-          <LabeledInput
-            label="Tipo (opcional)"
-            value={form.type}
-            onChange={(v) => setForm({ ...form, type: v })}
-            placeholder="article"
-          />
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <LabeledInput label="Título *" value={form.title} onChange={(v) => setForm({ ...form, title: v })} />
+            <LabeledInput
+              label="Loja (storeId) *"
+              value={form.storeId}
+              onChange={(v) => setForm({ ...form, storeId: v })}
+              placeholder="UUID da loja"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <LabeledInput
+              label="Categoria (opcional)"
+              value={form.categoryLabel}
+              onChange={(v) => setForm({ ...form, categoryLabel: v })}
+              placeholder="general"
+            />
+            <LabeledInput
+              label="Tipo (opcional)"
+              value={form.type}
+              onChange={(v) => setForm({ ...form, type: v })}
+              placeholder="article"
+            />
+          </div>
+
           <div className="space-y-2">
             <span className="text-white/70 text-sm">Imagem (opcional)</span>
             <div className="flex flex-col gap-2">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10">
+              <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10">
                 Enviar arquivo
                 <input
                   type="file"
@@ -262,19 +262,20 @@ export default function ContentDetailPage() {
                   }}
                 />
               </label>
-              <LabeledInput
-                label=""
-                value={form.imageUrl}
-                onChange={(v) => setForm({ ...form, imageUrl: v })}
-                placeholder="URL ou fileKey"
-              />
               {imagePreview ? (
-                <div className="relative h-32 w-full overflow-hidden rounded-xl border border-white/10">
+                <div className="relative h-36 w-48 overflow-hidden rounded-lg border border-white/10 bg-white">
                   <Image src={imagePreview} alt="Prévia" fill className="object-cover" />
                 </div>
               ) : null}
             </div>
           </div>
+
+          <LabeledTextArea
+            label="Descrição *"
+            value={form.description}
+            onChange={(v) => setForm({ ...form, description: v })}
+            rows={5}
+          />
         </div>
       </GlassCard>
     </div>

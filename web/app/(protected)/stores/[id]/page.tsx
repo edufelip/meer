@@ -328,7 +328,7 @@ export default function StoreDetailPage() {
       return;
     }
 
-    const socialPayload = buildSocialPayload(form, current);
+    const socialPayload = buildSocialPayload(form, current ?? null);
     if (socialPayload) {
       payload.social = socialPayload;
       // avoid sending deprecated flat fields
@@ -337,7 +337,7 @@ export default function StoreDetailPage() {
       delete payload.website;
     }
 
-    const baseImages = isCreate ? [] : data.images ?? [];
+    const baseImages = isCreate ? [] : (data?.images ?? []);
     const photosDirty = arePhotosDirty(photoDrafts, deletedPhotoIds, baseImages);
 
     if (!photosDirty && changes === 0) {
@@ -461,21 +461,13 @@ export default function StoreDetailPage() {
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {!isCreate && (
-              <>
-                <button
-                  onClick={() => setShowEdit((v) => !v)}
-                  className="rounded-xl border border-brand-card/40 bg-white/5 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
-                >
-                  {showEdit ? "Fechar edição" : "Editar"}
-                </button>
-                <button
-                  onClick={onDelete}
-                  className="rounded-xl border border-red-400/50 bg-red-500/20 px-4 py-2 text-sm font-semibold text-red-100 hover:bg-red-500/30 disabled:opacity-50"
-                  disabled={deleteMutation.isPending}
-                >
-                  {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
-                </button>
-              </>
+              <button
+                onClick={onDelete}
+                className="rounded-xl border border-red-500/70 bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 disabled:opacity-60"
+                disabled={deleteMutation.isPending}
+              >
+                {deleteMutation.isPending ? "Excluindo..." : "Excluir"}
+              </button>
             )}
           </div>
         }
@@ -484,24 +476,24 @@ export default function StoreDetailPage() {
       {showEdit && (
         <>
           <GlassCard className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-lg font-semibold text-white">Editar informações básicas</p>
-                  <p className="text-sm text-white/70">
-                    Atualize dados do brechó. Nome e endereço não podem ser vazios.
-                  </p>
-                </div>
-                <button
-                  onClick={handleSaveBasic}
-                  disabled={isSavingStore || isCreatingStore || savingAll}
-                  className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-brand-forest transition hover:scale-[1.01] hover:bg-white disabled:opacity-60"
-                >
-                  {savingAll || isSavingStore || isCreatingStore ? "Salvando..." : "Salvar alterações"}
-                </button>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-lg font-semibold text-white">Editar informações básicas</p>
+                <p className="text-sm text-white/80">
+                  Atualize dados do brechó. Nome e endereço não podem ser vazios.
+                </p>
               </div>
+              <button
+                onClick={handleSaveBasic}
+                disabled={isSavingStore || isCreatingStore || savingAll}
+                className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-semibold text-brand-forest transition hover:scale-[1.01] hover:bg-white disabled:opacity-60"
+              >
+                {savingAll || isSavingStore || isCreatingStore ? "Salvando..." : "Salvar alterações"}
+              </button>
+            </div>
 
-            {formError ? <p className="text-sm text-red-300">{formError}</p> : null}
-            {formMessage ? <p className="text-sm text-brand-muted">{formMessage}</p> : null}
+            {formError ? <p className="text-sm text-red-600">{formError}</p> : null}
+            {formMessage ? <p className="text-sm text-white/80">{formMessage}</p> : null}
 
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <LabeledInput label="Nome *" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
@@ -613,8 +605,8 @@ export default function StoreDetailPage() {
           <GlassCard className="space-y-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-lg font-semibold text-textDark">Fotos</p>
-                <p className="text-sm text-textSubtle">Máximo 10 fotos. JPEG ou WEBP até 2MB.</p>
+                <p className="text-lg font-semibold text-white">Fotos</p>
+                <p className="text-sm text-white/80">Máximo 10 fotos. JPEG ou WEBP até 2MB.</p>
               </div>
               <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-black/10 bg-white px-3 py-2 text-sm font-semibold text-textDark hover:bg-white/70">
                 Adicionar fotos
@@ -883,7 +875,7 @@ function LabeledInput({
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
-      <span className="text-textSubtle">{label}</span>
+      <span className="text-white/70">{label}</span>
       <input
         value={value}
         onChange={(e) => (disabled || readOnly || !onChange ? undefined : onChange(e.target.value))}
@@ -891,7 +883,7 @@ function LabeledInput({
         readOnly={readOnly}
         disabled={disabled}
         className={clsx(
-          "rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-textDark placeholder:text-textSubtle/80 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40",
+          "rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40",
           disabled || readOnly ? "cursor-not-allowed opacity-70 focus:ring-0" : ""
         )}
       />
@@ -912,12 +904,12 @@ function LabeledTextArea({
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
-      <span className="text-textSubtle">{label}</span>
+      <span className="text-white/70">{label}</span>
       <textarea
         value={value}
         rows={rows}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-xl border border-black/10 bg-white px-3 py-2 text-sm text-textDark placeholder:text-textSubtle/80 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
+        className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
       />
     </label>
   );

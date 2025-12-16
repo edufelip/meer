@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import Link from "next/link";
 import clsx from "classnames";
 import { api } from "@/lib/api";
 import type { User } from "@/types/index";
@@ -226,7 +227,7 @@ export default function UserDetailPage() {
           {avatarError ? <p className="text-sm text-red-300">{avatarError}</p> : null}
           {avatarStatus ? <p className="text-sm text-brand-muted">{avatarStatus}</p> : null}
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <div className="flex flex-col gap-4 w-full max-w-3xl mx-auto">
             <LabeledInput label="Nome *" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
             <LabeledInput
               label="Email *"
@@ -251,50 +252,31 @@ export default function UserDetailPage() {
             />
 
             <div className="space-y-2">
-              <span className="text-white/70 text-sm">Avatar</span>
-              <div className="flex items-center gap-3">
-                <label className="cursor-pointer rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10">
-                  Enviar arquivo
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      if (file.size > 5 * 1024 * 1024) {
-                        setAvatarError("Máximo 5MB.");
-                        return;
-                      }
-                      setAvatarError(null);
-                      setAvatarFile(file);
-                    }}
-                  />
-                </label>
-                <LabeledInput
-                  label=""
-                  value={form.avatarUrl}
-                  onChange={(v) => setForm({ ...form, avatarUrl: v })}
-                  placeholder="GCS key (opcional)"
+              <span className="text-white/70 text-sm mb-1 block">Avatar</span>
+              <label className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm font-semibold text-white hover:bg-white/10">
+                Enviar arquivo
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    if (file.size > 5 * 1024 * 1024) {
+                      setAvatarError("Máximo 5MB.");
+                      return;
+                    }
+                    setAvatarError(null);
+                    setAvatarFile(file);
+                  }}
                 />
-              </div>
+              </label>
               {avatarPreview ? (
                 <div className="relative h-24 w-24 overflow-hidden rounded-full border border-white/10">
                   <Image src={avatarPreview} alt="Avatar preview" fill className="object-cover" />
                 </div>
               ) : null}
             </div>
-
-            <ToggleRow
-              label="Notificar novos brechós"
-              checked={form.notifyNewStores}
-              onChange={(v) => setForm({ ...form, notifyNewStores: v })}
-            />
-            <ToggleRow
-              label="Notificar promoções"
-              checked={form.notifyPromos}
-              onChange={(v) => setForm({ ...form, notifyPromos: v })}
-            />
           </div>
         </GlassCard>
       )}
@@ -380,15 +362,5 @@ function LabeledTextArea({
 }
 
 function ToggleRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <label className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white">
-      <span>{label}</span>
-      <input
-        type="checkbox"
-        checked={checked}
-        onChange={(e) => onChange(e.target.checked)}
-        className="h-4 w-4 accent-brand-primary"
-      />
-    </label>
-  );
+  return null;
 }
