@@ -1,16 +1,30 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
+  Animated,
   Image,
   ImageBackground,
+  Linking,
+  Pressable,
   ScrollView,
   StatusBar,
   Text,
+  TextInput,
   View,
-  Pressable,
-  Linking,
-  Animated,
-  Easing
+  Easing,
+  Keyboard
 } from "react-native";
+import Reanimated, {
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+  withTiming
+} from "react-native-reanimated";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -23,13 +37,49 @@ interface ThriftDetailScreenProps {
   route?: { params?: { id?: ThriftStoreId } };
 }
 
+function RatingStarButton({
+  score,
+  active,
+  onSelect,
+  disabled
+}: {
+  score: number;
+  active: boolean;
+  onSelect: (score: number) => void;
+  disabled?: boolean;
+}) {
+  const scale = useSharedValue(1);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }]
+  }));
+
+  return (
+    <Pressable
+      onPress={() => {
+        scale.value = withSequence(withSpring(1.2), withSpring(1));
+        onSelect(score);
+      }}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={`Dar nota ${score}`}
+      disabled={disabled}
+    >
+      <Reanimated.View style={animatedStyle} collapsable={false}>
+        <Ionicons name={active ? "star" : "star-outline"} size={28} color={active ? "#E6A800" : "#D1D5DB"} />
+      </Reanimated.View>
+    </Pressable>
+  );
+}
+
 export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
   const insets = useSafeAreaInsets();
   const {
     getThriftStoreByIdUseCase,
     getFeaturedThriftStoresUseCase,
     toggleFavoriteThriftStoreUseCase,
-    isFavoriteThriftStoreUseCase
+    isFavoriteThriftStoreUseCase,
+    getMyFeedbackUseCase,
+    upsertFeedbackUseCase
   } = useDependencies();
   const navigation = useNavigation();
   const [store, setStore] = useState<ThriftStore | null>(null);
@@ -37,6 +87,15 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
   const [favorite, setFavorite] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
+  const [userRating, setUserRating] = useState(0);
+  const [userComment, setUserComment] = useState("");
+  const [showCommentBox, setShowCommentBox] = useState(false);
+  const [submittingFeedback, setSubmittingFeedback] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const toastOpacity = useSharedValue(0);
+  const toastTranslateY = useSharedValue(12);
+  const toastHideTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const toastClearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const shimmer = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -49,6 +108,42 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
       })
     ).start();
   }, [shimmer]);
+
+  useEffect(() => {
+    return () => {
+      if (toastHideTimeoutRef.current) {
+        clearTimeout(toastHideTimeoutRef.current);
+        toastHideTimeoutRef.current = null;
+      }
+      if (toastClearTimeoutRef.current) {
+        clearTimeout(toastClearTimeoutRef.current);
+        toastClearTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  const toastAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: toastOpacity.value,
+    transform: [{ translateY: toastTranslateY.value }]
+  }));
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    toastOpacity.value = withTiming(1, { duration: 180 });
+    toastTranslateY.value = withTiming(0, { duration: 180 });
+
+    if (toastHideTimeoutRef.current) {
+      clearTimeout(toastHideTimeoutRef.current);
+    }
+    if (toastClearTimeoutRef.current) {
+      clearTimeout(toastClearTimeoutRef.current);
+    }
+    toastHideTimeoutRef.current = setTimeout(() => {
+      toastOpacity.value = withTiming(0, { duration: 180 });
+      toastTranslateY.value = withTiming(12, { duration: 180 });
+      toastClearTimeoutRef.current = setTimeout(() => setToastMessage(null), 220);
+    }, 2200);
+  };
 
   const shimmerStyle = {
     opacity: shimmer.interpolate({ inputRange: [0, 0.5, 1], outputRange: [0.5, 1, 0.5] })
@@ -66,16 +161,35 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
       const id = route?.params?.id ?? "vintage-vibes";
       const match = await getThriftStoreByIdUseCase.execute(id);
       if (isMounted) {
-        if (match) {
-          setStore(match);
+        const fallback = match ? null : (await getFeaturedThriftStoresUseCase.execute())[0] ?? null;
+        const resolved = match ?? fallback;
+
+        if (resolved) {
+          setStore(resolved);
+          if (Object.prototype.hasOwnProperty.call(resolved as any, "myRating")) {
+            setUserRating(typeof resolved.myRating === "number" ? resolved.myRating : 0);
+          }
         } else {
-          const fallback = (await getFeaturedThriftStoresUseCase.execute())[0] ?? null;
-          setStore(fallback);
+          setStore(null);
         }
-        const target = match ?? null;
-        if (target) {
-          const fav = await isFavoriteThriftStoreUseCase.execute(target.id);
+
+        if (resolved) {
+          const fav = await isFavoriteThriftStoreUseCase.execute(resolved.id);
           if (isMounted) setFavorite(fav);
+
+          try {
+            const mine = await getMyFeedbackUseCase.execute(resolved.id);
+            if (isMounted && mine) {
+              if (mine.score != null) {
+                setUserRating(mine.score);
+              }
+              if (mine.body != null) {
+                setUserComment(mine.body);
+              }
+            }
+          } catch {
+            // ignore feedback load errors
+          }
         }
         setLoading(false);
       }
@@ -83,7 +197,13 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
     return () => {
       isMounted = false;
     };
-  }, [getThriftStoreByIdUseCase, getFeaturedThriftStoresUseCase, isFavoriteThriftStoreUseCase, route?.params?.id]);
+  }, [
+    getThriftStoreByIdUseCase,
+    getFeaturedThriftStoresUseCase,
+    isFavoriteThriftStoreUseCase,
+    getMyFeedbackUseCase,
+    route?.params?.id
+  ]);
 
   if (loading || !store) {
     return (
@@ -139,8 +259,57 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
 
   const resolvedGallery = galleryImages.length > 0 ? galleryImages.map((g) => g.uri) : heroImage ? [heroImage] : [];
 
-  return (
-    <SafeAreaView className="flex-1 bg-[#F3F4F6]" edges={["left", "right", "bottom"]}>
+  const renderStars = (value: number, size = 18) => {
+    const rounded = Math.round(value * 2) / 2; // keep halves if needed
+    return (
+      <View className="flex-row">
+        {[1, 2, 3, 4, 5].map((idx) => {
+          const filled = rounded >= idx;
+          const half = !filled && rounded + 0.5 === idx;
+          const icon = filled ? "star" : half ? "star-half" : "star-outline";
+          return <Ionicons key={idx} name={icon as any} size={size} color="#E6A800" style={{ marginRight: 2 }} />;
+        })}
+      </View>
+    );
+  };
+
+  const handleSubmitRating = async () => {
+    if (!userRating) {
+      Alert.alert("Escolha uma nota", "Selecione de 1 a 5 estrelas antes de enviar.");
+      return;
+    }
+    if (userComment.trim().length < 20) {
+      Alert.alert("Comentário muito curto", "Escreva pelo menos 20 caracteres para enviar.");
+      return;
+    }
+    if (!store?.id) return;
+
+    try {
+      setSubmittingFeedback(true);
+      await upsertFeedbackUseCase.execute({
+        storeId: store.id,
+        score: userRating,
+        body: userComment.trim()
+      });
+      showToast("Successo! Obrigado por avaliar!");
+      Keyboard.dismiss();
+      setShowCommentBox(false);
+    } catch (e: any) {
+      const status = e?.response?.status;
+      if (status === 401) {
+        Alert.alert("Sessão expirada", "Faça login novamente para enviar sua avaliação.");
+      } else if (status === 404) {
+        Alert.alert("Brechó não encontrado", "Esse brechó não existe mais.");
+      } else {
+        Alert.alert("Erro ao enviar", "Não foi possível enviar sua avaliação. Tente novamente.");
+      }
+    } finally {
+      setSubmittingFeedback(false);
+    }
+  };
+
+	  return (
+	    <SafeAreaView className="flex-1 bg-[#F3F4F6]" edges={["left", "right", "bottom"]}>
       <StatusBar barStyle="light-content" translucent />
       <View className="relative flex-1 bg-[#F3F4F6]">
         <ImageBackground
@@ -194,128 +363,224 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
           contentContainerStyle={{ paddingBottom: 24 }}
           showsVerticalScrollIndicator={false}
         >
-          <View className="bg-white rounded-t-2xl p-4 space-y-4">
-            <View className="flex-row items-center gap-4">
-              <View className="p-3 rounded-lg" style={{ backgroundColor: `${theme.colors.highlight}1a` }}>
-                <Ionicons name="location" size={20} color={theme.colors.highlight} />
-              </View>
-              <View>
-                <Text className="font-bold text-[#374151]">Localização</Text>
-                <Text className="text-sm text-gray-500">
-                  {store.addressLine ?? "Endereço em atualização"}
-                </Text>
-              </View>
-            </View>
-
-            <Pressable
-              className="h-40 rounded-lg bg-gray-200 overflow-hidden mt-4 mb-4"
-              onPress={openMaps}
+          <View className="bg-white rounded-t-2xl p-4">
+            <Reanimated.View
+              layout={LinearTransition.duration(220)}
+              collapsable={false}
+              style={{ borderBottomWidth: 1, borderColor: "#E5E7EB", paddingBottom: 12 }}
             >
-              {store.latitude && store.longitude ? (
-                <Image
-                  source={{
-                    uri: `https://maps.googleapis.com/maps/api/staticmap?center=${store.latitude},${store.longitude}&zoom=15&size=640x320&maptype=roadmap&markers=color:red%7C${store.latitude},${store.longitude}&scale=2&key=${process.env.EXPO_PUBLIC_GOOGLE_MAPS_STATIC_KEY}`
-                  }}
-                  className="w-full h-full"
-                />
-              ) : (
-                <View className="flex-1 items-center justify-center">
-                  <Text className="text-[#6B7280]">Localização indisponível</Text>
+              <Text className="font-bold text-[#374151] text-lg mb-2">Avaliações</Text>
+              <View className="flex-row justify-between items-center">
+                <View className="flex-row items-center gap-3">
+                  <Text className="text-3xl font-extrabold text-[#374151]">
+                    {store.rating != null ? store.rating.toFixed(1) : "—"}
+                  </Text>
+                  {renderStars(store.rating ?? 0, 20)}
                 </View>
-              )}
-            </Pressable>
-
-            <View className="flex-row items-center gap-4">
-              <View className="p-3 rounded-lg" style={{ backgroundColor: `${theme.colors.highlight}1a` }}>
-                <Ionicons name="time" size={20} color={theme.colors.highlight} />
-              </View>
-              <View>
-                <Text className="font-bold text-[#374151]">Horário de Funcionamento</Text>
-                <Text className="text-sm text-gray-500">
-                  {store.openingHours ?? "Seg a Sáb: 10:00 - 19:00"}
+                <Text className="text-sm text-[#6B7280]">
+                  {store.reviewCount ? `${store.reviewCount} avaliações` : "Sem avaliações ainda"}
                 </Text>
               </View>
-            </View>
 
-            <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
-              <Text className="font-bold text-[#374151] mb-2">Galeria de Fotos</Text>
-              <View className="flex-row flex-wrap gap-2">
-                {resolvedGallery.slice(0, 6).map((url, index) => (
-                  <Pressable
-                    key={`${url}-${index}`}
-                    onPress={() => {
-                      setViewerIndex(index);
-                      setViewerVisible(true);
-                    }}
-                    style={{ width: "30%" }}
-                  >
-                    <Image
-                      source={{ uri: url }}
-                      className="h-24 rounded-lg"
-                      style={{ width: "100%" }}
-                    />
-                  </Pressable>
-                ))}
-              </View>
-            </View>
-
-            {(() => {
-              const igRaw = (store.social?.instagram ?? store.socialHandle ?? "").trim();
-              const igHandle = igRaw.replace(/^@/, "");
-              const hasInstagram = igHandle.length > 0;
-              const hasAnySocial = hasInstagram || Boolean(store.social?.facebook || store.social?.whatsapp || store.social?.website);
-              if (!hasAnySocial) return null;
-
-              return (
-                <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
-                  <Text className="font-bold text-[#374151] mb-2">Redes Sociais</Text>
-                  {hasInstagram ? (
-                    <Pressable
-                      className="flex-row items-center gap-2"
-                      onPress={() => {
-                        const appUrl = `instagram://user?username=${igHandle}`;
-                        const webUrl = `https://www.instagram.com/${igHandle}`;
-                        Linking.canOpenURL(appUrl)
-                          .then((canOpen) => (canOpen ? Linking.openURL(appUrl) : Linking.openURL(webUrl)))
-                          .catch(() => Linking.openURL(webUrl));
-                      }}
-                      accessibilityRole="link"
-                      accessibilityLabel="Abrir Instagram"
-                    >
-                      <Ionicons name="logo-instagram" size={18} color={theme.colors.highlight} />
-                      <Text className="text-sm text-gray-500 underline">@{igHandle}</Text>
-                    </Pressable>
-                  ) : null}
+              <View style={{ marginTop: 16 }} className="space-y-3">
+                <Text className="font-semibold text-md text-[#374151]">Deixe sua avaliação</Text>
+                <View className="flex-row justify-center gap-2" style={{ paddingVertical: 16 }}>
+                  {[1, 2, 3, 4, 5].map((score) => {
+                    const active = userRating >= score;
+                    return (
+                      <RatingStarButton
+                        key={score}
+                        score={score}
+                        active={active}
+                        disabled={submittingFeedback}
+                        onSelect={(selected) => {
+                          setUserRating(selected);
+                          if (!showCommentBox) setShowCommentBox(true);
+                        }}
+                      />
+                    );
+                  })}
                 </View>
-              );
-            })()}
-
-            <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
-              <Text className="font-bold text-[#374151] mb-2">Categorias</Text>
-              <View className="flex-row flex-wrap gap-2">
-                {(store.categories ?? ["Feminino", "Vintage", "Acessórios"]).map((c) => (
-                  <View
-                    key={c}
-                    className="px-3 py-1 rounded-full"
-                    style={{ backgroundColor: `${theme.colors.highlight}22` }}
+                {showCommentBox ? (
+                  <Reanimated.View
+                    entering={FadeIn.duration(220)}
+                    exiting={FadeOut.duration(180)}
+                    layout={LinearTransition.duration(220)}
+                    collapsable={false}
                   >
-                    <Text className="text-xs font-semibold text-[#E6A800]">{c}</Text>
-                  </View>
-                ))}
+                    <TextInput
+                      value={userComment}
+                      onChangeText={setUserComment}
+                      placeholder="Escreva seu comentário aqui..."
+                      multiline
+                      numberOfLines={12}
+                      maxLength={2000}
+                      className="w-full border border-gray-200 rounded-lg text-sm px-3 py-3"
+                      placeholderTextColor="#9CA3AF"
+                      style={{ textAlignVertical: "top", marginBottom: 16 }}
+                    />
+	                    <Pressable
+	                      className="w-full py-3 rounded-lg"
+	                      style={{ backgroundColor: "#B55D05", opacity: submittingFeedback ? 0.7 : 1, marginBottom: 8 }}
+	                      onPress={handleSubmitRating}
+	                      disabled={submittingFeedback}
+	                      accessibilityRole="button"
+	                      accessibilityLabel="Enviar avaliação"
+	                    >
+                      {submittingFeedback ? (
+                        <ActivityIndicator color="#FFFFFF" />
+                      ) : (
+                        <Text className="text-white font-bold text-center">Enviar Avaliação</Text>
+                      )}
+                    </Pressable>
+                  </Reanimated.View>
+                ) : null}
               </View>
-            </View>
+            </Reanimated.View>
+
+            <Reanimated.View
+              layout={LinearTransition.duration(220)}
+              collapsable={false}
+              className="space-y-4"
+              style={{ paddingTop: 16 }}
+            >
+              <View className="flex-row items-center gap-4">
+                <View className="p-3 rounded-lg" style={{ backgroundColor: `${theme.colors.highlight}1a` }}>
+                  <Ionicons name="location" size={20} color={theme.colors.highlight} />
+                </View>
+                <View>
+                  <Text className="font-bold text-[#374151]">Localização</Text>
+                  <Text className="text-sm text-gray-500">
+                    {store.addressLine ?? "Endereço em atualização"}
+                  </Text>
+                </View>
+              </View>
+
+              <Pressable className="h-40 rounded-lg bg-gray-200 overflow-hidden mt-4 mb-4" onPress={openMaps}>
+                {store.latitude && store.longitude ? (
+                  <Image
+                    source={{
+                      uri: `https://maps.googleapis.com/maps/api/staticmap?center=${store.latitude},${store.longitude}&zoom=15&size=640x320&maptype=roadmap&markers=color:red%7C${store.latitude},${store.longitude}&scale=2&key=${process.env.EXPO_PUBLIC_GOOGLE_MAPS_STATIC_KEY}`
+                    }}
+                    className="w-full h-full"
+                  />
+                ) : (
+                  <View className="flex-1 items-center justify-center">
+                    <Text className="text-[#6B7280]">Localização indisponível</Text>
+                  </View>
+                )}
+              </Pressable>
+
+              <View className="flex-row items-center gap-4">
+                <View className="p-3 rounded-lg" style={{ backgroundColor: `${theme.colors.highlight}1a` }}>
+                  <Ionicons name="time" size={20} color={theme.colors.highlight} />
+                </View>
+                <View>
+                  <Text className="font-bold text-[#374151]">Horário de Funcionamento</Text>
+                  <Text className="text-sm text-gray-500">
+                    {store.openingHours ?? "Seg a Sáb: 10:00 - 19:00"}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
+                <Text className="font-bold text-[#374151] mb-2">Galeria de Fotos</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {resolvedGallery.slice(0, 6).map((url, index) => (
+                    <Pressable
+                      key={`${url}-${index}`}
+                      onPress={() => {
+                        setViewerIndex(index);
+                        setViewerVisible(true);
+                      }}
+                      style={{ width: "30%" }}
+                    >
+                      <Image source={{ uri: url }} className="h-24 rounded-lg" style={{ width: "100%" }} />
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+
+              {(() => {
+                const igRaw = (store.social?.instagram ?? store.socialHandle ?? "").trim();
+                const igHandle = igRaw.replace(/^@/, "");
+                const hasInstagram = igHandle.length > 0;
+                const hasAnySocial =
+                  hasInstagram || Boolean(store.social?.facebook || store.social?.whatsapp || store.social?.website);
+                if (!hasAnySocial) return null;
+
+                return (
+                  <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
+                    <Text className="font-bold text-[#374151] mb-2">Redes Sociais</Text>
+                    {hasInstagram ? (
+                      <Pressable
+                        className="flex-row items-center gap-2"
+                        onPress={() => {
+                          const appUrl = `instagram://user?username=${igHandle}`;
+                          const webUrl = `https://www.instagram.com/${igHandle}`;
+                          Linking.canOpenURL(appUrl)
+                            .then((canOpen) => (canOpen ? Linking.openURL(appUrl) : Linking.openURL(webUrl)))
+                            .catch(() => Linking.openURL(webUrl));
+                        }}
+                        accessibilityRole="link"
+                        accessibilityLabel="Abrir Instagram"
+                      >
+                        <Ionicons name="logo-instagram" size={18} color={theme.colors.highlight} />
+                        <Text className="text-sm text-gray-500 underline">@{igHandle}</Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
+                );
+              })()}
+
+              <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
+                <Text className="font-bold text-[#374151] mb-2">Categorias</Text>
+                <View className="flex-row flex-wrap gap-2">
+                  {(store.categories ?? ["Feminino", "Vintage", "Acessórios"]).map((c) => (
+                    <View
+                      key={c}
+                      className="px-3 py-1 rounded-full"
+                      style={{ backgroundColor: `${theme.colors.highlight}22` }}
+                    >
+                      <Text className="text-xs font-semibold text-[#E6A800]">{c}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            </Reanimated.View>
           </View>
         </ScrollView>
 
-        {galleryImages.length > 0 ? (
-          <ImageViewing
-            images={galleryImages}
-            imageIndex={viewerIndex}
-            visible={viewerVisible}
-            onRequestClose={() => setViewerVisible(false)}
-          />
-        ) : null}
-      </View>
-    </SafeAreaView>
-  );
+	        {galleryImages.length > 0 ? (
+	          <ImageViewing
+	            images={galleryImages}
+	            imageIndex={viewerIndex}
+	            visible={viewerVisible}
+	            onRequestClose={() => setViewerVisible(false)}
+	          />
+	        ) : null}
+
+	        {toastMessage ? (
+	          <Reanimated.View
+	            pointerEvents="none"
+	            style={[
+	              toastAnimatedStyle,
+	              { position: "absolute", left: 16, right: 16, bottom: insets.bottom + 16 }
+	            ]}
+	          >
+	            <View
+	              style={{
+	                backgroundColor: "rgba(17,24,39,0.92)",
+	                paddingVertical: 12,
+	                paddingHorizontal: 14,
+	                borderRadius: 12
+	              }}
+	            >
+	              <Text className="text-white font-semibold text-center">{toastMessage}</Text>
+	            </View>
+	          </Reanimated.View>
+	        ) : null}
+	      </View>
+	    </SafeAreaView>
+	  );
 }

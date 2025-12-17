@@ -33,7 +33,7 @@ import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
 import NetInfo from "@react-native-community/netinfo";
-import { getAccessTokenSync } from "../../../storage/authStorage";
+import { getTokens } from "../../../storage/authStorage";
 import {
   loadHomeCache,
   saveHomeCache,
@@ -193,33 +193,10 @@ export function HomeScreen() {
     hasFetchedOnce.current = true;
   }, [updateCombined]);
 
-  const loadCacheAndFetch = useCallback(
-    async (options?: { force?: boolean }) => {
-      if (loadCacheInFlight.current) return;
-      loadCacheInFlight.current = true;
-      const bucket = bucketFor(coordsRef.current ?? DEFAULT_COORDS);
-      const cached = await loadHomeCache(bucket);
-      const now = Date.now();
-      const stale = !cached || now - cached.fetchedAt > HOME_TTL;
-
-      if (cached) {
-        applyCache(cached);
-      }
-
-      try {
-        if (stale || options?.force) {
-          await fetchData({ force: true, forceFeatured: true, silent: !!cached });
-        }
-      } finally {
-        loadCacheInFlight.current = false;
-      }
-    },
-    [applyCache, fetchData]
-  );
-
   const fetchData = useCallback(
     async (opts?: { force?: boolean; forceFeatured?: boolean; silent?: boolean }) => {
-      if (!locationResolved.current || !getAccessTokenSync()) return;
+      // Hydrate token cache in case the app cold-started and in-memory cache is empty.
+      await getTokens();
       const now = Date.now();
       // Even for forced fetches, avoid concurrent duplicate runs.
       if (isFetching.current) return;
@@ -330,6 +307,40 @@ export function HomeScreen() {
       isFetching.current = false;
     },
     [getFeaturedThriftStoresUseCase, getNearbyPaginatedUseCase, getGuideContentUseCase, getCategoriesUseCase, updateCombined]
+  );
+
+  const loadCacheAndFetch = useCallback(
+    async (options?: { force?: boolean }) => {
+      if (loadCacheInFlight.current) return;
+      loadCacheInFlight.current = true;
+      const bucket = bucketFor(coordsRef.current ?? DEFAULT_COORDS);
+      const cached = await loadHomeCache(bucket);
+      const now = Date.now();
+      const stale = !cached || now - cached.fetchedAt > HOME_TTL;
+      const hasCachedContent =
+        (cached?.featured?.length ?? 0) > 0 ||
+        (cached?.nearby?.length ?? 0) > 0 ||
+        (cached?.contents?.length ?? 0) > 0;
+
+      if (cached) {
+        applyCache(cached);
+      }
+
+      try {
+        if (!hasCachedContent) {
+          // Nothing to show locally -> run a foreground fetch to avoid an empty screen.
+          await fetchData({ force: true, forceFeatured: true, silent: false });
+        } else if (stale || options?.force) {
+          await fetchData({ force: true, forceFeatured: true, silent: !!cached });
+        } else {
+          // Even when cache is fresh, run a silent background refresh so /featured, /nearby and /contents/top still fire.
+          void fetchData({ force: true, forceFeatured: false, silent: true });
+        }
+      } finally {
+        loadCacheInFlight.current = false;
+      }
+    },
+    [applyCache, fetchData]
   );
 
   useEffect(() => {

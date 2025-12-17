@@ -1,4 +1,9 @@
-import type { ThriftStore, ThriftStoreId } from "../../../domain/entities/ThriftStore";
+import {
+  ThriftStoreBadge,
+  getBadgeLabel,
+  type ThriftStore,
+  type ThriftStoreId
+} from "../../../domain/entities/ThriftStore";
 import type {
   CreateStorePayload,
   PhotoUploadSlot,
@@ -11,7 +16,7 @@ export class HttpThriftStoreRemoteDataSource implements ThriftStoreRemoteDataSou
     const res = await api.get<ThriftStore[]>("/featured", {
       params: { lat: params?.lat, lng: params?.lng }
     });
-    return res.data;
+    return mapStores(res.data);
   }
 
   async getNearby(params?: {
@@ -29,22 +34,22 @@ export class HttpThriftStoreRemoteDataSource implements ThriftStoreRemoteDataSou
         pageSize: params?.pageSize ?? 10
       }
     });
-    return res.data;
+    return { ...res.data, items: mapStores(res.data.items) };
   }
 
   async getFavorites(): Promise<ThriftStore[]> {
     const res = await api.get<ThriftStore[]>("/stores/favorites");
-    return res.data;
+    return mapStores(res.data);
   }
 
   async getById(id: ThriftStoreId): Promise<ThriftStore | null> {
     const res = await api.get<ThriftStore | null>(`/stores/${id}`);
-    return res.data;
+    return res.data ? mapStore(res.data) : null;
   }
 
   async search(query: string): Promise<ThriftStore[]> {
     const res = await api.get<ThriftStore[]>("/stores", { params: { q: query } });
-    return res.data;
+    return mapStores(res.data);
   }
 
   async listByCategory(params: {
@@ -59,7 +64,7 @@ export class HttpThriftStoreRemoteDataSource implements ThriftStoreRemoteDataSou
         pageSize: params.pageSize ?? 10
       }
     });
-    return res.data;
+    return { ...res.data, items: mapStores(res.data.items) };
   }
 
   async listNearbyPaginated(params: {
@@ -77,17 +82,17 @@ export class HttpThriftStoreRemoteDataSource implements ThriftStoreRemoteDataSou
         lng: params.lng
       }
     });
-    return res.data;
+    return { ...res.data, items: mapStores(res.data.items) };
   }
 
   async createStore(payload: CreateStorePayload): Promise<ThriftStore> {
     const res = await api.post<ThriftStore>("/stores", payload);
-    return res.data;
+    return mapStore(res.data);
   }
 
   async updateStore(id: ThriftStoreId, payload: Partial<CreateStorePayload>): Promise<ThriftStore> {
     const res = await api.put<ThriftStore>(`/stores/${id}`, payload);
-    return res.data;
+    return mapStore(res.data);
   }
 
   async requestPhotoUploads(
@@ -104,6 +109,57 @@ export class HttpThriftStoreRemoteDataSource implements ThriftStoreRemoteDataSou
     deletePhotoIds?: string[]
   ): Promise<ThriftStore> {
     const res = await api.put<ThriftStore>(`/stores/${storeId}/photos`, { photos, deletePhotoIds });
-    return res.data;
+    return mapStore(res.data);
   }
+}
+
+function mapStore(
+  store: ThriftStore & {
+    badge_label?: string;
+    badgeLabel?: string;
+    badge?: ThriftStoreBadge;
+    my_rating?: number | null;
+  }
+): ThriftStore {
+  const rawBadgeKey =
+    store.badge_label ?? store.badgeLabel ?? (store.badge as string | undefined);
+  const normalizedBadge = normalizeBadgeKey(rawBadgeKey);
+  const badgeLabel = getBadgeLabel(normalizedBadge) ?? humanizeBadgeKey(rawBadgeKey);
+  const myRating = Object.prototype.hasOwnProperty.call(store as any, "myRating")
+    ? (store as any).myRating
+    : Object.prototype.hasOwnProperty.call(store as any, "my_rating")
+      ? (store as any).my_rating
+      : undefined;
+
+  return {
+    ...store,
+    myRating,
+    badge: normalizedBadge ?? (rawBadgeKey as ThriftStoreBadge | undefined),
+    badgeLabel
+  };
+}
+
+function mapStores(stores: ThriftStore[]): ThriftStore[] {
+  return stores.map((s) => mapStore(s));
+}
+
+function normalizeBadgeKey(raw?: string | null): ThriftStoreBadge | undefined {
+  if (!raw) return undefined;
+  const value = raw.toLowerCase();
+
+  switch (value) {
+    case ThriftStoreBadge.MostLoved:
+      return ThriftStoreBadge.MostLoved;
+    default:
+      return raw as ThriftStoreBadge;
+  }
+}
+
+function humanizeBadgeKey(raw?: string): string | undefined {
+  if (!raw) return undefined;
+  return raw
+    .split("_")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }

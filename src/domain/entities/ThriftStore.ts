@@ -1,5 +1,18 @@
 export type ThriftStoreId = string;
 
+export enum ThriftStoreBadge {
+  MostLoved = "most_loved"
+}
+
+export const thriftStoreBadgeLabelMap: Record<ThriftStoreBadge, string> = {
+  [ThriftStoreBadge.MostLoved]: "Mais amado"
+};
+
+export function getBadgeLabel(badge?: ThriftStoreBadge): string | undefined {
+  if (!badge) return undefined;
+  return thriftStoreBadgeLabelMap[badge];
+}
+
 export interface ThriftStore {
   id: ThriftStoreId;
   name: string;
@@ -34,9 +47,15 @@ export interface ThriftStore {
   distanceKm?: number;
   walkTimeMinutes?: number;
   neighborhood?: string;
+  badge?: ThriftStoreBadge; // snake_case badge key from backend
   badgeLabel?: string; // e.g., "Mais amado"
   isFavorite?: boolean;
+  rating?: number;
+  reviewCount?: number;
+  myRating?: number | null;
 
   // Optional longer copy
   description?: string;
+  socialHandle?: string;
+  images?: { id?: string | number; url: string; isCover?: boolean; displayOrder?: number }[];
 }

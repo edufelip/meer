@@ -33,6 +33,18 @@ const emptyForm: ContentForm = {
 const MAX_IMAGE = 5 * 1024 * 1024;
 const ALLOWED_IMG = ["image/jpeg", "image/png", "image/webp"];
 
+function buildPublicImageUrl(uploadUrl: string, fileKey: string) {
+  try {
+    const url = new URL(uploadUrl);
+    const [, bucket, ...rest] = url.pathname.split("/"); // ['', 'bucket', 'path', ...]
+    if (!bucket || rest.length === 0) return fileKey;
+    const objectPath = rest.join("/");
+    return `https://storage.googleapis.com/${bucket}/${objectPath}`;
+  } catch {
+    return fileKey;
+  }
+}
+
 export default function ContentDetailPage() {
   const params = useParams<{ id: string }>();
   const contentId = params?.id as string;
@@ -78,9 +90,10 @@ export default function ContentDetailPage() {
   });
 
   const { mutateAsync: updateContent, isPending: saving } = useMutation({
-    mutationFn: (payload: any) => api.put<GuideContent>(`/contents/${contentId}`, payload),
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["content", contentId] });
+    mutationFn: ({ id, payload }: { id: string; payload: any }) => api.put<GuideContent>(`/contents/${id}`, payload),
+    onSuccess: async (_data, variables) => {
+      const target = variables?.id ?? contentId;
+      await qc.invalidateQueries({ queryKey: ["content", target] });
       await qc.invalidateQueries({ queryKey: ["contents"] });
     },
     onError: () => setErrorMsg("Não foi possível salvar o conteúdo.")
@@ -133,7 +146,7 @@ export default function ContentDetailPage() {
           body: file
         });
         if (!putRes.ok) throw new Error("Falha ao enviar imagem.");
-        imageUrl = slot.fileKey;
+        imageUrl = buildPublicImageUrl(slot.uploadUrl, slot.fileKey);
         setStatus("Imagem enviada.");
       }
 
@@ -151,7 +164,7 @@ export default function ContentDetailPage() {
       if (form.type.trim()) payload.type = form.type.trim();
 
       if (Object.keys(payload).length > 0) {
-        await updateContent(payload);
+        await updateContent({ id: targetId, payload });
         setStatus("Conteúdo atualizado.");
       } else if (!isCreate) {
         setStatus("Nada para salvar.");

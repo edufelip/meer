@@ -26,13 +26,20 @@ export function NearbyThriftListItem({ store, onPress, style }: NearbyThriftList
     .slice(0, 2)
     .toUpperCase();
 
+  const badgeLabel = store.badgeLabel ?? undefined;
+
   return (
     <Pressable
-      className="bg-white rounded-xl shadow-sm p-3 flex-row items-center"
+      className="bg-white rounded-xl shadow-sm p-3 flex-row items-center relative"
       onPress={onPress}
       accessibilityRole="button"
       style={style}
     >
+      {badgeLabel ? (
+        <View className="absolute bottom-2 right-2 bg-[#EC4899] px-2 py-1 rounded-full">
+          <Text className="text-[10px] font-extrabold text-white tracking-tight uppercase">{badgeLabel}</Text>
+        </View>
+      ) : null}
       {imageUri ? (
         <Image source={{ uri: imageUri }} className="w-16 h-16 rounded-lg mr-2" />
       ) : (

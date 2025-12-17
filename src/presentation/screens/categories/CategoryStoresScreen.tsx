@@ -134,9 +134,14 @@ export function CategoryStoresScreen() {
 
   const renderItem = ({ item }: { item: ThriftStore }) => (
     <Pressable
-      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-row items-stretch"
+      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-row items-stretch relative"
       onPress={() => navigation.navigate("thriftDetail", { id: item.id, store: item })}
     >
+      {item.badgeLabel ? (
+        <View className="absolute bottom-2 right-2 bg-[#EC4899] px-2 py-1 rounded-full z-10">
+          <Text className="text-[10px] font-extrabold text-white tracking-tight uppercase">{item.badgeLabel}</Text>
+        </View>
+      ) : null}
       <View style={{ width: 112, alignSelf: "stretch", minHeight: 120 }}>
         {item.coverImageUrl || item.images?.[0]?.url ? (
           <Image
