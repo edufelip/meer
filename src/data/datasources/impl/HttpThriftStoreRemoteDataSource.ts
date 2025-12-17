@@ -48,8 +48,10 @@ export class HttpThriftStoreRemoteDataSource implements ThriftStoreRemoteDataSou
   }
 
   async search(query: string): Promise<ThriftStore[]> {
-    const res = await api.get<ThriftStore[]>("/stores", { params: { q: query } });
-    return mapStores(res.data);
+    const res = await api.get<ThriftStore[] | { items?: ThriftStore[] }>("/stores", { params: { q: query } });
+    const data = res.data as any;
+    const items: ThriftStore[] = Array.isArray(data) ? data : (data?.items ?? []);
+    return mapStores(items);
   }
 
   async listByCategory(params: {
