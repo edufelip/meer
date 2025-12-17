@@ -4,13 +4,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
-import Link from "next/link";
 import clsx from "classnames";
 import { api } from "@/lib/api";
 import type { User } from "@/types/index";
 import { GlassCard } from "@/components/dashboard/GlassCard";
 import { PageHeader } from "@/components/dashboard/PageHeader";
-import { Pill } from "@/components/dashboard/Pill";
 
 type UserFormState = {
   name: string;
@@ -47,7 +45,7 @@ export default function UserDetailPage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarStatus, setAvatarStatus] = useState<string | null>(null);
   const [avatarError, setAvatarError] = useState<string | null>(null);
-  const [showEdit, setShowEdit] = useState(true);
+  const [showEdit] = useState(true);
 
   const { data, isLoading, error } = useQuery({
     queryKey: ["user", userId],
@@ -55,13 +53,14 @@ export default function UserDetailPage() {
     enabled: Boolean(userId) && !isCreate
   });
 
-  const { data: authMe } = useQuery({
+  const { data: authMeResponse } = useQuery({
     queryKey: ["me"],
-    queryFn: () => api.get<User>("/auth/me"),
+    queryFn: () => api.get<User | { user: User }>("/auth/me"),
     staleTime: 60_000
   });
 
-  const canEditThisUser = isCreate || (authMe && data && authMe.id === data.id);
+  const authMe = (authMeResponse as any)?.user ?? authMeResponse;
+  const authMeId = typeof authMe?.id === "string" ? authMe.id : null;
 
   useEffect(() => {
     if (!data || isCreate) return;
@@ -90,14 +89,27 @@ export default function UserDetailPage() {
     onError: () => setFormError("Não foi possível criar o usuário. Verifique os dados.")
   });
 
-  const { mutateAsync: patchProfile, isPending: saving } = useMutation({
-    mutationFn: (payload: any) => api.patch<User>(`/profile`, payload),
+  const { mutateAsync: patchProfile, isPending: savingProfile } = useMutation({
+    mutationFn: (payload: any) => api.patch<User>("/profile", payload),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ["user", userId] });
+      await qc.invalidateQueries({ queryKey: ["users"] });
       await qc.invalidateQueries({ queryKey: ["me"] });
     },
     onError: () => setFormError("Não foi possível salvar. Verifique os campos.")
   });
+
+  const { mutateAsync: patchUser, isPending: savingUser } = useMutation({
+    mutationFn: (payload: any) => api.patch<User>(`/dashboard/users/${userId}`, payload),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ["user", userId] });
+      await qc.invalidateQueries({ queryKey: ["users"] });
+      if (authMeId === userId) await qc.invalidateQueries({ queryKey: ["me"] });
+    },
+    onError: () => setFormError("Não foi possível salvar. Verifique os campos.")
+  });
+
+  const saving = savingProfile || savingUser;
 
   const handleDelete = () => {
     if (!data) return;
@@ -118,9 +130,6 @@ export default function UserDetailPage() {
       if (!form.name.trim()) return setFormError("Nome é obrigatório.");
       if (!form.email.trim()) return setFormError("Email é obrigatório.");
       if (!form.password.trim()) return setFormError("Senha é obrigatória.");
-    } else if (!canEditThisUser) {
-      setFormError("Você só pode editar seu próprio perfil.");
-      return;
     }
 
     try {
@@ -169,7 +178,11 @@ export default function UserDetailPage() {
         return;
       }
 
-      await patchProfile(payload);
+      if (authMeId === userId) {
+        await patchProfile(payload);
+      } else {
+        await patchUser(payload);
+      }
       setFormMessage("Alterações salvas.");
     } catch (err) {
       console.error(err);
@@ -283,25 +296,6 @@ export default function UserDetailPage() {
         </GlassCard>
       )}
 
-      {!isCreate && data && (
-        <GlassCard className="space-y-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <Pill>ID {data.id}</Pill>
-            {data.role ? <Pill className="bg-brand-primary/20 text-brand-primary">{data.role}</Pill> : null}
-            {data.notifyNewStores ? <Pill>Notificar novos brechós</Pill> : null}
-            {data.notifyPromos ? <Pill>Notificar promoções</Pill> : null}
-          </div>
-
-          {data.ownedThriftStore && (
-            <div className="space-y-2">
-              <p className="text-sm font-semibold text-white">Brechó do usuário</p>
-              <Link href={`/stores/${data.ownedThriftStore.id}`} className="text-brand-primary hover:underline">
-                {data.ownedThriftStore.name}
-              </Link>
-            </div>
-          )}
-        </GlassCard>
-      )}
     </div>
   );
 }
@@ -364,8 +358,4 @@ function LabeledTextArea({
       />
     </label>
   );
-}
-
-function ToggleRow({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return null;
 }
