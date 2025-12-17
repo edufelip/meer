@@ -341,12 +341,14 @@ function LabeledTextArea({
   label,
   value,
   onChange,
-  rows = 3
+  rows = 3,
+  maxLength
 }: {
   label: string;
   value: string;
   onChange: (value: string) => void;
   rows?: number;
+  maxLength?: number;
 }) {
   return (
     <label className="flex flex-col gap-1 text-sm">
@@ -354,6 +356,7 @@ function LabeledTextArea({
       <textarea
         value={value}
         rows={rows}
+        maxLength={maxLength}
         onChange={(e) => onChange(e.target.value)}
         className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/40"
       />
