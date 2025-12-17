@@ -36,7 +36,7 @@ jobs:
 
       - name: Setup Node
         uses: actions/setup-node@v4
-        with:
+        with: 
           node-version: 24
           cache: yarn
           cache-dependency-path: yarn.lock
