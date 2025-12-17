@@ -13,7 +13,7 @@ export class GetHomeUseCase {
     lat?: number;
     lng?: number;
   }): Promise<{ featured: ThriftStore[]; nearby: ThriftStore[]; content: GuideContent[] }> {
-    const [featured, nearbyPage, content] = await Promise.all([
+    const [featured, nearbyPage, contentPage] = await Promise.all([
       this.thriftStoreRepository.getFeatured(params),
       this.thriftStoreRepository.listNearbyPaginated({
         page: 1,
@@ -21,13 +21,13 @@ export class GetHomeUseCase {
         lat: params?.lat,
         lng: params?.lng
       }),
-      this.guideContentRepository.listLatest(10)
+      this.guideContentRepository.listLatest({ page: 0, pageSize: 10 })
     ]);
 
     return {
       featured: featured ?? [],
       nearby: nearbyPage.items ?? [],
-      content: content ?? []
+      content: contentPage.items ?? []
     };
   }
 }

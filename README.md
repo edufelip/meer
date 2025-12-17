@@ -25,7 +25,7 @@
 Key recent changes
 - Login is the entry route; Google Sign-In uses native SDK (no Expo AuthSession). Backend issues tokens; Firebase Auth is no longer used.
 - Token refresh flow: on first 401 we call `/auth/refresh` (max 3 attempts), retry the original request, then logout on failure. All requests send `X-App-Package: com.edufelip.meer`.
-- Home no longer uses `/home`; we fetch in paralelo: `/featured?lat&lng`, `/nearby?lat&lng&pageIndex=0&pageSize=10`, `/contents/top?limit=10`. Sections render as soon as each response arrives, with skeletons.
+- Home no longer uses `/home`; we fetch in paralelo: `/featured?lat&lng`, `/nearby?lat&lng&pageIndex=0&pageSize=10`, `/contents?page=0&pageSize=10`. Sections render as soon as each response arrives, with skeletons.
 - Favorites: optimistic UI + local outbox queue + background sync; falls back to server list when online.
 - Location: asks permission; if denied uses São Paulo fallback (-23.5561782, -46.6375468). Chips built from nearby neighborhoods.
 
@@ -80,7 +80,7 @@ The web admin calls the backend through the `/api` proxy (see `next.config.js`),
 - Home data (3 chamadas paralelas, todas com Bearer + `X-App-Package`)
   - `GET /featured?lat&lng`
   - `GET /nearby?lat&lng&pageIndex=0&pageSize=10`
-  - `GET /contents/top?limit=10`
+  - `GET /contents?page=0&pageSize=10` (optional `q`, `sort=newest|oldest`)
 - Favorites
   - `GET /favorites`
   - `POST /favorites/toggle` `{ storeId, isFavorite }` (optimistic outbox no cliente)

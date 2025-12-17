@@ -8,5 +8,6 @@ export interface GuideContent {
   imageUrl: string;
   storeId: import("./ThriftStore").ThriftStoreId;
   thriftStoreName?: string;
+  thriftStoreCoverImageUrl?: string | null;
   createdAt?: string;
 }

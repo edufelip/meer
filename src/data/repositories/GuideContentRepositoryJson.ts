@@ -1,4 +1,4 @@
-import type { GuideContentRepository } from "../../domain/repositories/GuideContentRepository";
+import type { GuideContentListParams, GuideContentRepository } from "../../domain/repositories/GuideContentRepository";
 import type { GuideContentRemoteDataSource } from "../datasources/GuideContentRemoteDataSource";
 
 export class GuideContentRepositoryJson implements GuideContentRepository {
@@ -8,7 +8,7 @@ export class GuideContentRepositoryJson implements GuideContentRepository {
     this.remote = remote;
   }
 
-  listLatest(params?: { page?: number; pageSize?: number; storeId?: string }) {
+  listLatest(params?: GuideContentListParams) {
     return this.remote.listLatest(params);
   }
 

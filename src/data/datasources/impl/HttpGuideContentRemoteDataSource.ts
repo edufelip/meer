@@ -1,9 +1,10 @@
 import type { GuideContent } from "../../../domain/entities/GuideContent";
 import type { GuideContentRemoteDataSource } from "../GuideContentRemoteDataSource";
+import type { GuideContentListParams } from "../../../domain/repositories/GuideContentRepository";
 import { api } from "../../../api/client";
 
 export class HttpGuideContentRemoteDataSource implements GuideContentRemoteDataSource {
-  async listLatest(params?: { page?: number; pageSize?: number; storeId?: string }): Promise<{
+  async listLatest(params?: GuideContentListParams): Promise<{
     items: GuideContent[];
     page: number;
     hasNext: boolean;
@@ -12,10 +13,12 @@ export class HttpGuideContentRemoteDataSource implements GuideContentRemoteDataS
       items: GuideContent[];
       page: number;
       hasNext: boolean;
-    }>("/contents/top", {
+    }>("/contents", {
       params: {
+        q: params?.q?.trim() || undefined,
+        sort: params?.sort,
         page: params?.page ?? 0,
-        pageSize: params?.pageSize ?? 10,
+        pageSize: params?.pageSize ?? 20,
         storeId: params?.storeId
       }
     });

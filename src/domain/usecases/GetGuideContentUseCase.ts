@@ -1,5 +1,4 @@
-import type { GuideContent } from "../entities/GuideContent";
-import type { GuideContentRepository } from "../repositories/GuideContentRepository";
+import type { GuideContentListParams, GuideContentPage, GuideContentRepository } from "../repositories/GuideContentRepository";
 
 export class GetGuideContentUseCase {
   private readonly repository: GuideContentRepository;
@@ -8,11 +7,7 @@ export class GetGuideContentUseCase {
     this.repository = repository;
   }
 
-  execute(params?: { page?: number; pageSize?: number; storeId?: string }): Promise<{
-    items: GuideContent[];
-    page: number;
-    hasNext: boolean;
-  }> {
+  execute(params?: GuideContentListParams): Promise<GuideContentPage> {
     return this.repository.listLatest(params);
   }
 }

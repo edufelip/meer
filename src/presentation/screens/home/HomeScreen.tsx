@@ -333,7 +333,7 @@ export function HomeScreen() {
         } else if (stale || options?.force) {
           await fetchData({ force: true, forceFeatured: true, silent: !!cached });
         } else {
-          // Even when cache is fresh, run a silent background refresh so /featured, /nearby and /contents/top still fire.
+          // Even when cache is fresh, run a silent background refresh so /featured, /nearby and /contents still fire.
           void fetchData({ force: true, forceFeatured: false, silent: true });
         }
       } finally {
