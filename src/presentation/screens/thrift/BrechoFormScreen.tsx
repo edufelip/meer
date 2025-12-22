@@ -463,6 +463,7 @@ export function BrechoFormScreen() {
         disabled={isActive}
         activeOpacity={0.9}
         onPress={() => setSelectedPhotoKey((prev) => (prev === key ? null : key))}
+        testID={`brecho-photo-${key}`}
         style={{ marginRight: 12 }}
       >
         <View className="relative">
@@ -479,6 +480,7 @@ export function BrechoFormScreen() {
                 handleDeletePhoto(item);
                 setSelectedPhotoKey(null);
               }}
+              testID={`brecho-photo-delete-${key}`}
               className="absolute inset-0 bg-black/35 items-center justify-center rounded-lg"
             >
               <Ionicons name="close" size={22} color="white" />
@@ -774,6 +776,7 @@ export function BrechoFormScreen() {
               photos.length >= MAX_PHOTOS ? null : (
                 <Pressable
                   className="h-24 w-24 mr-3 border-2 border-dashed border-gray-300 rounded-lg items-center justify-center bg-gray-100"
+                  testID="brecho-add-photo"
                   onPress={() => {
                     Alert.alert("Adicionar foto", "Escolha a origem", [
                       { text: "Câmera", onPress: () => pickImage(true) },

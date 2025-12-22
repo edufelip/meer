@@ -22,7 +22,12 @@ export function ContentDetailScreen() {
       <StatusBar barStyle="dark-content" />
       <View className="bg-white/90 border-b border-gray-200" style={{ paddingTop: insets.top }}>
         <View className="flex-row items-center p-4">
-          <Pressable className="p-2 rounded-full" onPress={() => navigation.goBack()}>
+          <Pressable
+            className="p-2 rounded-full"
+            onPress={() => navigation.goBack()}
+            accessibilityRole="button"
+            accessibilityLabel="Voltar"
+          >
             <Ionicons name="arrow-back" size={22} color={theme.colors.highlight} />
           </Pressable>
           <Text className="flex-1 text-center text-lg font-bold text-[#1F2937]">Conteúdo</Text>

@@ -9,7 +9,7 @@ import { linking } from "./navigation/linking";
 export function AppRoot() {
   return (
     <AppProviders>
-      <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureHandlerRootView style={{ flex: 1 }} testID="app-root">
         <NavigationContainer ref={navigationRef} linking={linking}>
           <RootStack />
         </NavigationContainer>

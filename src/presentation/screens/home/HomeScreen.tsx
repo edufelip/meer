@@ -542,7 +542,11 @@ export function HomeScreen() {
               <Text className="text-sm text-[#6B7280] mt-0.5 underline">{locationLabel}</Text>
             </Pressable>
           </View>
-          <Pressable className="w-8 h-8 items-center justify-center" onPress={() => navigation.navigate("search")}>
+          <Pressable
+            className="w-8 h-8 items-center justify-center"
+            testID="home-search-button"
+            onPress={() => navigation.navigate("search")}
+          >
             <Ionicons name="search" size={22} color={theme.colors.highlight} />
           </Pressable>
         </View>
@@ -668,7 +672,18 @@ export function HomeScreen() {
               )}
             </View>
             <View className="mt-6 items-center">
-              <Pressable className="bg-[#B55D05] rounded-full px-6 py-3 shadow-lg">
+              <Pressable
+                testID="home-view-all-stores"
+                className="bg-[#B55D05] rounded-full px-6 py-3 shadow-lg"
+                onPress={() =>
+                  navigation.navigate("categoryStores", {
+                    type: "nearby",
+                    title: "Brechós próximos",
+                    lat: (coords ?? DEFAULT_COORDS).lat,
+                    lng: (coords ?? DEFAULT_COORDS).lng
+                  })
+                }
+              >
                 <Text className="text-sm font-bold text-white">Ver todos os brechós</Text>
               </Pressable>
             </View>

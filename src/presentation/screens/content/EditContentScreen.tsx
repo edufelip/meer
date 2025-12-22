@@ -300,11 +300,12 @@ export function EditContentScreen() {
         <View className="mb-6">
           <Text className="text-lg font-bold mb-2 text-[#1F2937]">Mídia</Text>
           <View className="grid grid-cols-2 gap-4">
-            {media.map((url) => (
+            {media.map((url, index) => (
               <Pressable
                 key={url}
                 className="relative"
                 onPress={() => setSelectedMedia((prev) => (prev === url ? null : url))}
+                testID={`edit-content-media-${index}`}
               >
                 <Image source={{ uri: url }} className="w-full h-40 rounded-lg" resizeMode="cover" />
                 {selectedMedia === url ? (
@@ -314,6 +315,7 @@ export function EditContentScreen() {
                       setMedia([]);
                       setSelectedMedia(null);
                     }}
+                    testID={`edit-content-media-delete-${index}`}
                   >
                     <Ionicons name="close" size={24} color="#fff" />
                   </Pressable>

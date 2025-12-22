@@ -207,7 +207,11 @@ export function CategoryStoresScreen() {
         <StatusBar barStyle="dark-content" />
         <View className="bg-white px-4 py-4 border-b border-gray-100">
           <View className="flex-row items-center">
-            <Pressable className="h-10 w-10 items-center justify-center" onPress={() => navigation.goBack()}>
+            <Pressable
+              className="h-10 w-10 items-center justify-center"
+              testID="category-stores-back"
+              onPress={() => navigation.goBack()}
+            >
               <Ionicons name="arrow-back" size={22} color={theme.colors.highlight} />
             </Pressable>
             <Text className="flex-1 text-center text-xl font-bold text-[#374151] pr-10">{title}</Text>
@@ -259,7 +263,11 @@ export function CategoryStoresScreen() {
         <StatusBar barStyle="dark-content" />
         <View className="bg-white px-4 py-4 border-b border-gray-100">
           <View className="flex-row items-center">
-            <Pressable className="h-10 w-10 items-center justify-center" onPress={() => navigation.goBack()}>
+            <Pressable
+              className="h-10 w-10 items-center justify-center"
+              testID="category-stores-back"
+              onPress={() => navigation.goBack()}
+            >
               <Ionicons name="arrow-back" size={22} color={theme.colors.highlight} />
             </Pressable>
             <Text className="flex-1 text-center text-xl font-bold text-[#374151] pr-10">{title}</Text>
@@ -280,7 +288,11 @@ export function CategoryStoresScreen() {
       <StatusBar barStyle="dark-content" />
       <View className="bg-white px-4 py-4 border-b border-gray-200">
         <View className="flex-row items-center">
-          <Pressable className="h-10 w-10 items-center justify-center" onPress={() => navigation.goBack()}>
+          <Pressable
+            className="h-10 w-10 items-center justify-center"
+            testID="category-stores-back"
+            onPress={() => navigation.goBack()}
+          >
             <Ionicons name="arrow-back" size={22} color={theme.colors.highlight} />
           </Pressable>
           <Text className="flex-1 text-center text-xl font-bold text-[#374151] pr-10">{title}</Text>
