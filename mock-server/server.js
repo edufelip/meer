@@ -17,6 +17,8 @@ let contents = [...seed.contents];
 let categories = [...seed.categories];
 let profile = { ...seed.profile };
 let favoriteStoreIds = new Set(seed.favorites || []);
+let ratings = [...(seed.ratings || [])];
+let myFeedback = { ...(seed.myFeedback || {}) };
 
 const nowIso = () => new Date().toISOString();
 
@@ -63,6 +65,35 @@ const paginate = (items, page, pageSize) => {
     page: safePage,
     hasNext: end < items.length
   };
+};
+
+const paginateOneBased = (items, page, pageSize) => {
+  const safePage = Math.max(Number(page) || 1, 1);
+  const safeSize = Math.max(Number(pageSize) || 10, 1);
+  const start = (safePage - 1) * safeSize;
+  const end = start + safeSize;
+  const slice = items.slice(start, end);
+  return {
+    items: slice,
+    page: safePage,
+    hasNext: end < items.length
+  };
+};
+
+const recomputeStoreReviews = (storeId) => {
+  const storeRatings = ratings.filter((rating) => String(rating.storeId) === String(storeId));
+  const store = findStore(storeId);
+  if (!store) return;
+  const reviewCount = storeRatings.length;
+  const rating =
+    reviewCount === 0
+      ? null
+      : storeRatings.reduce((sum, rating) => sum + Number(rating.score || 0), 0) / reviewCount;
+  stores = stores.map((item) =>
+    String(item.id) === String(storeId)
+      ? { ...item, reviewCount, rating: rating == null ? item.rating : Number(rating.toFixed(1)) }
+      : item
+  );
 };
 
 const findStore = (id) => stores.find((store) => String(store.id) === String(id));
@@ -119,6 +150,58 @@ app.get("/stores/favorites", (req, res) => {
 app.get("/stores/:id", (req, res) => {
   const store = findStore(req.params.id);
   res.json(store || null);
+});
+
+app.get("/stores/:id/ratings", (req, res) => {
+  const storeId = req.params.id;
+  const list = ratings
+    .filter((rating) => String(rating.storeId) === String(storeId))
+    .slice()
+    .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+  const page = Number(req.query.page ?? 1);
+  const pageSize = Number(req.query.pageSize ?? 10);
+  res.json(paginateOneBased(list, page, pageSize));
+});
+
+app.get("/stores/:id/feedback", (req, res) => {
+  const feedback = myFeedback[req.params.id];
+  if (!feedback) {
+    res.status(404).end();
+    return;
+  }
+  res.json(feedback);
+});
+
+app.post("/stores/:id/feedback", (req, res) => {
+  const storeId = req.params.id;
+  const payload = req.body || {};
+  const entry = { storeId, score: payload.score, body: payload.body };
+  myFeedback[storeId] = entry;
+  const ratingId = `rating-${ratings.length + 1}`;
+  ratings = [
+    {
+      id: ratingId,
+      storeId,
+      score: payload.score,
+      body: payload.body,
+      authorName: profile.name || "Você",
+      authorAvatarUrl: profile.avatarUrl,
+      createdAt: nowIso()
+    },
+    ...ratings
+  ];
+  recomputeStoreReviews(storeId);
+  res.status(204).end();
+});
+
+app.delete("/stores/:id/feedback", (req, res) => {
+  const storeId = req.params.id;
+  delete myFeedback[storeId];
+  ratings = ratings.filter(
+    (rating) => !(String(rating.storeId) === String(storeId) && rating.authorName === profile.name)
+  );
+  recomputeStoreReviews(storeId);
+  res.status(204).end();
 });
 
 app.post("/stores", (req, res) => {

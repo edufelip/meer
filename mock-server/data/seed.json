@@ -135,5 +135,41 @@
     },
     "articlesCount": 2
   },
-  "favorites": ["store-1", "store-2"]
+  "favorites": ["store-1", "store-2"],
+  "ratings": [
+    {
+      "id": "rating-1",
+      "storeId": "store-1",
+      "score": 5,
+      "body": "Atendimento incrível e peças lindas.",
+      "authorName": "João",
+      "authorAvatarUrl": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=200&q=70",
+      "createdAt": "2025-12-18T10:30:00.000Z"
+    },
+    {
+      "id": "rating-2",
+      "storeId": "store-1",
+      "score": 4,
+      "body": "Variedade boa, encontrei ótimos achados.",
+      "authorName": "Ana",
+      "authorAvatarUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=70",
+      "createdAt": "2025-12-16T14:10:00.000Z"
+    },
+    {
+      "id": "rating-3",
+      "storeId": "store-2",
+      "score": 5,
+      "body": "Amo a curadoria, sempre volto.",
+      "authorName": "Camila",
+      "authorAvatarUrl": "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=200&q=70",
+      "createdAt": "2025-12-14T09:05:00.000Z"
+    }
+  ],
+  "myFeedback": {
+    "store-1": {
+      "storeId": "store-1",
+      "score": 5,
+      "body": "Meu brechó favorito, sempre tem novidades."
+    }
+  }
 }
