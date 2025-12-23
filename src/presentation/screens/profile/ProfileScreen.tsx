@@ -125,17 +125,18 @@ export function ProfileScreen() {
           <View className="bg-white rounded-lg shadow-sm">
             <Pressable
               className="flex-row items-center justify-between p-4 border-b border-gray-200"
-              onPress={() =>
+              onPress={() => {
+                if (!displayUser) return;
                 navigation.navigate("editProfile", {
                   profile: {
-                    ...(user ?? displayUser),
+                    ...displayUser,
                     bio: user?.bio,
                     notifyNewStores: user?.notifyNewStores ?? false,
                     notifyPromos: user?.notifyPromos ?? false,
                     avatarUrl: user?.avatarUrl
                   }
-                })
-              }
+                });
+              }}
               testID="profile-edit-button"
             >
               <Text className="text-[#374151]">Editar Perfil</Text>
@@ -151,7 +152,10 @@ export function ProfileScreen() {
           </View>
         </View>
 
-        {user?.ownedThriftStore ? (
+        {(() => {
+          const ownedStore = user?.ownedThriftStore ?? null;
+          if (!ownedStore) return null;
+          return (
           <View className="px-4 pt-0 pb-4">
             <Text className="text-lg font-bold mb-2 text-[#1F2937]">Brechó</Text>
             <View className="bg-white rounded-lg shadow-sm">
@@ -159,7 +163,7 @@ export function ProfileScreen() {
                 className="flex-row items-center justify-between p-4 border-b border-gray-200"
                 onPress={() =>
                   navigation.navigate("brechoForm", {
-                    thriftStore: user?.ownedThriftStore ?? null
+                    thriftStore: ownedStore
                   })
                 }
               >
@@ -168,7 +172,7 @@ export function ProfileScreen() {
               </Pressable>
               <Pressable
                 className="flex-row items-center justify-between p-4 border-b border-gray-200"
-                onPress={() => navigation.navigate("myContents", { storeId: user.ownedThriftStore.id })}
+                onPress={() => navigation.navigate("myContents", { storeId: ownedStore.id })}
                 testID="profile-create-content-button"
               >
                 <Text className="text-[#374151]">Criar Conteúdo</Text>
@@ -177,7 +181,7 @@ export function ProfileScreen() {
               {hasArticles ? (
                 <Pressable
                   className="flex-row items-center justify-between p-4"
-                  onPress={() => navigation.navigate("myContents", { storeId: user.ownedThriftStore.id })}
+                  onPress={() => navigation.navigate("myContents", { storeId: ownedStore.id })}
                 >
                   <Text className="text-[#374151]">Meus Conteúdos</Text>
                   <Ionicons name="chevron-forward" size={18} color={theme.colors.highlight} />
@@ -185,7 +189,8 @@ export function ProfileScreen() {
               ) : null}
             </View>
           </View>
-        ) : (
+        );
+        })() ?? (
           <View className="px-4 pt-0 pb-4">
             <Text className="text-lg font-bold mb-2 text-[#1F2937]">Brechó</Text>
             <View className="bg-white rounded-lg shadow-sm">

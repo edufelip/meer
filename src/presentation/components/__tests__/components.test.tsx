@@ -1,6 +1,5 @@
 import React from "react";
 import { render, fireEvent } from "@testing-library/react-native";
-import type { ReactTestInstance } from "react-test-renderer";
 import { SectionTitle } from "../SectionTitle";
 import { CategoryCard, getCategoryDisplayName } from "../CategoryCard";
 import { FilterChips } from "../FilterChips";
@@ -12,6 +11,8 @@ import { NearbyThriftListItem } from "../NearbyThriftListItem";
 import { FavoriteThriftCard } from "../FavoriteThriftCard";
 import { GuideContentCard } from "../GuideContentCard";
 import { AppHeader } from "../AppHeader";
+
+type ReactTestInstance = any;
 
 jest.mock("@expo/vector-icons", () => ({
   Ionicons: () => null
@@ -35,7 +36,6 @@ const makeStore = (overrides: Partial<any> = {}) => ({
 
 const makeCategory = (overrides: Partial<any> = {}) => ({
   id: "cat-1",
-  name: "Category",
   nameStringId: "brecho_de_casa",
   imageResId: "unknown",
   ...overrides
@@ -45,7 +45,9 @@ const makeContent = (overrides: Partial<any> = {}) => ({
   id: "content-1",
   title: "Dicas",
   description: "Desc",
+  categoryLabel: "Guia",
   imageUrl: "https://example.com/image.jpg",
+  storeId: "store-1",
   thriftStoreName: "Loja",
   createdAt: "2024-01-02T00:00:00.000Z",
   ...overrides

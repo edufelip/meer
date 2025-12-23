@@ -70,7 +70,7 @@ describe("hooks", () => {
   });
 
   it("useLogin delegates to login", async () => {
-    const options = useLogin();
+    const options = useLogin() as any;
     apiMock.login.mockResolvedValue({ token: "t" });
 
     await options.mutationFn({ email: "user@example.com", password: "pw" });
@@ -80,7 +80,7 @@ describe("hooks", () => {
   });
 
   it("useSignup delegates to signup", async () => {
-    const options = useSignup();
+    const options = useSignup() as any;
     apiMock.signup.mockResolvedValue({ token: "t" });
 
     await options.mutationFn({ name: "User", email: "user@example.com", password: "pw" });
@@ -89,7 +89,7 @@ describe("hooks", () => {
   });
 
   it("useLoginWithGoogle delegates to loginWithGoogle", async () => {
-    const options = useLoginWithGoogle();
+    const options = useLoginWithGoogle() as any;
     apiMock.loginWithGoogle.mockResolvedValue({ token: "t" });
 
     await options.mutationFn({ provider: "google", client: "web", idToken: "id" });
@@ -98,7 +98,7 @@ describe("hooks", () => {
   });
 
   it("useLoginWithApple delegates to loginWithApple", async () => {
-    const options = useLoginWithApple();
+    const options = useLoginWithApple() as any;
     apiMock.loginWithApple.mockResolvedValue({ token: "t" });
 
     await options.mutationFn({ provider: "apple", client: "ios", authorizationCode: "code" });
@@ -108,7 +108,7 @@ describe("hooks", () => {
 
   it("useForgotPassword posts reset request", async () => {
     apiClientMock.post.mockResolvedValue({ data: { message: "ok" } });
-    const options = useForgotPassword();
+    const options = useForgotPassword() as any;
 
     const result = await options.mutationFn({ email: "user@example.com" });
 

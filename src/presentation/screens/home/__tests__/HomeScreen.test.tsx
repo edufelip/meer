@@ -105,7 +105,7 @@ jest.mock("../../../components/GuideContentCard", () => ({
 }));
 
 describe("HomeScreen", () => {
-  const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+  const flushPromises = () => new Promise<void>((resolve) => setImmediate(() => resolve()));
 
   beforeEach(() => {
     jest.clearAllMocks();

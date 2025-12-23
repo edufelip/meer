@@ -8,6 +8,7 @@ export type CreateStorePayload = {
   latitude?: number;
   longitude?: number;
   openingHours?: string;
+  neighborhood?: string;
   email?: string;
   social?: { instagram?: string };
   categories?: string[];

@@ -92,7 +92,7 @@ function AuthBootstrap({ children }: PropsWithChildren) {
     return null; // keep splash
   }
 
-  return children as JSX.Element;
+  return children as React.ReactElement;
 }
 
 function FavoriteSyncBootstrap() {

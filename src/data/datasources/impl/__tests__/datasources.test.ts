@@ -87,11 +87,37 @@ describe("AsyncStorage local data sources", () => {
 
   it("stores and retrieves featured cache", async () => {
     const ds = new AsyncStorageFeaturedLocalDataSource();
-    await ds.saveFeatured("bucket", { data: [{ id: "store-1" }], fetchedAt: 1 });
+    await ds.saveFeatured("bucket", {
+      data: [
+        {
+          id: "store-1",
+          name: "Store",
+          tagline: "tag",
+          coverImageUrl: "cover",
+          addressLine: "addr",
+          openingHours: "hours",
+          categories: []
+        }
+      ],
+      fetchedAt: 1
+    });
 
     const result = await ds.getFeatured("bucket");
 
-    expect(result).toEqual({ data: [{ id: "store-1" }], fetchedAt: 1 });
+    expect(result).toEqual({
+      data: [
+        {
+          id: "store-1",
+          name: "Store",
+          tagline: "tag",
+          coverImageUrl: "cover",
+          addressLine: "addr",
+          openingHours: "hours",
+          categories: []
+        }
+      ],
+      fetchedAt: 1
+    });
   });
 
   it("returns null for invalid featured cache and clears it", async () => {

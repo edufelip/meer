@@ -32,7 +32,7 @@ jest.mock("../../../../storage/authStorage", () => ({
 }));
 
 describe("ProfileScreen", () => {
-  const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+  const flushPromises = () => new Promise<void>((resolve) => setImmediate(() => resolve()));
 
   beforeEach(() => {
     jest.clearAllMocks();

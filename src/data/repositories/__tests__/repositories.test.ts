@@ -43,34 +43,43 @@ beforeEach(() => {
 
 describe("CategoryRepositoryJson", () => {
   it("fetches remote and caches locally", async () => {
-    const remote = { list: jest.fn().mockResolvedValue([{ id: "cat-1" }]) };
+    const remote = {
+      list: jest.fn().mockResolvedValue([{ id: "cat-1", nameStringId: "brecho_de_casa", imageResId: "img" }])
+    };
     const local = { saveCategories: jest.fn(), getCategories: jest.fn() };
     const repo = new CategoryRepositoryJson(remote as any, local as any);
 
     const result = await repo.list();
 
     expect(remote.list).toHaveBeenCalledTimes(1);
-    expect(local.saveCategories).toHaveBeenCalledWith([{ id: "cat-1" }]);
-    expect(result).toEqual([{ id: "cat-1" }]);
+    expect(local.saveCategories).toHaveBeenCalledWith([
+      { id: "cat-1", nameStringId: "brecho_de_casa", imageResId: "img" }
+    ]);
+    expect(result).toEqual([{ id: "cat-1", nameStringId: "brecho_de_casa", imageResId: "img" }]);
   });
 
   it("exposes cached categories", async () => {
-    const local = { getCategories: jest.fn().mockResolvedValue([{ id: "cat-2" }]), saveCategories: jest.fn() };
+    const local = {
+      getCategories: jest.fn().mockResolvedValue([{ id: "cat-2", nameStringId: "brecho_feminino", imageResId: "img" }]),
+      saveCategories: jest.fn()
+    };
     const repo = new CategoryRepositoryJson({ list: jest.fn() } as any, local as any);
 
     const result = await repo.getCached();
 
     expect(local.getCategories).toHaveBeenCalledTimes(1);
-    expect(result).toEqual([{ id: "cat-2" }]);
+    expect(result).toEqual([{ id: "cat-2", nameStringId: "brecho_feminino", imageResId: "img" }]);
   });
 
   it("saves cache", async () => {
     const local = { saveCategories: jest.fn() };
     const repo = new CategoryRepositoryJson({ list: jest.fn() } as any, local as any);
 
-    await repo.saveCache([{ id: "cat-3" }]);
+    await repo.saveCache([{ id: "cat-3", nameStringId: "brecho_de_desapego", imageResId: "img" }]);
 
-    expect(local.saveCategories).toHaveBeenCalledWith([{ id: "cat-3" }]);
+    expect(local.saveCategories).toHaveBeenCalledWith([
+      { id: "cat-3", nameStringId: "brecho_de_desapego", imageResId: "img" }
+    ]);
   });
 });
 
@@ -368,7 +377,7 @@ describe("ThriftStoreRepositoryJson", () => {
 
     resolveRemote([{ id: "fresh" }]);
     await remotePromise;
-    await new Promise((resolve) => setImmediate(resolve));
+    await new Promise<void>((resolve) => setImmediate(() => resolve()));
 
     expect(onUpdated).toHaveBeenCalledWith([{ id: "fresh" }]);
 

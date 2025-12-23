@@ -21,6 +21,7 @@ export interface ThriftStore {
   // Media
   coverImageUrl: string; // hero image
   galleryUrls?: string[]; // supporting gallery
+  imageUrl?: string;
 
   // Location
   addressLine: string; // e.g., "Rua das Flores, 123 - Centro"

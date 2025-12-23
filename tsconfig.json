@@ -5,7 +5,10 @@
     "resolveJsonModule": true,
     "types": [
       "jest",
-      "@testing-library/jest-native"
+      "@testing-library/jest-native",
+      "node",
+      "react",
+      "react-native"
     ],
     "paths": {
       "@/*": [
@@ -17,5 +20,9 @@
     "**/*.ts",
     "**/*.tsx",
     "nativewind-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "web/**"
   ]
 }

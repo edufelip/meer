@@ -164,12 +164,13 @@ export function BrechoFormScreen() {
         uri: string;
         contentType: string;
         uiPosition: number;
+        markedForDelete?: boolean;
       };
 
   const [photos, setPhotos] = useState<UiPhoto[]>(
     (initial.images ?? []).map((img, idx) => ({
       state: "existing",
-      photoId: img.id ?? img.url,
+      photoId: String(img.id ?? img.url),
       fileKey: (img as any).fileKey, // if backend provides
       url: img.url,
       uiPosition: idx
@@ -407,7 +408,7 @@ export function BrechoFormScreen() {
           results.slice(0, 1).map(async (r) => {
             try {
               const [rev] = await Location.reverseGeocodeAsync({ latitude: r.latitude, longitude: r.longitude });
-              const neighborhoodLabel = rev?.district ?? rev?.subregion;
+              const neighborhoodLabel = rev?.district ?? rev?.subregion ?? undefined;
               const parts = [
                 rev?.street ?? rev?.name,
                 rev?.streetNumber,
@@ -450,10 +451,11 @@ export function BrechoFormScreen() {
 
   const photoKey = (p: UiPhoto) => (p.state === "existing" ? p.photoId : p.tempId);
 
-  const renderPhotoItem = ({ item, drag, isActive, index }: RenderItemParams<UiPhoto>) => {
+  const renderPhotoItem = ({ item, drag, isActive }: RenderItemParams<UiPhoto>) => {
     if (item.markedForDelete) return null;
-    const isCover = index === 0;
     const key = photoKey(item);
+    const index = photos.findIndex((p) => photoKey(p) === key);
+    const isCover = index === 0;
     const isSelected = selectedPhotoKey === key;
 
     return (
@@ -594,7 +596,7 @@ export function BrechoFormScreen() {
       let newFileKeys: string[] = [];
       const visibleNew = orderedVisible.filter((p): p is UiPhoto & { state: "new" } => p.state === "new");
       const deletedExisting = photos
-        .filter((p) => p.state === "existing" && p.markedForDelete)
+        .filter((p): p is UiPhoto & { state: "existing" } => p.state === "existing" && !!p.markedForDelete)
         .map((p) => p.photoId);
 
       if (visibleNew.length) {

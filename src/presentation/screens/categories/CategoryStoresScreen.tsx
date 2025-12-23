@@ -13,7 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient, type InfiniteData } from "@tanstack/react-query";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -44,18 +44,25 @@ export function CategoryStoresScreen() {
   const scrollKey = useMemo(() => `${type ?? "nearby"}-${categoryId ?? "nearby"}`, [type, categoryId]);
   const savedOffsetRef = useRef(0);
 
-  const query = useInfiniteQuery({
+  const query = useInfiniteQuery<
+    { items: ThriftStore[]; page: number; hasNext: boolean },
+    Error,
+    InfiniteData<{ items: ThriftStore[]; page: number; hasNext: boolean }>,
+    (string | undefined)[],
+    number
+  >({
     queryKey: cacheKey,
     queryFn: async ({ pageParam = 1 }) =>
       type === "nearby"
         ? getNearbyPaginatedUseCase.execute({ page: pageParam, pageSize: PAGE_SIZE, lat, lng })
         : getStoresByCategoryUseCase.execute({ categoryId: categoryId!, page: pageParam, pageSize: PAGE_SIZE }),
+    initialPageParam: 1,
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     refetchOnMount: "always",
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     staleTime: 5 * 60 * 1000,
-    cacheTime: 0
+    gcTime: 0
   });
 
   // Clear cached data for this category when leaving the screen, so revisiting shows loading.
@@ -135,7 +142,7 @@ export function CategoryStoresScreen() {
   const renderItem = ({ item }: { item: ThriftStore }) => (
     <Pressable
       className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-row items-stretch relative"
-      onPress={() => navigation.navigate("thriftDetail", { id: item.id, store: item })}
+      onPress={() => navigation.navigate("thriftDetail", { id: item.id })}
       testID={`category-store-${item.id}`}
     >
       {item.badgeLabel ? (

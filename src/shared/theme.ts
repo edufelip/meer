@@ -1,6 +1,7 @@
 export const theme = {
   colors: {
     highlight: "#B55D05",
+    complementary: "#E6A800",
     background: "#FFFFFF",
     section: "#F3F4F6",
     textDark: "#374151",

@@ -15,6 +15,7 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { GuideContent } from "../../../domain/entities/GuideContent";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
@@ -67,7 +68,7 @@ function ContentGridCard({
 
 export function ContentsScreen() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, "contents">>();
   const { getGuideContentUseCase } = useDependencies();
 
@@ -283,7 +284,7 @@ export function ContentsScreen() {
             <View style={{ flex: 1, marginRight: isLeft ? GRID_GAP : 0, marginBottom: GRID_GAP }}>
               <ContentGridCard
                 content={item}
-                onPress={() => navigation.navigate("contentDetail" as never, { content: item } as never)}
+                onPress={() => navigation.navigate("contentDetail", { content: item })}
               />
             </View>
           );

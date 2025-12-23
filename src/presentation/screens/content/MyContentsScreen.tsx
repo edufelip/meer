@@ -4,13 +4,14 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation, useRoute, useFocusEffect } from "@react-navigation/native";
 import type { RouteProp } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { theme } from "../../../shared/theme";
 
 export function MyContentsScreen() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, "myContents">>();
   const { getGuideContentUseCase } = useDependencies();
 
@@ -57,10 +58,11 @@ export function MyContentsScreen() {
               className="flex-row items-center bg-white rounded-lg shadow-sm overflow-hidden"
               style={{ marginBottom: 12 }}
               onPress={() =>
-                navigation.navigate(
-                  "editContent" as never,
-                  { articleId: item.id, storeId: route.params.storeId, article: item } as never
-                )
+                navigation.navigate("editContent", {
+                  articleId: item.id,
+                  storeId: route.params.storeId,
+                  article: item
+                })
               }
               testID={`my-contents-item-${item.id}`}
             >
@@ -109,7 +111,7 @@ export function MyContentsScreen() {
           ListHeaderComponent={
             <Pressable
               className="w-full bg-[#B55D05] rounded-lg py-3 px-4 items-center shadow mb-3"
-              onPress={() => navigation.navigate("editContent" as never, { storeId: route.params.storeId } as never)}
+              onPress={() => navigation.navigate("editContent", { storeId: route.params.storeId })}
               testID="my-contents-create-button"
             >
               <Text className="text-white font-bold">Criar Conteúdo</Text>

@@ -10,7 +10,8 @@ rc.defaultConfig = {
 };
 
 rc.settings = {
-  minimumFetchIntervalMillis: 60000
+  minimumFetchIntervalMillis: 60000,
+  fetchTimeoutMillis: 60000
 };
 
 export async function loadRemoteConfig() {

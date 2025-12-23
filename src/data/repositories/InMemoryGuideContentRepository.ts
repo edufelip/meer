@@ -61,4 +61,20 @@ export class InMemoryGuideContentRepository implements GuideContentRepository {
 
     return { items, page, hasNext };
   }
+
+  async createContent(): Promise<{ id: string }> {
+    throw new Error("InMemory repository does not support createContent");
+  }
+
+  async updateContent(): Promise<void> {
+    throw new Error("InMemory repository does not support updateContent");
+  }
+
+  async requestImageUpload(): Promise<{ uploadUrl: string; fileKey: string; contentType: string }> {
+    throw new Error("InMemory repository does not support requestImageUpload");
+  }
+
+  async deleteContent(): Promise<void> {
+    throw new Error("InMemory repository does not support deleteContent");
+  }
 }

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { StoreRating } from "../../../domain/entities/StoreRating";
@@ -34,17 +34,24 @@ export function StoreRatingsScreen() {
 
   const cacheKey = useMemo(() => ["store-ratings", storeId ?? "unknown"], [storeId]);
 
-  const query = useInfiniteQuery({
+  const query = useInfiniteQuery<
+    { items: StoreRating[]; page: number; hasNext: boolean },
+    Error,
+    InfiniteData<{ items: StoreRating[]; page: number; hasNext: boolean }>,
+    (string | undefined)[],
+    number
+  >({
     queryKey: cacheKey,
     queryFn: async ({ pageParam = 1 }) =>
       getStoreRatingsUseCase.execute({ storeId: storeId!, page: pageParam, pageSize: PAGE_SIZE }),
+    initialPageParam: 1,
     getNextPageParam: (lastPage) => (lastPage.hasNext ? lastPage.page + 1 : undefined),
     enabled: !!storeId,
     refetchOnMount: "always",
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
     staleTime: 3 * 60 * 1000,
-    cacheTime: 0
+    gcTime: 0
   });
 
   const ratings = query.data?.pages.flatMap((p) => p.items) ?? [];

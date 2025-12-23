@@ -29,11 +29,13 @@ import Reanimated, {
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { ThriftStore, ThriftStoreId } from "../../../domain/entities/ThriftStore";
 import { theme } from "../../../shared/theme";
 import ImageViewing from "react-native-image-viewing";
 import { buildThriftStoreShareUrl } from "../../../shared/deepLinks";
+import type { RootStackParamList } from "../../../app/navigation/RootStack";
 
 interface ThriftDetailScreenProps {
   route?: { params?: { id?: ThriftStoreId } };
@@ -84,7 +86,7 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
     upsertFeedbackUseCase,
     deleteMyFeedbackUseCase
   } = useDependencies();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [store, setStore] = useState<ThriftStore | null>(null);
   const [loading, setLoading] = useState(true);
   const [favorite, setFavorite] = useState(false);
@@ -456,17 +458,14 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
                 {store.reviewCount && store.reviewCount > 0 ? (
                   <Pressable
                     onPress={() => {
-                      navigation.navigate(
-                        "tabs" as never,
-                        {
-                          screen: "ratings",
-                          params: {
-                            storeId: store.id,
-                            storeName: store.name,
-                            reviewCount: Math.floor(store.reviewCount ?? 0)
-                          }
-                        } as never
-                      );
+                      navigation.navigate("tabs", {
+                        screen: "ratings",
+                        params: {
+                          storeId: store.id,
+                          storeName: store.name,
+                          reviewCount: Math.floor(store.reviewCount ?? 0)
+                        }
+                      });
                     }}
                     accessibilityRole="button"
                     accessibilityLabel="Ver avaliações"

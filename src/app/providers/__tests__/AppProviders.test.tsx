@@ -3,7 +3,7 @@ import { AppState, Text } from "react-native";
 import { act, render, waitFor } from "@testing-library/react-native";
 import { AppProviders } from "../AppProviders";
 import { useValidateToken } from "../../../hooks/useValidateToken";
-const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
+const flushPromises = () => new Promise<void>((resolve) => setImmediate(() => resolve()));
 
 const mockRefetch = jest.fn().mockResolvedValue(undefined);
 const mockGetTokens = jest.fn();

@@ -1,5 +1,6 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import type { NavigatorScreenParams } from "@react-navigation/native";
 import { RootTabs } from "./RootTabs";
 import { ThriftDetailScreen } from "../../presentation/screens/thrift/ThriftDetailScreen";
 import { EditProfileScreen } from "../../presentation/screens/profile/EditProfileScreen";
@@ -14,13 +15,14 @@ import { ContentDetailScreen } from "../../presentation/screens/content/ContentD
 import { ContentsScreen } from "../../presentation/screens/content/ContentsScreen";
 import { CategoryStoresScreen } from "../../presentation/screens/categories/CategoryStoresScreen";
 import type { ThriftStoreId } from "../../domain/entities/ThriftStore";
+import type { RootTabParamList } from "./RootTabs";
 import type { User } from "../../domain/entities/User";
 import type { GuideContent } from "../../domain/entities/GuideContent";
 
 export type RootStackParamList = {
   login: undefined;
   signup: undefined;
-  tabs: undefined;
+  tabs: NavigatorScreenParams<RootTabParamList>;
   thriftDetail: { id: ThriftStoreId };
   editProfile: {
     profile: User & { bio?: string; notifyNewStores: boolean; notifyPromos: boolean; avatarUrl?: string };
@@ -30,7 +32,7 @@ export type RootStackParamList = {
   search: undefined;
   contact: undefined;
   editContent: { articleId?: string; storeId: ThriftStoreId; article?: GuideContent };
-  categoryStores: { categoryId?: string; title: string; type?: "nearby" | "category" };
+  categoryStores: { categoryId?: string; title: string; type?: "nearby" | "category"; lat?: number; lng?: number };
   contentDetail: { content: GuideContent };
   contents:
     | {

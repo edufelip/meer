@@ -13,7 +13,8 @@ import {
   LayoutAnimation,
   Platform,
   UIManager,
-  RefreshControl
+  RefreshControl,
+  type AppStateStatus
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createAnimatedComponent, interpolateColor, useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
@@ -351,28 +352,6 @@ export function HomeScreen() {
     [applyCache, fetchData]
   );
 
-  useEffect(() => {
-    const unsubscribeNet = NetInfo.addEventListener((state) => {
-      const connected = !!state.isConnected;
-      setOffline(!connected);
-      if (connected && locationResolved.current) {
-        const now = Date.now();
-        if (!hasFetchedOnce.current) {
-          void loadCacheAndFetch();
-        } else if (now - lastFetchRef.current > HOME_TTL) {
-          void fetchData({ force: true, silent: true });
-        }
-      }
-    });
-
-    const unsubscribeAppState = AppState.addEventListener("change", handleAppStateChange);
-
-    return () => {
-      unsubscribeNet();
-      unsubscribeAppState.remove();
-    };
-  }, [fetchData, handleAppStateChange, loadCacheAndFetch]);
-
   const requestLocation = useCallback(
     async (askPermission: boolean) => {
       try {
@@ -429,7 +408,7 @@ export function HomeScreen() {
   );
 
   const handleAppStateChange = useCallback(
-    (nextState: string) => {
+    (nextState: AppStateStatus) => {
       if (appState.current.match(/inactive|background/) && nextState === "active") {
         requestLocation(false);
       }
@@ -437,6 +416,28 @@ export function HomeScreen() {
     },
     [requestLocation]
   );
+
+  useEffect(() => {
+    const unsubscribeNet = NetInfo.addEventListener((state) => {
+      const connected = !!state.isConnected;
+      setOffline(!connected);
+      if (connected && locationResolved.current) {
+        const now = Date.now();
+        if (!hasFetchedOnce.current) {
+          void loadCacheAndFetch();
+        } else if (now - lastFetchRef.current > HOME_TTL) {
+          void fetchData({ force: true, silent: true });
+        }
+      }
+    });
+
+    const unsubscribeAppState = AppState.addEventListener("change", handleAppStateChange);
+
+    return () => {
+      unsubscribeNet();
+      unsubscribeAppState.remove();
+    };
+  }, [fetchData, handleAppStateChange, loadCacheAndFetch]);
 
   useEffect(() => {
     requestLocation(false);

@@ -5,8 +5,11 @@ const featured: ThriftStore[] = [
   {
     id: "vintage-vibes",
     name: "Vintage Vibes",
+    tagline: "Garimpos curados com pegada retrô.",
     description: "Garimpos curados com pegada retrô.",
     imageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuARBJPDQo7Uu8yQM4xPWLRoF-_TeSBcst8BBMAz0dACZaF9hNuYW9fyZlskN-VCyBUbQLMCPqLMBf_t1YGByk0mVteVZPK7QC3OpMdu9GR3BnopzabXnSwodUhMLJyvJj9rxOFVE9uZZZE_g7BJaxt8WTigdOQ7RmKc4Py36Z_K2ZrQuIxCdU1YJJEn9prdha2DUr9YzrNNjkyVxtQM3_0GCJFBYsJjYaPQ2B4ng6rdqa3D9gMNc_dDlJS1Jwrk5tLGtld_Y6fqaNQ",
+    coverImageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuARBJPDQo7Uu8yQM4xPWLRoF-_TeSBcst8BBMAz0dACZaF9hNuYW9fyZlskN-VCyBUbQLMCPqLMBf_t1YGByk0mVteVZPK7QC3OpMdu9GR3BnopzabXnSwodUhMLJyvJj9rxOFVE9uZZZE_g7BJaxt8WTigdOQ7RmKc4Py36Z_K2ZrQuIxCdU1YJJEn9prdha2DUr9YzrNNjkyVxtQM3_0GCJFBYsJjYaPQ2B4ng6rdqa3D9gMNc_dDlJS1Jwrk5tLGtld_Y6fqaNQ",
     badgeLabel: "Mais amado",
     neighborhood: "Pinheiros",
@@ -27,22 +30,32 @@ const featured: ThriftStore[] = [
   {
     id: "secondhand-chic",
     name: "Secondhand Chic",
+    tagline: "Peças de grife em segunda mão.",
     description: "Peças de grife em segunda mão.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAOVk3nq4m3vr37Zwd-diMYSVbsPlR3-vTbKQNtxhRnSFzz5nNb_gspC1GacDtcVHlCfAkPiabUO7DiaWj82Ej-3CXVcZBzVuAG5XwjY1lmi9MmE6TSzxBV_fpazCztCZqsZHb7-StUS-b319YJd2SziNcWu_BNV9L82uJ2e735mhIw2kdCWS0wq8xS8z7a9jNP4OOJkER7W8wXIihkJRDcKYuZ3IDi42wM_J04kfaUeprhiQ5LGy-5zz-xnE_nSs_1LKWuWxawUso",
+    coverImageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuAOVk3nq4m3vr37Zwd-diMYSVbsPlR3-vTbKQNtxhRnSFzz5nNb_gspC1GacDtcVHlCfAkPiabUO7DiaWj82Ej-3CXVcZBzVuAG5XwjY1lmi9MmE6TSzxBV_fpazCztCZqsZHb7-StUS-b319YJd2SziNcWu_BNV9L82uJ2e735mhIw2kdCWS0wq8xS8z7a9jNP4OOJkER7W8wXIihkJRDcKYuZ3IDi42wM_J04kfaUeprhiQ5LGy-5zz-xnE_nSs_1LKWuWxawUso",
     neighborhood: "Vila Madalena",
     addressLine: "Av. Paulista, 456",
+    openingHours: "Seg a Sáb: 10:00 - 19:00",
+    categories: ["Designer"],
     distanceKm: 1.2,
     walkTimeMinutes: 15
   },
   {
     id: "thrift-haven",
     name: "Thrift Haven",
+    tagline: "Achadinhos baratos e estilosos.",
     description: "Achadinhos baratos e estilosos.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuD-A56MKMnqcuWT0lhYX0X9SOhpoyVFIaIyUy5TWpClE7mViw4oDUJxTUEwW__iQthJ7jJ0I7T4G7CHX6xb5kdhUBSRgTeTKIlTCadoFlAC0hYc_Nks4AQlfwFj9uySe1CifrKjMNM3t4dL7pomHXYstDcgxPBwG4URxhbzxxEez2IXjcMDZ-gubenRb9YU6apfFVWOdYVRnz4GuTedBllJoW6-QJ6rl2B0mfGj_959s0bt0DYi4XqFt7JBX3LB49HAjk3MPPN0iqE",
+    coverImageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuD-A56MKMnqcuWT0lhYX0X9SOhpoyVFIaIyUy5TWpClE7mViw4oDUJxTUEwW__iQthJ7jJ0I7T4G7CHX6xb5kdhUBSRgTeTKIlTCadoFlAC0hYc_Nks4AQlfwFj9uySe1CifrKjMNM3t4dL7pomHXYstDcgxPBwG4URxhbzxxEez2IXjcMDZ-gubenRb9YU6apfFVWOdYVRnz4GuTedBllJoW6-QJ6rl2B0mfGj_959s0bt0DYi4XqFt7JBX3LB49HAjk3MPPN0iqE",
     neighborhood: "Centro",
     addressLine: "Rua 7 de Abril, 90",
+    openingHours: "Seg a Sáb: 10:00 - 19:00",
+    categories: ["Geral"],
     distanceKm: 2.4,
     walkTimeMinutes: 28
   }
@@ -52,34 +65,49 @@ const nearby: ThriftStore[] = [
   {
     id: "garimpo-urbano",
     name: "Garimpo Urbano",
+    tagline: "Mix de moda street e vintage.",
     description: "Mix de moda street e vintage.",
     imageUrl:
+      "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?auto=format&fit=crop&w=1400&q=70",
+    coverImageUrl:
       "https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?auto=format&fit=crop&w=1400&q=70",
     distanceKm: 0.6,
     neighborhood: "Consolação",
     addressLine: "Rua da Consolação, 210",
+    openingHours: "Seg a Sáb: 10:00 - 19:00",
+    categories: ["Vintage"],
     walkTimeMinutes: 8
   },
   {
     id: "querido-brecho",
     name: "Querido Brechó",
+    tagline: "Curadoria feminina e genderless.",
     description: "Curadoria feminina e genderless.",
     imageUrl:
+      "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1400&q=70",
+    coverImageUrl:
       "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=1400&q=70",
     distanceKm: 1.2,
     neighborhood: "Higienópolis",
     addressLine: "Rua Sabará, 41",
+    openingHours: "Seg a Sáb: 10:00 - 19:00",
+    categories: ["Feminino"],
     walkTimeMinutes: 15
   },
   {
     id: "revive",
     name: "Revive Vintage",
+    tagline: "Peças clássicas restauradas.",
     description: "Peças clássicas restauradas.",
     imageUrl:
+      "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1400&q=70",
+    coverImageUrl:
       "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1400&q=70",
     distanceKm: 2.1,
     neighborhood: "Bela Vista",
     addressLine: "Rua São Carlos do Pinhal, 15",
+    openingHours: "Seg a Sáb: 10:00 - 19:00",
+    categories: ["Vintage"],
     walkTimeMinutes: 25
   }
 ];
@@ -90,22 +118,32 @@ const favorites: ThriftStore[] = [
   {
     id: "eco-trends",
     name: "Eco Trends",
+    tagline: "Peças sustentáveis e slow fashion.",
     description: "Peças sustentáveis e slow fashion.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuCl3MFVqlTBTwWfdv_BpgAwWTyAcF1A7BC-55wLzqGdf-liREBNmdO9GMc3lfyUpt9u1Vq8jRdfcgtrzoVKl7xp3ofYVQTetSzvmrOiVF2XOV8TUlArjxGb812Xhfo19Ix7ihAg02-gQYtNeX2zUaaq2X_qlEWWGQPFzeBPydbViCn-37R9c5Z_0LgRDaA8lX6Qu8FhlWP1sn9gu99PxnN8xX7ysCN2Wi8WyqfLFdogXgVU86a_17Z8_T5Rq1d25NWzPavCzjfnLlk",
+    coverImageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuCl3MFVqlTBTwWfdv_BpgAwWTyAcF1A7BC-55wLzqGdf-liREBNmdO9GMc3lfyUpt9u1Vq8jRdfcgtrzoVKl7xp3ofYVQTetSzvmrOiVF2XOV8TUlArjxGb812Xhfo19Ix7ihAg02-gQYtNeX2zUaaq2X_qlEWWGQPFzeBPydbViCn-37R9c5Z_0LgRDaA8lX6Qu8FhlWP1sn9gu99PxnN8xX7ysCN2Wi8WyqfLFdogXgVU86a_17Z8_T5Rq1d25NWzPavCzjfnLlk",
     neighborhood: "Moema",
     addressLine: "Alameda dos Maracatins, 300",
+    openingHours: "Seg a Sáb: 10:00 - 19:00",
+    categories: ["Sustentável"],
     distanceKm: 3.1,
     walkTimeMinutes: 35
   },
   {
     id: "retro-closet",
     name: "Retro Closet",
+    tagline: "Curadoria colorida e divertida.",
     description: "Curadoria colorida e divertida.",
     imageUrl:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuApzMYo7AGhzLhPB0Jy520PqIdhpEKLX6aVMaPGiv1S0EGhWOzpFiX9rdWKh4JXNUi-R0wVxH0GlWO5fHrtSfTsZWuED_-gGcl1wCMdYAKoHEErg1yYR6_HFD2ifY8ulot9UldCRXkTZkxLV5OtfsyC_uPEt6FS6yicIco564twbpkvLBuYsSuUNRVNkIAkyeyyeO6tFr2SAKD-dJPhKHDJfEfTS_RuKpc5wFAtEg5nBZRPw_lNFl7twLoqYelAPR3KreK13yl9tRg",
+    coverImageUrl:
+      "https://lh3.googleusercontent.com/aida-public/AB6AXuApzMYo7AGhzLhPB0Jy520PqIdhpEKLX6aVMaPGiv1S0EGhWOzpFiX9rdWKh4JXNUi-R0wVxH0GlWO5fHrtSfTsZWuED_-gGcl1wCMdYAKoHEErg1yYR6_HFD2ifY8ulot9UldCRXkTZkxLV5OtfsyC_uPEt6FS6yicIco564twbpkvLBuYsSuUNRVNkIAkyeyyeO6tFr2SAKD-dJPhKHDJfEfTS_RuKpc5wFAtEg5nBZRPw_lNFl7twLoqYelAPR3KreK13yl9tRg",
     neighborhood: "Liberdade",
     addressLine: "Praça da Sé, 45",
+    openingHours: "Seg a Sáb: 10:00 - 19:00",
+    categories: ["Vintage"],
     distanceKm: 2.8,
     walkTimeMinutes: 30
   }
@@ -153,5 +191,13 @@ export class InMemoryThriftStoreRepository implements ThriftStoreRepository {
 
   async updateStore(): Promise<ThriftStore> {
     throw new Error("InMemory repository does not support updateStore");
+  }
+
+  async requestPhotoUploads(): Promise<{ uploadUrl: string; fileKey: string; contentType: string }[]> {
+    throw new Error("InMemory repository does not support requestPhotoUploads");
+  }
+
+  async confirmPhotos(): Promise<ThriftStore> {
+    throw new Error("InMemory repository does not support confirmPhotos");
   }
 }

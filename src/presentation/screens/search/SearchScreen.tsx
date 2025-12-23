@@ -3,6 +3,8 @@ import { FlatList, Pressable, StatusBar, Text, TextInput, View } from "react-nat
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { NearbyThriftListItem } from "../../components/NearbyThriftListItem";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -13,7 +15,7 @@ const suggestionChips = ["Vestidos", "Roupas de festa", "Acessórios", "Vintage"
 const SEARCH_HISTORY_KEY = "search.history";
 
 export function SearchScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { searchThriftStoresUseCase } = useDependencies();
   const [query, setQuery] = useState("");
   const [recents, setRecents] = useState<string[]>([]);
@@ -225,7 +227,7 @@ export function SearchScreen() {
                 <NearbyThriftListItem
                   key={store.id}
                   store={store}
-                  onPress={() => navigation.navigate("thriftDetail" as never, { id: store.id } as never)}
+                  onPress={() => navigation.navigate("thriftDetail", { id: store.id })}
                   style={{ marginBottom: 8 }}
                 />
               ))
