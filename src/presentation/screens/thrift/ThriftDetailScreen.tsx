@@ -484,23 +484,25 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
                     {renderStars(userRating, 18)}
                   </View>
                 ) : null}
-                <View className="flex-row justify-center gap-2" style={{ paddingVertical: 16 }}>
-                  {[1, 2, 3, 4, 5].map((score) => {
-                    const active = userRating >= score;
-                    return (
-                      <RatingStarButton
-                        key={score}
-                        score={score}
-                        active={active}
-                        disabled={submittingFeedback}
-                        onSelect={(selected) => {
-                          setUserRating(selected);
-                          if (!showCommentBox) setShowCommentBox(true);
-                        }}
-                      />
-                    );
-                  })}
-                </View>
+                {!hasExistingFeedback ? (
+                  <View className="flex-row justify-center gap-2" style={{ paddingVertical: 16 }}>
+                    {[1, 2, 3, 4, 5].map((score) => {
+                      const active = userRating >= score;
+                      return (
+                        <RatingStarButton
+                          key={score}
+                          score={score}
+                          active={active}
+                          disabled={submittingFeedback}
+                          onSelect={(selected) => {
+                            setUserRating(selected);
+                            if (!showCommentBox) setShowCommentBox(true);
+                          }}
+                        />
+                      );
+                    })}
+                  </View>
+                ) : null}
                 {hasExistingFeedback ? (
                   <Pressable onPress={handleDeleteFeedback} accessibilityRole="button">
                     <Text className="text-xs text-[#DC2626] text-center">Apagar minha avaliação</Text>
