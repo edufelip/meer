@@ -101,6 +101,7 @@ jobs:
             -workspace Meer.xcworkspace \
             -scheme Meer \
             -configuration Release \
+            -destination "generic/platform=iOS" \
             -archivePath "$PWD/build/MeerAdHoc.xcarchive" \
             archive \
             CODE_SIGN_STYLE=Manual \
