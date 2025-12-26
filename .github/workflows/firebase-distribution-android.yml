@@ -45,6 +45,9 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Set CI version code
+        run: echo "CI_VERSION_CODE=${{ github.run_number }}" >> $GITHUB_ENV
+
       - name: Write google-services.json
         run: |
           mkdir -p app
