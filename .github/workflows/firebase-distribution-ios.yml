@@ -138,6 +138,14 @@ jobs:
             -exportPath "$PWD/build" \
             OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH"
 
+      - name: Resolve IPA path
+        run: |
+          IPA_PATH=$(ls ios/build/*.ipa | head -n 1)
+          if [ -z "$IPA_PATH" ]; then
+            echo "IPA not found in ios/build" && exit 1
+          fi
+          echo "IPA_PATH=$IPA_PATH" >> "$GITHUB_ENV"
+
       - name: Release notes
         run: |
           NOTES=$(git log -1 --pretty=%B)
@@ -153,7 +161,7 @@ jobs:
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
         run: |
-          npx --yes firebase-tools@latest appdistribution:distribute "ios/build/MeerAdHoc.ipa" \
+          npx --yes firebase-tools@latest appdistribution:distribute "$IPA_PATH" \
             --app "1:586821855462:ios:5a9f9d1e1a8ceea58bf327" \
             --groups "base-group" \
             --release-notes "$RELEASE_NOTES"
