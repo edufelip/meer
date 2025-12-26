@@ -7,7 +7,7 @@ const mockScreenOptionsCalls: any[] = [];
 jest.mock("@react-navigation/bottom-tabs", () => ({
   createBottomTabNavigator: () => ({
     Navigator: ({ screenOptions, children }: any) => {
-      const routes = ["home", "favorites", "categories", "ratings", "profile"].map((name) => ({ name }));
+      const routes = ["home", "favorites", "categories", "profile"].map((name) => ({ name }));
       routes.forEach((route) => {
         if (typeof screenOptions === "function") {
           mockScreenOptionsCalls.push(screenOptions({ route }));
@@ -30,7 +30,6 @@ jest.mock("@expo/vector-icons", () => ({
 jest.mock("../../../presentation/screens/home/HomeScreen", () => ({ HomeScreen: () => null }));
 jest.mock("../../../presentation/screens/favorites/FavoritesScreen", () => ({ FavoritesScreen: () => null }));
 jest.mock("../../../presentation/screens/categories/CategoriesScreen", () => ({ CategoriesScreen: () => null }));
-jest.mock("../../../presentation/screens/ratings/StoreRatingsScreen", () => ({ StoreRatingsScreen: () => null }));
 jest.mock("../../../presentation/screens/profile/ProfileScreen", () => ({ ProfileScreen: () => null }));
 
 jest.mock("../../../shared/theme", () => ({
@@ -46,7 +45,7 @@ describe("RootTabs", () => {
     render(<RootTabs />);
 
     const labels = mockScreenOptionsCalls.map((opt) => opt.tabBarLabel);
-    expect(labels).toEqual(["Home", "Favoritos", "Categorias", "Avaliações", "Perfil"]);
+    expect(labels).toEqual(["Home", "Favoritos", "Categorias", "Perfil"]);
 
     const icon = mockScreenOptionsCalls[0].tabBarIcon({ color: "#000", size: 20 });
     expect(icon.props.name).toBe("home");

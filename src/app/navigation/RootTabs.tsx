@@ -5,21 +5,12 @@ import { HomeScreen } from "../../presentation/screens/home/HomeScreen";
 import { FavoritesScreen } from "../../presentation/screens/favorites/FavoritesScreen";
 import { CategoriesScreen } from "../../presentation/screens/categories/CategoriesScreen";
 import { ProfileScreen } from "../../presentation/screens/profile/ProfileScreen";
-import { StoreRatingsScreen } from "../../presentation/screens/ratings/StoreRatingsScreen";
-import type { ThriftStoreId } from "../../domain/entities/ThriftStore";
 import { theme } from "../../shared/theme";
 
 export type RootTabParamList = {
   home: undefined;
   favorites: undefined;
   categories: undefined;
-  ratings:
-    | {
-        storeId?: ThriftStoreId;
-        storeName?: string;
-        reviewCount?: number;
-      }
-    | undefined;
   profile: undefined;
 };
 
@@ -37,8 +28,6 @@ export function RootTabs() {
             ? "Favoritos"
             : route.name === "categories"
             ? "Categorias"
-            : route.name === "ratings"
-            ? "Avaliações"
             : "Perfil",
         tabBarIcon: ({ color, size = 22 }) => {
           const iconName =
@@ -48,8 +37,6 @@ export function RootTabs() {
               ? "heart"
               : route.name === "categories"
               ? "grid"
-              : route.name === "ratings"
-              ? "star"
               : "person";
           return <Ionicons name={iconName as never} size={size} color={color} />;
         },
@@ -66,7 +53,6 @@ export function RootTabs() {
       <Tab.Screen name="home" component={HomeScreen} />
       <Tab.Screen name="favorites" component={FavoritesScreen} />
       <Tab.Screen name="categories" component={CategoriesScreen} />
-      <Tab.Screen name="ratings" component={StoreRatingsScreen} />
       <Tab.Screen name="profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

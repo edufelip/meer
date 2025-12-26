@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import type { NavigatorScreenParams } from "@react-navigation/native";
 import { RootTabs } from "./RootTabs";
 import { ThriftDetailScreen } from "../../presentation/screens/thrift/ThriftDetailScreen";
+import { StoreRatingsScreen } from "../../presentation/screens/ratings/StoreRatingsScreen";
 import { EditProfileScreen } from "../../presentation/screens/profile/EditProfileScreen";
 import { LoginScreen } from "../../presentation/screens/auth/LoginScreen";
 import { SignUpScreen } from "../../presentation/screens/auth/SignUpScreen";
@@ -24,6 +25,7 @@ export type RootStackParamList = {
   signup: undefined;
   tabs: NavigatorScreenParams<RootTabParamList>;
   thriftDetail: { id: ThriftStoreId };
+  storeRatings: { storeId: ThriftStoreId; storeName?: string; reviewCount?: number };
   editProfile: {
     profile: User & { bio?: string; notifyNewStores: boolean; notifyPromos: boolean; avatarUrl?: string };
   };
@@ -53,6 +55,7 @@ export function RootStack() {
       <Stack.Screen name="signup" component={SignUpScreen} />
       <Stack.Screen name="tabs" component={RootTabs} />
       <Stack.Screen name="thriftDetail" component={ThriftDetailScreen} />
+      <Stack.Screen name="storeRatings" component={StoreRatingsScreen} />
       <Stack.Screen name="editProfile" component={EditProfileScreen} />
       <Stack.Screen name="brechoForm" component={BrechoFormScreen} />
       <Stack.Screen name="myContents" component={MyContentsScreen} />

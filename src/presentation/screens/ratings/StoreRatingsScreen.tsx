@@ -11,6 +11,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { useInfiniteQuery, type InfiniteData } from "@tanstack/react-query";
 import { useNavigation, useRoute } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { StoreRating } from "../../../domain/entities/StoreRating";
 import { theme } from "../../../shared/theme";
@@ -24,7 +26,7 @@ type RouteParams = {
 };
 
 export function StoreRatingsScreen() {
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<any>();
   const params = (route.params ?? {}) as RouteParams;
   const storeId = params.storeId;

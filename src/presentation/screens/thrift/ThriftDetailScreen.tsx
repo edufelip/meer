@@ -458,13 +458,10 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
                 {store.reviewCount && store.reviewCount > 0 ? (
                   <Pressable
                     onPress={() => {
-                      navigation.navigate("tabs", {
-                        screen: "ratings",
-                        params: {
-                          storeId: store.id,
-                          storeName: store.name,
-                          reviewCount: Math.floor(store.reviewCount ?? 0)
-                        }
+                      navigation.navigate("storeRatings", {
+                        storeId: store.id,
+                        storeName: store.name,
+                        reviewCount: Math.floor(store.reviewCount ?? 0)
                       });
                     }}
                     accessibilityRole="button"
