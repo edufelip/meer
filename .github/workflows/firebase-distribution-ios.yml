@@ -150,13 +150,13 @@ jobs:
           echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > "$RUNNER_TEMP/firebase-service-account.json"
 
       - name: Upload to Firebase App Distribution
-        uses: wzieba/Firebase-Distribution-Github-Action@v1
-        with:
-          appId: 1:586821855462:ios:5a9f9d1e1a8ceea58bf327
-          serviceCredentialsFile: ${{ runner.temp }}/firebase-service-account.json
-          groups: base-group
-          file: ios/build/MeerAdHoc.ipa
-          releaseNotes: ${{ env.RELEASE_NOTES }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/firebase-service-account.json
+        run: |
+          npx --yes firebase-tools@latest appdistribution:distribute "ios/build/MeerAdHoc.ipa" \
+            --app "1:586821855462:ios:5a9f9d1e1a8ceea58bf327" \
+            --groups "base-group" \
+            --release-notes "$RELEASE_NOTES"
 
       - name: Clean keychain and profiles
         if: always()
