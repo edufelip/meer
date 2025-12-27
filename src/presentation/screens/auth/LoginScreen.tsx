@@ -22,12 +22,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getApiBaseUrl, primeApiToken, setDebugApiBaseUrlOverride } from "../../../api/client";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
-import { isValidEmail, validatePassword } from "../../../domain/validation/auth";
+import { isValidEmail } from "../../../domain/validation/auth";
 import { useForgotPassword } from "../../../hooks/useForgotPassword";
 import { useLogin } from "../../../hooks/useLogin";
 import { useLoginWithApple } from "../../../hooks/useLoginWithApple";
 import { useLoginWithGoogle } from "../../../hooks/useLoginWithGoogle";
-import { IS_DEBUG_MODE } from "../../../shared/env";
+import { IS_DEBUG_API_BASE_URL } from "../../../network/config";
 import { saveTokens } from "../../../storage/authStorage";
 import { cacheProfile } from "../../../storage/profileCache";
 
@@ -68,7 +68,7 @@ export function LoginScreen() {
   }, []);
 
   const openDebugBaseUrlDialog = async () => {
-    if (!IS_DEBUG_MODE) return;
+    if (!IS_DEBUG_API_BASE_URL) return;
     try {
       const url = await getApiBaseUrl();
       setDebugBaseUrlValue(url);
@@ -138,7 +138,7 @@ export function LoginScreen() {
               />
             </View>
 
-            {IS_DEBUG_MODE ? (
+            {IS_DEBUG_API_BASE_URL ? (
               <Pressable
                 onLongPress={openDebugBaseUrlDialog}
                 delayLongPress={550}
@@ -283,11 +283,6 @@ export function LoginScreen() {
                     setError("Digite um e-mail válido.");
                     return;
                   }
-                  const pass = validatePassword(password);
-                  if (!pass.valid) {
-                    setError(pass.error ?? "Senha inválida.");
-                    return;
-                  }
                   try {
                     setLoading(true);
                     const auth = await loginMutation.mutateAsync({ email: email.trim(), password });
@@ -335,7 +330,7 @@ export function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      {IS_DEBUG_MODE ? (
+      {IS_DEBUG_API_BASE_URL ? (
         <Modal
           visible={debugBaseUrlVisible}
           transparent

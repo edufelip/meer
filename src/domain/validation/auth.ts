@@ -8,6 +8,15 @@ export function validatePassword(value: string): { valid: boolean; error?: strin
   if (value.length < 6) {
     return { valid: false, error: "A senha deve ter pelo menos 6 caracteres." };
   }
+  if (!/[A-Z]/.test(value)) {
+    return { valid: false, error: "A senha deve ter pelo menos 1 letra maiuscula." };
+  }
+  if (!/[0-9]/.test(value)) {
+    return { valid: false, error: "A senha deve ter pelo menos 1 numero." };
+  }
+  if (!/[^A-Za-z0-9]/.test(value)) {
+    return { valid: false, error: "A senha deve ter pelo menos 1 caractere especial." };
+  }
   return { valid: true };
 }
 

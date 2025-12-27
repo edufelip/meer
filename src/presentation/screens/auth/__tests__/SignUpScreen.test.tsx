@@ -66,8 +66,8 @@ describe("SignUpScreen", () => {
     const { getByPlaceholderText, getByText } = render(<SignUpScreen />);
     fireEvent.changeText(getByPlaceholderText("Seu nome completo"), "User Name");
     fireEvent.changeText(getByPlaceholderText("seuemail@dominio.com"), "bad-email");
-    fireEvent.changeText(getByPlaceholderText("Crie uma senha"), "123456");
-    fireEvent.changeText(getByPlaceholderText("Repita a senha"), "123456");
+    fireEvent.changeText(getByPlaceholderText("Crie uma senha"), "Senha1!");
+    fireEvent.changeText(getByPlaceholderText("Repita a senha"), "Senha1!");
     fireEvent.press(getByText("Cadastrar"));
     expect(getByText("Digite um e-mail válido.")).toBeTruthy();
   });
@@ -76,8 +76,8 @@ describe("SignUpScreen", () => {
     const { getByPlaceholderText, getByText } = render(<SignUpScreen />);
     fireEvent.changeText(getByPlaceholderText("Seu nome completo"), "User Name");
     fireEvent.changeText(getByPlaceholderText("seuemail@dominio.com"), "user@example.com");
-    fireEvent.changeText(getByPlaceholderText("Crie uma senha"), "123456");
-    fireEvent.changeText(getByPlaceholderText("Repita a senha"), "654321");
+    fireEvent.changeText(getByPlaceholderText("Crie uma senha"), "Senha1!");
+    fireEvent.changeText(getByPlaceholderText("Repita a senha"), "Senha2!");
     fireEvent.press(getByText("Cadastrar"));
     expect(getByText("As senhas não coincidem.")).toBeTruthy();
   });
@@ -92,8 +92,8 @@ describe("SignUpScreen", () => {
     const { getByPlaceholderText, getByText } = render(<SignUpScreen />);
     fireEvent.changeText(getByPlaceholderText("Seu nome completo"), "Ana Silva");
     fireEvent.changeText(getByPlaceholderText("seuemail@dominio.com"), "ana@example.com");
-    fireEvent.changeText(getByPlaceholderText("Crie uma senha"), "123456");
-    fireEvent.changeText(getByPlaceholderText("Repita a senha"), "123456");
+    fireEvent.changeText(getByPlaceholderText("Crie uma senha"), "Senha1!");
+    fireEvent.changeText(getByPlaceholderText("Repita a senha"), "Senha1!");
 
     await act(async () => {
       fireEvent.press(getByText("Cadastrar"));
@@ -103,7 +103,7 @@ describe("SignUpScreen", () => {
       expect(mockSignup).toHaveBeenCalledWith({
         name: "Ana Silva",
         email: "ana@example.com",
-        password: "123456"
+        password: "Senha1!"
       })
     );
     expect(mockSaveTokens).toHaveBeenCalledWith("token-1", "refresh-1");

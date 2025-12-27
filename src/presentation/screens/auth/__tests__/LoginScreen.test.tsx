@@ -104,17 +104,22 @@ describe("LoginScreen", () => {
   it("shows error for invalid email", () => {
     const { getByPlaceholderText, getByText } = render(<LoginScreen />);
     fireEvent.changeText(getByPlaceholderText("seuemail@dominio.com"), "bad-email");
-    fireEvent.changeText(getByPlaceholderText("Sua senha"), "123456");
+    fireEvent.changeText(getByPlaceholderText("Sua senha"), "Senha1!");
     fireEvent.press(getByText("Entrar"));
     expect(getByText("Digite um e-mail válido.")).toBeTruthy();
   });
 
-  it("shows error for weak password", () => {
-    const { getByPlaceholderText, getByText } = render(<LoginScreen />);
+  it("allows short password without client validation", async () => {
+    const { getByPlaceholderText, getByText, queryByText } = render(<LoginScreen />);
     fireEvent.changeText(getByPlaceholderText("seuemail@dominio.com"), "user@example.com");
     fireEvent.changeText(getByPlaceholderText("Sua senha"), "123");
-    fireEvent.press(getByText("Entrar"));
-    expect(getByText("A senha deve ter pelo menos 6 caracteres.")).toBeTruthy();
+
+    await act(async () => {
+      fireEvent.press(getByText("Entrar"));
+    });
+
+    await waitFor(() => expect(mockLogin).toHaveBeenCalledWith({ email: "user@example.com", password: "123" }));
+    expect(queryByText("A senha deve ter pelo menos 6 caracteres.")).toBeNull();
   });
 
   it("navigates to signup from CTA", () => {
@@ -126,13 +131,13 @@ describe("LoginScreen", () => {
   it("logs in and resets navigation on success", async () => {
     const { getByPlaceholderText, getByText } = render(<LoginScreen />);
     fireEvent.changeText(getByPlaceholderText("seuemail@dominio.com"), "user@example.com");
-    fireEvent.changeText(getByPlaceholderText("Sua senha"), "123456");
+    fireEvent.changeText(getByPlaceholderText("Sua senha"), "Senha1!");
 
     await act(async () => {
       fireEvent.press(getByText("Entrar"));
     });
 
-    await waitFor(() => expect(mockLogin).toHaveBeenCalledWith({ email: "user@example.com", password: "123456" }));
+    await waitFor(() => expect(mockLogin).toHaveBeenCalledWith({ email: "user@example.com", password: "Senha1!" }));
     expect(mockSaveTokens).toHaveBeenCalledWith("token-1", "refresh-1");
     expect(mockCacheProfile).toHaveBeenCalledWith({ id: "u1", name: "Ana", email: "ana@test.com" });
     expect(mockPrimeApiToken).toHaveBeenCalledWith("token-1");
