@@ -32,9 +32,9 @@ jobs:
           set +a
           env | grep '^EXPO_PUBLIC_' >> "$GITHUB_ENV" || true
 
-      - name: Set debug API base URL
+      - name: Set debug API flag
         run: |
-          echo "EXPO_PUBLIC_API_BASE_URL=https://api.dev.guiabrecho.com.br" >> "$GITHUB_ENV"
+          echo "EXPO_PUBLIC_USE_DEV_API=true" >> "$GITHUB_ENV"
 
       - name: Bump iOS build number
         run: |

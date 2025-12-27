@@ -7,8 +7,8 @@ function normalizeApiBaseUrl(raw: string): string {
 export const PROD_API_BASE_URL = normalizeApiBaseUrl(urls.prodApiBaseUrl);
 export const DEV_API_BASE_URL = normalizeApiBaseUrl(urls.devApiBaseUrl || urls.prodApiBaseUrl);
 
-const isDevBuild = typeof __DEV__ === "boolean" ? __DEV__ : process.env.NODE_ENV !== "production";
-const baseUrl = isDevBuild ? DEV_API_BASE_URL : PROD_API_BASE_URL;
+const shouldUseDevApi = process.env.EXPO_PUBLIC_USE_DEV_API === "true";
+const baseUrl = shouldUseDevApi ? DEV_API_BASE_URL : PROD_API_BASE_URL;
 
 // normalize by stripping trailing slash so callers can safely append paths
 export const API_BASE_URL = baseUrl;

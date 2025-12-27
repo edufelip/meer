@@ -20,12 +20,14 @@ const getAsyncStorageMock = () =>
   };
 
 const originalNodeEnv = process.env.NODE_ENV;
-const originalDevFlag = (global as any).__DEV__;
+const originalUseDevApi = process.env.EXPO_PUBLIC_USE_DEV_API;
 
-const resetModulesWithEnv = (nodeEnv: string, devFlag?: boolean) => {
+const resetModulesWithEnv = (nodeEnv: string, useDevApi?: boolean) => {
   process.env.NODE_ENV = nodeEnv;
-  if (typeof devFlag === "boolean") {
-    (global as any).__DEV__ = devFlag;
+  if (typeof useDevApi === "boolean") {
+    process.env.EXPO_PUBLIC_USE_DEV_API = useDevApi ? "true" : "false";
+  } else {
+    delete process.env.EXPO_PUBLIC_USE_DEV_API;
   }
   jest.resetModules();
   getAsyncStorageMock().__reset();
@@ -38,18 +40,23 @@ describe("apiBaseUrl", () => {
 
   afterEach(() => {
     process.env.NODE_ENV = originalNodeEnv;
-    if (typeof originalDevFlag === "boolean") {
-      (global as any).__DEV__ = originalDevFlag;
-    } else if ("__DEV__" in global) {
-      try {
-        delete (global as any).__DEV__;
-      } catch {
-        (global as any).__DEV__ = undefined;
-      }
+    if (typeof originalUseDevApi === "string") {
+      process.env.EXPO_PUBLIC_USE_DEV_API = originalUseDevApi;
+    } else {
+      delete process.env.EXPO_PUBLIC_USE_DEV_API;
     }
   });
 
-  it("returns default base URL when no override", async () => {
+  it("returns prod base URL when no override", async () => {
+    const { getApiBaseUrlSync, getApiBaseUrl } = jest.requireActual("../apiBaseUrl");
+
+    const expected = urls.prodApiBaseUrl.replace(/\/$/, "");
+    expect(getApiBaseUrlSync()).toBe(expected);
+    await expect(getApiBaseUrl()).resolves.toBe(expected);
+  });
+
+  it("returns dev base URL when dev flag is true", async () => {
+    resetModulesWithEnv("test", true);
     const { getApiBaseUrlSync, getApiBaseUrl } = jest.requireActual("../apiBaseUrl");
 
     const expected = urls.devApiBaseUrl.replace(/\/$/, "");
@@ -58,6 +65,7 @@ describe("apiBaseUrl", () => {
   });
 
   it("loads override when base URL is non-prod and normalizes", async () => {
+    resetModulesWithEnv("test", true);
     const asyncStorageMock = getAsyncStorageMock();
     await asyncStorageMock.setItem("debug_api_base_url_override", "https://api.override.com/");
 
@@ -68,6 +76,7 @@ describe("apiBaseUrl", () => {
   });
 
   it("ignores invalid stored override", async () => {
+    resetModulesWithEnv("test", true);
     const asyncStorageMock = getAsyncStorageMock();
     await asyncStorageMock.setItem("debug_api_base_url_override", "ftp://invalid");
 
@@ -78,6 +87,7 @@ describe("apiBaseUrl", () => {
   });
 
   it("sets and persists debug override", async () => {
+    resetModulesWithEnv("test", true);
     const asyncStorageMock = getAsyncStorageMock();
     const { setDebugApiBaseUrlOverride, getApiBaseUrlSync } = jest.requireActual("../apiBaseUrl");
 
@@ -89,6 +99,7 @@ describe("apiBaseUrl", () => {
   });
 
   it("throws when invalid override is set", async () => {
+    resetModulesWithEnv("test", true);
     const { setDebugApiBaseUrlOverride } = jest.requireActual("../apiBaseUrl");
 
     await expect(setDebugApiBaseUrlOverride("not-a-url")).rejects.toThrow("invalid_url");

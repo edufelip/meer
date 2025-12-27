@@ -88,7 +88,8 @@ module.exports = ({ config }) => {
   const hostname = tryGetHostname(webBaseUrl);
   const wwwHostname = getWwwHostname(hostname);
   const isProdBuild = process.env.NODE_ENV === "production" || process.env.EAS_BUILD_PROFILE === "production";
-  const apiBaseUrl = isProdBuild ? prodApiBaseUrl : devApiBaseUrl || prodApiBaseUrl;
+  const shouldUseDevApi = process.env.EXPO_PUBLIC_USE_DEV_API === "true";
+  const apiBaseUrl = shouldUseDevApi ? devApiBaseUrl || prodApiBaseUrl : prodApiBaseUrl;
   const apiHost = tryGetHostname(apiBaseUrl);
   const allowLocalApi = process.env.EXPO_PUBLIC_ALLOW_LOCAL_API === "true";
 
