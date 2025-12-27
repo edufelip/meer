@@ -23,10 +23,9 @@ jobs:
         working-directory: .
       - name: Export env vars
         run: |
-          set -a
-          source .env
-          set +a
-          env | grep '^EXPO_PUBLIC_' >> "$GITHUB_ENV"
+          tr -d '\r' < .env | \
+            awk '/^[[:space:]]*(export[[:space:]]+)?EXPO_PUBLIC_[A-Za-z0-9_]+=/ { sub(/^[[:space:]]*export[[:space:]]+/, "", $0); print $0; }' \
+            >> "$GITHUB_ENV"
         working-directory: .
       - uses: actions/setup-node@v4
         with:
