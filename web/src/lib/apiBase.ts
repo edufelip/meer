@@ -17,7 +17,6 @@ export function selectBackendBase(hostname?: string | null): string {
 
   const base =
     (preferDev ? process.env.NEXT_PUBLIC_DEV_API_BASE_URL : process.env.NEXT_PUBLIC_API_BASE_URL) ||
-    process.env.EXPO_PUBLIC_API_BASE_URL ||
     "http://localhost:8080"; // fallback so build-time type check always has a string
 
   return base;

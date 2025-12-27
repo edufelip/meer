@@ -9,7 +9,6 @@ function isDevHost(host?: string | null): boolean {
 function pickBackendBase(host?: string | null): string {
   const base =
     (isDevHost(host) ? process.env.NEXT_PUBLIC_DEV_API_BASE_URL : process.env.NEXT_PUBLIC_API_BASE_URL) ||
-    process.env.EXPO_PUBLIC_API_BASE_URL ||
     "http://localhost:8080";
   return base;
 }
