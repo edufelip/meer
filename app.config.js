@@ -82,19 +82,19 @@ function getWwwHostname(hostname) {
   return `www.${hostname}`;
 }
 
-const { webBaseUrl, prodApiBaseUrl } = require("./constants/urls.json");
+const { webBaseUrl, prodApiBaseUrl, devApiBaseUrl } = require("./constants/urls.json");
 
 module.exports = ({ config }) => {
   const hostname = tryGetHostname(webBaseUrl);
   const wwwHostname = getWwwHostname(hostname);
-  const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL || prodApiBaseUrl;
+  const isProdBuild = process.env.NODE_ENV === "production" || process.env.EAS_BUILD_PROFILE === "production";
+  const apiBaseUrl = isProdBuild ? prodApiBaseUrl : devApiBaseUrl || prodApiBaseUrl;
   const apiHost = tryGetHostname(apiBaseUrl);
   const allowLocalApi = process.env.EXPO_PUBLIC_ALLOW_LOCAL_API === "true";
-  const isProdBuild = process.env.NODE_ENV === "production" || process.env.EAS_BUILD_PROFILE === "production";
 
   if (isProdBuild && !allowLocalApi && isLocalHost(apiHost)) {
     throw new Error(
-      "EXPO_PUBLIC_API_BASE_URL points to a local host in a production build. Set a real API host or EXPO_PUBLIC_ALLOW_LOCAL_API=true."
+      "prodApiBaseUrl in constants/urls.json points to a local host in a production build. Set a real API host or EXPO_PUBLIC_ALLOW_LOCAL_API=true."
     );
   }
 

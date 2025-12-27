@@ -1,4 +1,6 @@
 const http = require("http");
+const fs = require("fs");
+const path = require("path");
 const { spawn } = require("child_process");
 
 const args = process.argv.slice(2);
@@ -18,6 +20,21 @@ if (!platform || (platform !== "ios" && platform !== "android")) {
 
 const baseUrl = `http://localhost:${port}`;
 const devServerUrl = `http://localhost:${devServerPort}`;
+const urlsPath = path.join(__dirname, "..", "constants", "urls.json");
+let urlsBackup = null;
+
+const applyMockApiBaseUrl = () => {
+  urlsBackup = fs.readFileSync(urlsPath, "utf8");
+  const parsed = JSON.parse(urlsBackup);
+  const next = { ...parsed, devApiBaseUrl: baseUrl };
+  fs.writeFileSync(urlsPath, `${JSON.stringify(next, null, 2)}\n`);
+};
+
+const restoreUrls = () => {
+  if (urlsBackup === null) return;
+  fs.writeFileSync(urlsPath, urlsBackup);
+  urlsBackup = null;
+};
 
 const run = (command, commandArgs, env) =>
   new Promise((resolve, reject) => {
@@ -90,6 +107,7 @@ let serverProcess;
 let devServerProcess;
 
 const cleanup = () => {
+  restoreUrls();
   if (serverProcess && !serverProcess.killed) {
     serverProcess.kill("SIGTERM");
   }
@@ -109,6 +127,7 @@ process.on("SIGTERM", () => {
 
 (async () => {
   try {
+    applyMockApiBaseUrl();
     serverProcess = spawn("node", ["mock-server/server.js"], {
       stdio: "inherit",
       env: {
@@ -133,7 +152,6 @@ process.on("SIGTERM", () => {
     }
 
     const env = {
-      EXPO_PUBLIC_API_BASE_URL: baseUrl,
       DETOX_DEV_SERVER_URL: devServerUrl,
       EXPO_DEV_CLIENT_SERVER_URL: devServerUrl,
       EXPO_DEV_CLIENT_SCHEME: "meer",
