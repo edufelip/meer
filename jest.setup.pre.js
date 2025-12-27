@@ -16,7 +16,3 @@ if (typeof global.structuredClone === "undefined") {
     writable: true
   });
 }
-
-if (!process.env.EXPO_PUBLIC_API_BASE_URL) {
-  process.env.EXPO_PUBLIC_API_BASE_URL = "https://api.dev.test";
-}
