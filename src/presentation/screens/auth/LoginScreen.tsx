@@ -27,6 +27,7 @@ import { useForgotPassword } from "../../../hooks/useForgotPassword";
 import { useLogin } from "../../../hooks/useLogin";
 import { useLoginWithApple } from "../../../hooks/useLoginWithApple";
 import { useLoginWithGoogle } from "../../../hooks/useLoginWithGoogle";
+import { IS_DEBUG_MODE } from "../../../shared/env";
 import { saveTokens } from "../../../storage/authStorage";
 import { cacheProfile } from "../../../storage/profileCache";
 
@@ -67,7 +68,7 @@ export function LoginScreen() {
   }, []);
 
   const openDebugBaseUrlDialog = async () => {
-    if (!__DEV__) return;
+    if (!IS_DEBUG_MODE) return;
     try {
       const url = await getApiBaseUrl();
       setDebugBaseUrlValue(url);
@@ -137,7 +138,7 @@ export function LoginScreen() {
               />
             </View>
 
-            {__DEV__ ? (
+            {IS_DEBUG_MODE ? (
               <Pressable
                 onLongPress={openDebugBaseUrlDialog}
                 delayLongPress={550}
@@ -334,7 +335,7 @@ export function LoginScreen() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      {__DEV__ ? (
+      {IS_DEBUG_MODE ? (
         <Modal
           visible={debugBaseUrlVisible}
           transparent
@@ -376,7 +377,11 @@ export function LoginScreen() {
                         const res = await setDebugApiBaseUrlOverride(debugBaseUrlValue);
                         setDebugBaseUrlVisible(false);
                         if (res.changed) {
-                          DevSettings.reload();
+                          if (__DEV__) {
+                            DevSettings.reload();
+                          } else {
+                            Alert.alert("Reinicie o app", "Feche e abra novamente para aplicar a nova URL.");
+                          }
                         }
                       } catch {
                         Alert.alert("URL inválida", "Digite uma URL válida (http/https), sem espaços.");

@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { API_BASE_URL } from "./config";
+import { IS_DEBUG_MODE } from "../shared/env";
 
 const DEBUG_API_BASE_URL_KEY = "debug_api_base_url_override";
 
@@ -20,7 +21,7 @@ function normalizeApiBaseUrl(raw: string): string | null {
 }
 
 export async function ensureDebugApiBaseUrlLoaded() {
-  if (!__DEV__) return;
+  if (!IS_DEBUG_MODE) return;
   if (debugBaseUrlLoaded) return;
   if (debugBaseUrlLoadPromise) return debugBaseUrlLoadPromise;
 
@@ -65,4 +66,3 @@ export async function setDebugApiBaseUrlOverride(nextRaw: string): Promise<{ cha
 
   return { changed, next: normalized };
 }
-

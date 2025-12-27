@@ -20,3 +20,7 @@ if (typeof global.structuredClone === "undefined") {
 if (!process.env.EXPO_PUBLIC_API_BASE_URL) {
   process.env.EXPO_PUBLIC_API_BASE_URL = "https://api.test";
 }
+
+if (!process.env.EXPO_PUBLIC_API_DEV_BASE_URL) {
+  process.env.EXPO_PUBLIC_API_DEV_BASE_URL = "https://api.dev.test";
+}

@@ -1,7 +1,15 @@
-const baseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+import { IS_DEBUG_MODE } from "../shared/env";
+
+const prodBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+const devBaseUrl = process.env.EXPO_PUBLIC_API_DEV_BASE_URL;
+const baseUrl = IS_DEBUG_MODE ? devBaseUrl : prodBaseUrl;
 
 if (!baseUrl) {
-  throw new Error("Missing EXPO_PUBLIC_API_BASE_URL environment variable");
+  throw new Error(
+    IS_DEBUG_MODE
+      ? "Missing EXPO_PUBLIC_API_DEV_BASE_URL environment variable"
+      : "Missing EXPO_PUBLIC_API_BASE_URL environment variable"
+  );
 }
 
 // normalize by stripping trailing slash so callers can safely append paths

@@ -31,6 +31,10 @@ jobs:
           set +a
           env | grep '^EXPO_PUBLIC_' >> "$GITHUB_ENV"
 
+      - name: Enable debug tools
+        run: |
+          echo "EXPO_PUBLIC_ENABLE_DEBUG_TOOLS=true" >> "$GITHUB_ENV"
+
       - name: Bump iOS build number
         run: |
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $GITHUB_RUN_NUMBER" ios/Meer/Info.plist
