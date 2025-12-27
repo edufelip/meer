@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths-ignore:
       - "web/**"
+      - "site/**"
 
 jobs:
   firebase-distribution:
@@ -27,7 +28,12 @@ jobs:
           set -a
           source .env
           set +a
-          env | grep '^EXPO_PUBLIC_' >> "$GITHUB_ENV"
+          env | grep '^EXPO_PUBLIC_' >> "$GITHUB_ENV" || true
+        working-directory: .
+
+      - name: Set debug API base URL
+        run: |
+          echo "EXPO_PUBLIC_API_BASE_URL=https://api.dev.guiabrecho.com.br" >> "$GITHUB_ENV"
         working-directory: .
 
       - uses: actions/setup-node@v4

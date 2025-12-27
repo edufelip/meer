@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths-ignore:
       - "web/**"
+      - "site/**"
 
 jobs:
   lint-test-build:
