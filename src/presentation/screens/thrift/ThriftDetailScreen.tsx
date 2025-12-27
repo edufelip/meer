@@ -504,7 +504,11 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
                   </View>
                 ) : null}
                 {hasExistingFeedback ? (
-                  <Pressable onPress={handleDeleteFeedback} accessibilityRole="button">
+                  <Pressable
+                    onPress={handleDeleteFeedback}
+                    accessibilityRole="button"
+                    style={{ marginTop: 8 }}
+                  >
                     <Text className="text-xs text-[#DC2626] text-center">Apagar minha avaliação</Text>
                   </Pressable>
                 ) : null}
