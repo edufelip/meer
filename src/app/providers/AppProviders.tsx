@@ -81,10 +81,20 @@ function AuthBootstrap({ children }: PropsWithChildren) {
   useEffect(() => {
     if (booting) return;
     if (validateTokenQuery.status === "success" && !hasRerouted.current) {
-      hasRerouted.current = true;
-      if (navigationRef.isReady()) {
-        navigationRef.reset({ index: 0, routes: [{ name: "tabs" }] });
-      }
+      let cancelled = false;
+      const tryReset = () => {
+        if (cancelled || hasRerouted.current) return;
+        if (navigationRef.isReady()) {
+          hasRerouted.current = true;
+          navigationRef.reset({ index: 0, routes: [{ name: "tabs" }] });
+          return;
+        }
+        setTimeout(tryReset, 50);
+      };
+      tryReset();
+      return () => {
+        cancelled = true;
+      };
     }
   }, [booting, validateTokenQuery.status]);
 
