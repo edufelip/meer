@@ -18,6 +18,7 @@
 * React Native + NativeWind
 * React Navigation (stack + tabs)
 * Axios + @tanstack/react-query (requests, caching, retry/refresh queue)
+* Zustand (shared UI state across screens)
 * @react-native-google-signin/google-signin (native Google login → backend)
 * AsyncStorage (prefs, token cache, favorites outbox)
 * Clean architecture: Presentation → Domain → Data, DI via provider hook
@@ -116,6 +117,12 @@ Headers always include:
 UI (screens/components) → use cases → repositories → data sources.  
 DI via `DependenciesProvider` hook.  
 Network layer centraliza axios interceptors (logging, package header, token refresh + queued retries).
+
+## State Management
+- Local UI state: `useState` in the screen/component.
+- Server state & caching: React Query.
+- Shared UI state (cross-screen, optimistic updates): Zustand stores in `src/presentation/state`.
+- Stores are reset on logout (see `src/presentation/state/resetAllStores.ts`).
 
 ## Notes
 - Requires device or simulator with dev build for Google Sign-In (Expo Go não serve).
