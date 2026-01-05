@@ -8,7 +8,7 @@ import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { NearbyThriftListItem } from "../../components/NearbyThriftListItem";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import NetInfo from "@react-native-community/netinfo";
+import { useNetworkStatusStore } from "../../state/networkStatusStore";
 
 const suggestionChips = ["Vestidos", "Roupas de festa", "Acessórios", "Vintage"];
 
@@ -23,7 +23,7 @@ export function SearchScreen() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [offline, setOffline] = useState(false);
+  const isOnline = useNetworkStatusStore((state) => state.isOnline);
 
   useEffect(() => {
     let active = true;
@@ -42,14 +42,6 @@ export function SearchScreen() {
     return () => {
       active = false;
     };
-  }, []);
-
-  useEffect(() => {
-    const unsub = NetInfo.addEventListener((state) => {
-      const connected = !!state.isConnected;
-      setOffline(!connected);
-    });
-    return () => unsub();
   }, []);
 
   const persistRecents = async (items: string[]) => {
@@ -122,7 +114,7 @@ export function SearchScreen() {
             />
           </View>
         </View>
-        {offline && (
+        {!isOnline && (
           <View className="mt-3 bg-[#FDE68A] rounded-lg px-3 py-2">
             <Text className="text-xs font-semibold text-[#92400E]">
               Sem conexão. As buscas podem falhar até a conexão voltar.

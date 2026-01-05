@@ -6,17 +6,16 @@ import { Image, Pressable, ScrollView, StatusBar, Text, View } from "react-nativ
 import { SafeAreaView } from "react-native-safe-area-context";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
-import type { User } from "../../../domain/entities/User";
 import { theme } from "../../../shared/theme";
 import { getTokens } from "../../../storage/authStorage";
 import { Buffer } from "buffer";
+import { useProfileSummaryStore } from "../../state/profileSummaryStore";
 
 export function ProfileScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { getCachedProfileUseCase, getProfileUseCase } = useDependencies();
-  const [user, setUser] = useState<(User & { bio?: string; notifyNewStores: boolean; notifyPromos: boolean }) | null>(
-    null
-  );
+  const profile = useProfileSummaryStore((state) => state.profile);
+  const setProfile = useProfileSummaryStore((state) => state.setProfile);
   const [hasArticles, setHasArticles] = useState(false);
 
   const decodeJwtPayload = (token: string | null | undefined) => {
@@ -34,13 +33,13 @@ export function ProfileScreen() {
   const loadCachedProfile = useCallback(async () => {
     const cached = await getCachedProfileUseCase.execute();
     if (cached) {
-      setUser(cached);
+      setProfile(cached);
       setHasArticles(Boolean(cached.ownedThriftStore && (cached as any).articlesCount > 0));
       // If critical fields are missing (owned store or avatar), fetch a fresh profile to hydrate them.
       if (!cached.ownedThriftStore || !cached.avatarUrl) {
         try {
           const fresh = await getProfileUseCase.execute();
-          setUser(fresh);
+          setProfile(fresh);
           setHasArticles(Boolean(fresh.ownedThriftStore && (fresh as any).articlesCount > 0));
         } catch {
           // ignore network error; keep cached
@@ -63,12 +62,12 @@ export function ProfileScreen() {
         notifyNewStores: payload.notifyNewStores ?? false,
         notifyPromos: payload.notifyPromos ?? false
       };
-      setUser(fallbackProfile);
+      setProfile(fallbackProfile);
     } else {
-      setUser(null);
+      setProfile(null);
       setHasArticles(false);
     }
-  }, [getCachedProfileUseCase, getProfileUseCase]);
+  }, [getCachedProfileUseCase, getProfileUseCase, setProfile]);
 
   // Load once on mount
   useEffect(() => {
@@ -83,7 +82,7 @@ export function ProfileScreen() {
     }, [loadCachedProfile])
   );
 
-  const displayUser = user;
+  const displayUser = profile;
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
@@ -130,10 +129,10 @@ export function ProfileScreen() {
                 navigation.navigate("editProfile", {
                   profile: {
                     ...displayUser,
-                    bio: user?.bio,
-                    notifyNewStores: user?.notifyNewStores ?? false,
-                    notifyPromos: user?.notifyPromos ?? false,
-                    avatarUrl: user?.avatarUrl
+                    bio: profile?.bio,
+                    notifyNewStores: profile?.notifyNewStores ?? false,
+                    notifyPromos: profile?.notifyPromos ?? false,
+                    avatarUrl: profile?.avatarUrl
                   }
                 });
               }}
@@ -153,7 +152,7 @@ export function ProfileScreen() {
         </View>
 
         {(() => {
-          const ownedStore = user?.ownedThriftStore ?? null;
+          const ownedStore = profile?.ownedThriftStore ?? null;
           if (!ownedStore) return null;
           return (
           <View className="px-4 pt-0 pb-4">

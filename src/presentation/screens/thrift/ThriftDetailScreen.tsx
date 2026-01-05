@@ -36,6 +36,8 @@ import { theme } from "../../../shared/theme";
 import ImageViewing from "react-native-image-viewing";
 import { buildThriftStoreShareUrl } from "../../../shared/deepLinks";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
+import { useFavoritesStore } from "../../state/favoritesStore";
+import { useStoreSummaryStore } from "../../state/storeSummaryStore";
 
 interface ThriftDetailScreenProps {
   route?: { params?: { id?: ThriftStoreId } };
@@ -87,9 +89,14 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
     deleteMyFeedbackUseCase
   } = useDependencies();
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const favoriteIds = useFavoritesStore((state) => state.ids);
+  const setFavoriteItem = useFavoritesStore((state) => state.setFavoriteItem);
+  const storeSummaries = useStoreSummaryStore((state) => state.summaries);
+  const ensureSummary = useStoreSummaryStore((state) => state.ensureSummary);
+  const applyRatingChange = useStoreSummaryStore((state) => state.applyRatingChange);
+  const applyRatingDeletion = useStoreSummaryStore((state) => state.applyRatingDeletion);
   const [store, setStore] = useState<ThriftStore | null>(null);
   const [loading, setLoading] = useState(true);
-  const [favorite, setFavorite] = useState(false);
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
   const [userRating, setUserRating] = useState(0);
@@ -104,6 +111,11 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
   const toastClearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const existingFeedbackRef = useRef<{ score: number; body: string } | null>(null);
   const shimmer = useRef(new Animated.Value(0)).current;
+
+  const summary = store?.id ? storeSummaries[store.id] : undefined;
+  const summaryRating = summary?.rating ?? store?.rating ?? 0;
+  const summaryReviewCount = summary?.reviewCount ?? store?.reviewCount ?? 0;
+  const isFavorite = store?.id ? !!favoriteIds[store.id] : false;
 
   useEffect(() => {
     Animated.loop(
@@ -188,6 +200,7 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
 
         if (resolved) {
           setStore(resolved);
+          ensureSummary(resolved.id, resolved.rating ?? 0, resolved.reviewCount ?? 0);
           if (Object.prototype.hasOwnProperty.call(resolved as any, "myRating")) {
             setUserRating(typeof resolved.myRating === "number" ? resolved.myRating : 0);
           }
@@ -197,7 +210,7 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
 
         if (resolved) {
           const fav = await isFavoriteThriftStoreUseCase.execute(resolved.id);
-          if (isMounted) setFavorite(fav);
+          if (isMounted) setFavoriteItem(resolved, fav);
 
           try {
             const mine = await getMyFeedbackUseCase.execute(resolved.id);
@@ -228,6 +241,8 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
     getFeaturedThriftStoresUseCase,
     isFavoriteThriftStoreUseCase,
     getMyFeedbackUseCase,
+    ensureSummary,
+    setFavoriteItem,
     route?.params?.id
   ]);
 
@@ -326,6 +341,13 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
         score: userRating,
         body: trimmedComment
       });
+      applyRatingChange({
+        storeId: store.id,
+        prevScore: existingFeedback?.score ?? null,
+        nextScore: userRating,
+        baseRating: summaryRating,
+        baseReviewCount: summaryReviewCount
+      });
       showToast("Sucesso! Obrigado por avaliar 🧡");
       Keyboard.dismiss();
       setShowCommentBox(false);
@@ -358,6 +380,13 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
           onPress: async () => {
             try {
               await deleteMyFeedbackUseCase.execute(store.id);
+              const prevScore = existingFeedbackRef.current?.score ?? userRating;
+              applyRatingDeletion({
+                storeId: store.id,
+                prevScore,
+                baseRating: summaryRating,
+                baseReviewCount: summaryReviewCount
+              });
               existingFeedbackRef.current = null;
               setHasExistingFeedback(false);
               setUserRating(0);
@@ -407,12 +436,12 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
               onPress={async () => {
                 if (!store) return;
                 const next = await toggleFavoriteThriftStoreUseCase.execute(store);
-                setFavorite(next);
+                setFavoriteItem(store, next);
               }}
               accessibilityRole="button"
               accessibilityLabel="Favoritar"
             >
-              <Ionicons name={favorite ? "heart" : "heart-outline"} size={22} color={theme.colors.accent} />
+              <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={22} color={theme.colors.accent} />
             </Pressable>
           </View>
           <View className="absolute bottom-2 left-4 right-4">
@@ -451,24 +480,24 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
               <View className="flex-row justify-between items-center">
                 <View className="flex-row items-center gap-3">
                   <Text className="text-3xl font-extrabold text-[#374151]">
-                    {store.rating != null ? store.rating.toFixed(1) : "—"}
+                    {summaryRating.toFixed(1)}
                   </Text>
-                  {renderStars(store.rating ?? 0, 20)}
+                  {renderStars(summaryRating, 20)}
                 </View>
-                {store.reviewCount && store.reviewCount > 0 ? (
+                {summaryReviewCount > 0 ? (
                   <Pressable
                     onPress={() => {
                       navigation.navigate("storeRatings", {
                         storeId: store.id,
                         storeName: store.name,
-                        reviewCount: Math.floor(store.reviewCount ?? 0)
+                        reviewCount: Math.floor(summaryReviewCount)
                       });
                     }}
                     accessibilityRole="button"
                     accessibilityLabel="Ver avaliações"
                   >
                     <Text className="text-sm text-[#6B7280]">{`${Math.floor(
-                      store.reviewCount
+                      summaryReviewCount
                     )} avaliações`}</Text>
                   </Pressable>
                 ) : null}

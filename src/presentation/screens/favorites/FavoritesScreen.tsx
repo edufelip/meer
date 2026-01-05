@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { Animated, FlatList, RefreshControl, StatusBar, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -10,6 +10,7 @@ import type { ThriftStore } from "../../../domain/entities/ThriftStore";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import { FavoriteThriftCard } from "../../components/FavoriteThriftCard";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
+import { useFavoritesStore } from "../../state/favoritesStore";
 
 const STORAGE_KEY = "favorites";
 const STORAGE_META_KEY = "favorites_meta";
@@ -56,19 +57,29 @@ export function FavoritesScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { getFavoriteThriftStoresUseCase } = useDependencies();
 
-  const [favorites, setFavorites] = useState<ThriftStore[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+  const favorites = useFavoritesStore((state) => state.items);
+  const loading = useFavoritesStore((state) => state.loading);
+  const refreshing = useFavoritesStore((state) => state.refreshing);
+  const setFavorites = useFavoritesStore((state) => state.setFavorites);
+  const setLoading = useFavoritesStore((state) => state.setLoading);
+  const setRefreshing = useFavoritesStore((state) => state.setRefreshing);
 
   const shimmer = useRef(new Animated.Value(0)).current;
-  const favoritesRef = useRef<ThriftStore[]>([]);
+  const favoritesRef = useRef<ThriftStore[]>(favorites);
   const fetchedAtRef = useRef<number | null>(null);
   const fetchingRef = useRef(false);
 
-  const updateFavorites = (list: ThriftStore[]) => {
-    favoritesRef.current = list;
-    setFavorites(list);
-  };
+  const updateFavorites = useCallback(
+    (list: ThriftStore[], fetchedAt?: number | null) => {
+      favoritesRef.current = list;
+      setFavorites(list, fetchedAt);
+    },
+    [setFavorites]
+  );
+
+  useEffect(() => {
+    favoritesRef.current = favorites;
+  }, [favorites]);
 
   useEffect(() => {
     Animated.loop(
@@ -91,11 +102,13 @@ export function FavoritesScreen() {
       if (force) setRefreshing(true);
       try {
         const remote = await getFavoriteThriftStoresUseCase.execute();
-        if (areDifferent(remote, favoritesRef.current)) {
-          updateFavorites(remote);
-        }
         const now = Date.now();
         fetchedAtRef.current = now;
+        if (areDifferent(remote, favoritesRef.current)) {
+          updateFavorites(remote, now);
+        } else {
+          updateFavorites(favoritesRef.current, now);
+        }
         await writeCachedFavorites(remote, now);
       } catch {
         // keep showing cached data
@@ -105,7 +118,7 @@ export function FavoritesScreen() {
         setRefreshing(false);
       }
     },
-    [getFavoriteThriftStoresUseCase]
+    [getFavoriteThriftStoresUseCase, setLoading, setRefreshing, updateFavorites]
   );
 
   const onRefresh = useCallback(() => {
@@ -120,7 +133,7 @@ export function FavoritesScreen() {
       if (!active) return;
 
       if (cached.items.length > 0) {
-        updateFavorites(cached.items);
+        updateFavorites(cached.items, cached.fetchedAt);
         fetchedAtRef.current = cached.fetchedAt;
         setLoading(false);
       } else {
@@ -138,7 +151,7 @@ export function FavoritesScreen() {
     return () => {
       active = false;
     };
-  }, [fetchRemote]);
+  }, [fetchRemote, setLoading, updateFavorites]);
 
   // Refresh view from cache whenever the tab regains focus (no network call).
   useFocusEffect(
@@ -148,14 +161,14 @@ export function FavoritesScreen() {
         const cached = await readCachedFavorites();
         if (!active) return;
         if (cached.items.length > 0) {
-          updateFavorites(cached.items);
+          updateFavorites(cached.items, cached.fetchedAt);
           fetchedAtRef.current = cached.fetchedAt;
         }
       })();
       return () => {
         active = false;
       };
-    }, [])
+    }, [updateFavorites])
   );
 
   return (

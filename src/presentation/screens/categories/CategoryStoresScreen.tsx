@@ -20,6 +20,8 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { theme } from "../../../shared/theme";
+import { useFavoritesStore } from "../../state/favoritesStore";
+import { useStoreSummaryStore } from "../../state/storeSummaryStore";
 
 const PAGE_SIZE = 10;
 const scrollOffsets = new Map<string, number>();
@@ -39,6 +41,9 @@ export function CategoryStoresScreen() {
   const { getStoresByCategoryUseCase, getNearbyPaginatedUseCase, toggleFavoriteThriftStoreUseCase } =
     useDependencies();
   const queryClient = useQueryClient();
+  const favoriteIds = useFavoritesStore((state) => state.ids);
+  const setFavoriteItem = useFavoritesStore((state) => state.setFavoriteItem);
+  const storeSummaries = useStoreSummaryStore((state) => state.summaries);
   const listRef = useRef<FlatList<any>>(null);
   const cacheKey = useMemo(() => ["category-stores", categoryId ?? "nearby"], [categoryId]);
   const scrollKey = useMemo(() => `${type ?? "nearby"}-${categoryId ?? "nearby"}`, [type, categoryId]);
@@ -114,6 +119,8 @@ export function CategoryStoresScreen() {
       // optimistic update
       const queryKey = ["category-stores", categoryId ?? "nearby"];
       const prevData = queryClient.getQueryData(queryKey);
+      const prevFavorite = (favoriteIds[store.id] ?? store.isFavorite) ?? false;
+      const nextFavorite = !prevFavorite;
 
       queryClient.setQueryData(queryKey, (old: any) => {
         if (!old) return old;
@@ -122,86 +129,96 @@ export function CategoryStoresScreen() {
           pages: old.pages.map((p: any) => ({
             ...p,
             items: p.items.map((it: ThriftStore) =>
-              it.id === store.id ? { ...it, isFavorite: !it.isFavorite } : it
+              it.id === store.id ? { ...it, isFavorite: nextFavorite } : it
             )
           }))
         };
       });
+      setFavoriteItem(store, nextFavorite);
 
       try {
-        await toggleFavoriteThriftStoreUseCase.execute(store);
+        const next = await toggleFavoriteThriftStoreUseCase.execute(store);
+        setFavoriteItem(store, next);
       } catch (e) {
         console.log("favorite toggle error", e);
         // rollback
         queryClient.setQueryData(queryKey, prevData);
+        setFavoriteItem(store, prevFavorite);
       }
     },
-    [toggleFavoriteThriftStoreUseCase, queryClient, categoryId]
+    [toggleFavoriteThriftStoreUseCase, queryClient, categoryId, favoriteIds, setFavoriteItem]
   );
 
-  const renderItem = ({ item }: { item: ThriftStore }) => (
-    <Pressable
-      className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-row items-stretch relative"
-      onPress={() => navigation.navigate("thriftDetail", { id: item.id })}
-      testID={`category-store-${item.id}`}
-    >
-      {item.badgeLabel ? (
-        <View className="absolute bottom-2 right-2 bg-[#EC4899] px-2 py-1 rounded-full z-10">
-          <Text className="text-[10px] font-extrabold text-white tracking-tight uppercase">{item.badgeLabel}</Text>
-        </View>
-      ) : null}
-      <View style={{ width: 112, alignSelf: "stretch", minHeight: 120 }}>
-        {item.coverImageUrl || item.images?.[0]?.url ? (
-          <Image
-            source={{ uri: item.coverImageUrl ?? item.images?.[0]?.url }}
-            style={{ flex: 1, width: "100%", height: "100%" }}
-            resizeMode="cover"
-          />
-        ) : (
-          <LinearGradient
-            colors={["#E5E7EB", "#D1D5DB"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={{ flex: 1, width: "100%", height: "100%" }}
-          />
-        )}
-      </View>
-      <View className="p-4 flex-1">
-        <View className="flex-row justify-between items-start">
-          <Text className="font-bold text-[#374151] text-lg" numberOfLines={1}>
-            {item.name}
-          </Text>
-          <Pressable onPress={() => handleToggleFavorite(item)}>
-            <Ionicons
-              name={item.isFavorite ? "heart" : "heart-outline"}
-              size={20}
-              color={item.isFavorite ? theme.colors.highlight : "#9CA3AF"}
+  const renderItem = ({ item }: { item: ThriftStore }) => {
+    const summary = storeSummaries[item.id];
+    const rating = summary?.rating ?? item.rating ?? 0;
+    const reviewCount = summary?.reviewCount ?? item.reviewCount ?? 0;
+    const isFavorite = (favoriteIds[item.id] ?? item.isFavorite) ?? false;
+
+    return (
+      <Pressable
+        className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex-row items-stretch relative"
+        onPress={() => navigation.navigate("thriftDetail", { id: item.id })}
+        testID={`category-store-${item.id}`}
+      >
+        {item.badgeLabel ? (
+          <View className="absolute bottom-2 right-2 bg-[#EC4899] px-2 py-1 rounded-full z-10">
+            <Text className="text-[10px] font-extrabold text-white tracking-tight uppercase">{item.badgeLabel}</Text>
+          </View>
+        ) : null}
+        <View style={{ width: 112, alignSelf: "stretch", minHeight: 120 }}>
+          {item.coverImageUrl || item.images?.[0]?.url ? (
+            <Image
+              source={{ uri: item.coverImageUrl ?? item.images?.[0]?.url }}
+              style={{ flex: 1, width: "100%", height: "100%" }}
+              resizeMode="cover"
             />
-          </Pressable>
+          ) : (
+            <LinearGradient
+              colors={["#E5E7EB", "#D1D5DB"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{ flex: 1, width: "100%", height: "100%" }}
+            />
+          )}
         </View>
-        <Text className="text-sm text-[#4B5563] mt-1" numberOfLines={1}>
-          {item.addressLine ?? ""}
-        </Text>
-        <View className="flex-row items-center gap-1 mt-2">
-          <Ionicons name="star" size={16} color={theme.colors.complementary} />
-          <Text className="font-bold text-sm text-[#374151]">{item.rating?.toFixed(1) ?? "4.5"}</Text>
-          {item.reviewCount ? (
-            <Text className="text-sm text-[#6B7280]">({item.reviewCount} avaliações)</Text>
-          ) : null}
-        </View>
-        <View className="flex-row flex-wrap gap-2 mt-3">
-          {(item.categories ?? []).slice(0, 3).map((cat) => (
-            <Text
-              key={cat}
-              className="text-xs bg-[#B55D051A] text-primary font-medium px-2 py-1 rounded-full"
-            >
-              {cat}
+        <View className="p-4 flex-1">
+          <View className="flex-row justify-between items-start">
+            <Text className="font-bold text-[#374151] text-lg" numberOfLines={1}>
+              {item.name}
             </Text>
-          ))}
+            <Pressable onPress={() => handleToggleFavorite(item)}>
+              <Ionicons
+                name={isFavorite ? "heart" : "heart-outline"}
+                size={20}
+                color={isFavorite ? theme.colors.highlight : "#9CA3AF"}
+              />
+            </Pressable>
+          </View>
+          <Text className="text-sm text-[#4B5563] mt-1" numberOfLines={1}>
+            {item.addressLine ?? ""}
+          </Text>
+          <View className="flex-row items-center gap-1 mt-2">
+            <Ionicons name="star" size={16} color={theme.colors.complementary} />
+            <Text className="font-bold text-sm text-[#374151]">{rating.toFixed(1)}</Text>
+            {reviewCount > 0 ? (
+              <Text className="text-sm text-[#6B7280]">({reviewCount} avaliações)</Text>
+            ) : null}
+          </View>
+          <View className="flex-row flex-wrap gap-2 mt-3">
+            {(item.categories ?? []).slice(0, 3).map((cat) => (
+              <Text
+                key={cat}
+                className="text-xs bg-[#B55D051A] text-primary font-medium px-2 py-1 rounded-full"
+              >
+                {cat}
+              </Text>
+            ))}
+          </View>
         </View>
-      </View>
-    </Pressable>
-  );
+      </Pressable>
+    );
+  };
 
   const ListFooter = () => (
     <View className="py-4 items-center">

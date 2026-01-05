@@ -33,13 +33,13 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { Ionicons } from "@expo/vector-icons";
 import * as Location from "expo-location";
-import NetInfo from "@react-native-community/netinfo";
 import { getTokens } from "../../../storage/authStorage";
 import {
   loadHomeCache,
   saveHomeCache,
   type HomeCache
 } from "../../../data/datasources/impl/AsyncStorageHomeCache";
+import { useNetworkStatusStore } from "../../state/networkStatusStore";
 
 const DEFAULT_COORDS = { lat: -23.5561782, lng: -46.6375468 };
 const HOME_TTL = 24 * 60 * 60 * 1000; // 24h strict
@@ -79,7 +79,7 @@ export function HomeScreen() {
   const [filteredList, setFilteredList] = useState<ThriftStore[]>([]);
   const [locationLabel, setLocationLabel] = useState("São Paulo, SP");
   const [neighborhoods, setNeighborhoods] = useState<string[]>(["Próximo a mim"]);
-  const [offline, setOffline] = useState(false);
+  const isOnline = useNetworkStatusStore((state) => state.isOnline);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const coordsRef = useRef<{ lat: number; lng: number }>(DEFAULT_COORDS);
@@ -418,26 +418,22 @@ export function HomeScreen() {
   );
 
   useEffect(() => {
-    const unsubscribeNet = NetInfo.addEventListener((state) => {
-      const connected = !!state.isConnected;
-      setOffline(!connected);
-      if (connected && locationResolved.current) {
-        const now = Date.now();
-        if (!hasFetchedOnce.current) {
-          void loadCacheAndFetch();
-        } else if (now - lastFetchRef.current > HOME_TTL) {
-          void fetchData({ force: true, silent: true });
-        }
-      }
-    });
-
     const unsubscribeAppState = AppState.addEventListener("change", handleAppStateChange);
 
     return () => {
-      unsubscribeNet();
       unsubscribeAppState.remove();
     };
-  }, [fetchData, handleAppStateChange, loadCacheAndFetch]);
+  }, [handleAppStateChange]);
+
+  useEffect(() => {
+    if (!isOnline || !locationResolved.current) return;
+    const now = Date.now();
+    if (!hasFetchedOnce.current) {
+      void loadCacheAndFetch();
+    } else if (now - lastFetchRef.current > HOME_TTL) {
+      void fetchData({ force: true, silent: true });
+    }
+  }, [fetchData, isOnline, loadCacheAndFetch]);
 
   useEffect(() => {
     requestLocation(false);
@@ -551,7 +547,7 @@ export function HomeScreen() {
             <Ionicons name="search" size={22} color={theme.colors.highlight} />
           </Pressable>
         </View>
-        {offline && (
+        {!isOnline && (
           <View className="mt-3 bg-[#FDE68A] rounded-lg px-3 py-2">
             <Text className="text-xs font-semibold text-[#92400E]">
               Sem conexão. Mostrando dados locais. Tentando reconectar...

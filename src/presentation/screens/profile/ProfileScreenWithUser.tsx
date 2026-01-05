@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { User } from "../../../domain/entities/User";
+import { useProfileSummaryStore } from "../../state/profileSummaryStore";
 
 export function ProfileScreenWithUser() {
   const { getCurrentUserUseCase } = useDependencies();
+  const setProfile = useProfileSummaryStore((state) => state.setProfile);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -16,6 +18,9 @@ export function ProfileScreenWithUser() {
       .then(result => {
         if (isMounted) {
           setUser(result);
+          if (result) {
+            setProfile(result);
+          }
         }
       })
       .finally(() => {
@@ -27,7 +32,7 @@ export function ProfileScreenWithUser() {
     return () => {
       isMounted = false;
     };
-  }, [getCurrentUserUseCase]);
+  }, [getCurrentUserUseCase, setProfile]);
 
   if (loading) {
     return (

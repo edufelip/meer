@@ -7,6 +7,8 @@ import { getTokens } from "../../storage/authStorage";
 import { clearAuthSession, primeApiToken } from "../../api/client";
 import { useValidateToken } from "../../hooks/useValidateToken";
 import { navigationRef } from "../navigation/navigationRef";
+import NetInfo from "@react-native-community/netinfo";
+import { useNetworkStatusStore } from "../../presentation/state/networkStatusStore";
 
 // Add cross-cutting providers (theme, auth, localization, etc.) here.
 export function AppProviders(props: PropsWithChildren) {
@@ -17,6 +19,7 @@ export function AppProviders(props: PropsWithChildren) {
       <QueryClientProvider client={queryClient}>
         <AuthBootstrap>{children}</AuthBootstrap>
         <FirebaseBootstrap />
+        <NetworkStatusBootstrap />
         <FavoriteSyncBootstrap />
       </QueryClientProvider>
     </DependenciesProvider>
@@ -40,6 +43,19 @@ function FirebaseBootstrap() {
       }
     })();
   }, [getCachedProfileUseCase]);
+
+  return null;
+}
+
+function NetworkStatusBootstrap() {
+  const setIsOnline = useNetworkStatusStore((state) => state.setIsOnline);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsOnline(!!state.isConnected);
+    });
+    return () => unsubscribe();
+  }, [setIsOnline]);
 
   return null;
 }

@@ -16,6 +16,7 @@ import type { RootStackParamList } from "../../../app/navigation/RootStack";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
 import type { StoreRating } from "../../../domain/entities/StoreRating";
 import { theme } from "../../../shared/theme";
+import { useStoreSummaryStore } from "../../state/storeSummaryStore";
 
 const PAGE_SIZE = 10;
 
@@ -31,7 +32,8 @@ export function StoreRatingsScreen() {
   const params = (route.params ?? {}) as RouteParams;
   const storeId = params.storeId;
   const storeName = params.storeName ?? "";
-  const reviewCount = params.reviewCount ?? 0;
+  const summary = useStoreSummaryStore((state) => (storeId ? state.summaries[storeId] : undefined));
+  const reviewCount = summary?.reviewCount ?? params.reviewCount ?? 0;
   const { getStoreRatingsUseCase } = useDependencies();
 
   const cacheKey = useMemo(() => ["store-ratings", storeId ?? "unknown"], [storeId]);

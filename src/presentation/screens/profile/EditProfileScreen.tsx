@@ -28,12 +28,14 @@ import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { uploadAsync } from "expo-file-system/legacy";
 import { useLogout } from "../../../hooks/useLogout";
+import { useProfileSummaryStore } from "../../state/profileSummaryStore";
 
 export function EditProfileScreen() {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "editProfile">>();
   const { getProfileUseCase, updateProfileUseCase, deleteAccountUseCase, requestAvatarUploadSlotUseCase } = useDependencies();
   const logout = useLogout();
+  const setProfile = useProfileSummaryStore((state) => state.setProfile);
   const goBackSafe = () => {
     if (navigation.canGoBack()) {
       navigation.goBack();
@@ -167,7 +169,8 @@ export function EditProfileScreen() {
         return;
       }
 
-      await updateProfileUseCase.execute(payload);
+      const updated = await updateProfileUseCase.execute(payload);
+      setProfile(updated);
       goBackSafe();
     } catch {
       Alert.alert("Erro", "Não foi possível salvar as alterações. Tente novamente.");
