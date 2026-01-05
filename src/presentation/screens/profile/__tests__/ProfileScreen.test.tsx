@@ -40,6 +40,7 @@ describe("ProfileScreen", () => {
       id: "u1",
       name: "Bea",
       email: "bea@test.com",
+      bio: "Bio da Bea",
       avatarUrl: "http://avatar",
       notifyNewStores: false,
       notifyPromos: false,
@@ -57,6 +58,7 @@ describe("ProfileScreen", () => {
     const { getByText } = view;
     await waitFor(() => expect(getByText("Bea")).toBeTruthy());
     expect(getByText("bea@test.com")).toBeTruthy();
+    expect(getByText("Bio da Bea")).toBeTruthy();
   });
 
   it("falls back to JWT payload when cache is empty", async () => {

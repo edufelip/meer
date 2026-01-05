@@ -43,6 +43,10 @@ jest.mock("../../navigation/navigationRef", () => ({
   }
 }));
 
+jest.mock("@react-native-community/netinfo", () => ({
+  addEventListener: jest.fn(() => () => undefined)
+}));
+
 describe("AppProviders", () => {
   beforeEach(() => {
     jest.clearAllMocks();

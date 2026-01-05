@@ -32,10 +32,6 @@ jest.mock("@react-native-async-storage/async-storage", () => ({
   removeItem: (...args: any[]) => mockRemoveItem(...args)
 }));
 
-jest.mock("@react-native-community/netinfo", () => ({
-  addEventListener: () => () => undefined
-}));
-
 describe("SearchScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();

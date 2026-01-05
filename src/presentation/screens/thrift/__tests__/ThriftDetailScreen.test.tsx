@@ -1,6 +1,8 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react-native";
 import { ThriftDetailScreen } from "../ThriftDetailScreen";
+import { useFavoritesStore } from "../../../state/favoritesStore";
+import { useStoreSummaryStore } from "../../../state/storeSummaryStore";
 
 jest.mock("@react-navigation/native", () => ({
   useNavigation: () => ({ goBack: jest.fn(), navigate: jest.fn() })
@@ -50,6 +52,11 @@ jest.mock("../../../../shared/deepLinks", () => ({
 }));
 
 describe("ThriftDetailScreen", () => {
+  beforeEach(() => {
+    useFavoritesStore.getState().reset();
+    useStoreSummaryStore.getState().reset();
+  });
+
   it("renders thrift store details", async () => {
     const { getByText } = render(<ThriftDetailScreen route={{ params: { id: "s1" } }} />);
     await waitFor(() => expect(getByText("Brecho Central")).toBeTruthy());

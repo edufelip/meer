@@ -1,8 +1,8 @@
 import React from "react";
 import { act, render, waitFor, fireEvent } from "@testing-library/react-native";
 import { HomeScreen } from "../HomeScreen";
-import NetInfo from "@react-native-community/netinfo";
 import * as Location from "expo-location";
+import { useNetworkStatusStore } from "../../../state/networkStatusStore";
 
 const mockNavigate = jest.fn();
 const mockGetFeatured = jest.fn();
@@ -48,10 +48,6 @@ jest.mock("expo-location", () => ({
   requestForegroundPermissionsAsync: jest.fn().mockResolvedValue({ status: "granted" }),
   getCurrentPositionAsync: jest.fn().mockResolvedValue({ coords: { latitude: 1, longitude: 2 } }),
   reverseGeocodeAsync: jest.fn().mockResolvedValue([{ city: "Sao Paulo", isoCountryCode: "BR" }])
-}));
-
-jest.mock("@react-native-community/netinfo", () => ({
-  addEventListener: jest.fn()
 }));
 
 jest.mock("../../../../storage/authStorage", () => ({
@@ -109,7 +105,7 @@ describe("HomeScreen", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (NetInfo.addEventListener as jest.Mock).mockImplementation(() => () => undefined);
+    useNetworkStatusStore.getState().reset();
     mockGetFeatured.mockResolvedValue([]);
     mockGetNearby.mockResolvedValue({ items: [], page: 1, hasNext: false });
     mockGetGuides.mockResolvedValue({ items: [], hasNext: false });
@@ -129,10 +125,7 @@ describe("HomeScreen", () => {
   });
 
   it("shows offline banner when netinfo reports disconnected", async () => {
-    (NetInfo.addEventListener as jest.Mock).mockImplementation((handler: any) => {
-      handler({ isConnected: false });
-      return () => undefined;
-    });
+    useNetworkStatusStore.getState().setIsOnline(false);
 
     const view = render(<HomeScreen />);
     await act(async () => {

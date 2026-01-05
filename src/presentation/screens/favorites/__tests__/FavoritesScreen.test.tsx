@@ -1,6 +1,7 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react-native";
 import { FavoritesScreen } from "../FavoritesScreen";
+import { useFavoritesStore } from "../../../state/favoritesStore";
 
 const mockGetFavorites = jest.fn();
 
@@ -29,6 +30,7 @@ describe("FavoritesScreen", () => {
   const originalConsoleError = console.error;
 
   beforeEach(() => {
+    useFavoritesStore.getState().reset();
     mockGetFavorites.mockResolvedValue([]);
   });
 

@@ -1,5 +1,7 @@
 import "@testing-library/jest-native/extend-expect";
 import "react-native-gesture-handler/jestSetup";
+import { resetAllStores } from "./src/presentation/state/resetAllStores";
+import { useNetworkStatusStore } from "./src/presentation/state/networkStatusStore";
 
 jest.mock("react-native-reanimated", () => require("react-native-reanimated/mock"));
 jest.mock("@react-native-async-storage/async-storage", () =>
@@ -18,3 +20,8 @@ jest.mock("react-native/Libraries/Animated/NativeAnimatedHelper", () => ({}), { 
 if (!(global as any).__ExpoImportMetaRegistry) {
   (global as any).__ExpoImportMetaRegistry = { url: null };
 }
+
+afterEach(() => {
+  resetAllStores();
+  useNetworkStatusStore.getState().reset();
+});
