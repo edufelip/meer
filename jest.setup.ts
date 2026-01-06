@@ -1,5 +1,6 @@
 import "@testing-library/jest-native/extend-expect";
 import "react-native-gesture-handler/jestSetup";
+import { act } from "@testing-library/react-native";
 import { resetAllStores } from "./src/presentation/state/resetAllStores";
 import { useNetworkStatusStore } from "./src/presentation/state/networkStatusStore";
 
@@ -22,6 +23,8 @@ if (!(global as any).__ExpoImportMetaRegistry) {
 }
 
 afterEach(() => {
-  resetAllStores();
-  useNetworkStatusStore.getState().reset();
+  act(() => {
+    resetAllStores();
+    useNetworkStatusStore.getState().reset();
+  });
 });

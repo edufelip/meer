@@ -161,6 +161,34 @@ describe("BrechoFormScreen", () => {
     alertSpy.mockRestore();
   });
 
+  it("clears social fields when instagram/website are removed", async () => {
+    mockUseRoute.mockReturnValue({
+      params: {
+        thriftStore: {
+          id: "s1",
+          name: "Brecho X",
+          description: "Desc",
+          openingHours: "9-18",
+          addressLine: "Rua A",
+          phone: "11999999999",
+          social: { instagram: "@brecho", website: "brecho.com" },
+          images: [{ id: "p1", url: "http://img" }]
+        }
+      }
+    });
+
+    const view = await renderBrecho();
+    fireEvent.changeText(view.getByPlaceholderText("seu_brecho"), "");
+    fireEvent.changeText(view.getByPlaceholderText("www.seu-brecho.com"), "");
+    fireEvent.press(view.getByText("Salvar alterações"));
+
+    await waitFor(() => expect(mockConfirmPhotos).toHaveBeenCalled());
+    await waitFor(() => expect(mockExecuteUpdate).toHaveBeenCalled());
+    const payload = mockExecuteUpdate.mock.calls[0][1];
+    expect(payload.social?.instagram).toBeNull();
+    expect(payload.social?.website).toBeNull();
+  });
+
   it("blocks invalid instagram handles", async () => {
     const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {});
     mockUseRoute.mockReturnValue({
@@ -190,6 +218,32 @@ describe("BrechoFormScreen", () => {
       "Instagram inválido",
       "Digite apenas um nome de usuário (uma única palavra, sem espaços)."
     );
+
+    alertSpy.mockRestore();
+  });
+
+  it("blocks invalid website values", async () => {
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(() => {});
+    mockUseRoute.mockReturnValue({
+      params: {
+        thriftStore: {
+          id: "s1",
+          name: "Brecho X",
+          description: "Desc",
+          openingHours: "9-18",
+          addressLine: "Rua A",
+          phone: "11999999999",
+          images: [{ id: "p1", url: "http://img" }]
+        }
+      }
+    });
+
+    const view = await renderBrecho();
+    const { getByPlaceholderText, getByText } = view;
+    fireEvent.changeText(getByPlaceholderText("www.seu-brecho.com"), "meu-site");
+
+    fireEvent.press(getByText("Salvar alterações"));
+    expect(alertSpy).toHaveBeenCalledWith("Website inválido", "Digite um site válido contendo .com.");
 
     alertSpy.mockRestore();
   });
