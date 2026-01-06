@@ -27,6 +27,7 @@ export const linking: LinkingOptions<RootStackParamList> = {
         }
       },
       thriftDetail: "store/:id",
+      contentDetail: "content/:contentId",
       search: "search",
       contact: "contact"
     }

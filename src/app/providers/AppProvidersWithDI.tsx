@@ -16,6 +16,7 @@ import { GetCurrentUserUseCase } from "../../domain/usecases/GetCurrentUserUseCa
 import { GetFeaturedThriftStoresUseCase } from "../../domain/usecases/GetFeaturedThriftStoresUseCase";
 import { GetNearbyThriftStoresUseCase } from "../../domain/usecases/GetNearbyThriftStoresUseCase";
 import { GetGuideContentUseCase } from "../../domain/usecases/GetGuideContentUseCase";
+import { GetGuideContentByIdUseCase } from "../../domain/usecases/GetGuideContentByIdUseCase";
 import { CreateContentUseCase } from "../../domain/usecases/CreateContentUseCase";
 import { UpdateContentUseCase } from "../../domain/usecases/UpdateContentUseCase";
 import { RequestContentImageUploadUseCase } from "../../domain/usecases/RequestContentImageUploadUseCase";
@@ -55,6 +56,7 @@ interface Dependencies {
   getFeaturedThriftStoresUseCase: GetFeaturedThriftStoresUseCase;
   getNearbyThriftStoresUseCase: GetNearbyThriftStoresUseCase;
   getGuideContentUseCase: GetGuideContentUseCase;
+  getGuideContentByIdUseCase: GetGuideContentByIdUseCase;
   createContentUseCase: CreateContentUseCase;
   updateContentUseCase: UpdateContentUseCase;
   requestContentImageUploadUseCase: RequestContentImageUploadUseCase;
@@ -123,6 +125,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const getFeaturedThriftStoresUseCase = new GetFeaturedThriftStoresUseCase(thriftStoreRepository);
     const getNearbyThriftStoresUseCase = new GetNearbyThriftStoresUseCase(thriftStoreRepository);
     const getGuideContentUseCase = new GetGuideContentUseCase(guideContentRepository);
+    const getGuideContentByIdUseCase = new GetGuideContentByIdUseCase(guideContentRepository);
     const createContentUseCase = new CreateContentUseCase(guideContentRepository);
     const updateContentUseCase = new UpdateContentUseCase(guideContentRepository);
     const requestContentImageUploadUseCase = new RequestContentImageUploadUseCase(guideContentRepository);
@@ -155,6 +158,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
       getFeaturedThriftStoresUseCase,
       getNearbyThriftStoresUseCase,
       getGuideContentUseCase,
+      getGuideContentByIdUseCase,
       createContentUseCase,
       updateContentUseCase,
       requestContentImageUploadUseCase,

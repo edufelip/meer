@@ -12,6 +12,10 @@ export class GuideContentRepositoryJson implements GuideContentRepository {
     return this.remote.listLatest(params);
   }
 
+  getById(id: string) {
+    return this.remote.getById(id);
+  }
+
   createContent(payload: { title: string; description?: string; storeId: string }): Promise<{ id: string }> {
     return this.remote.createContent(payload);
   }

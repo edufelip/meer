@@ -1,5 +1,6 @@
 import * as Linking from "expo-linking";
 import type { ThriftStoreId } from "../domain/entities/ThriftStore";
+import type { GuideContentId } from "../domain/entities/GuideContent";
 import urls from "../../constants/urls.json";
 
 const WEB_BASE_URL = urls.webBaseUrl;
@@ -39,9 +40,24 @@ export function buildThriftStorePath(id: ThriftStoreId): string {
   return `store/${encodeURIComponent(id)}`;
 }
 
+export function buildContentPath(id: GuideContentId): string {
+  return `content/${encodeURIComponent(id)}`;
+}
+
 export function buildThriftStoreShareUrl(id: ThriftStoreId): string {
   const baseUrl = getWebBaseUrl();
   const path = buildThriftStorePath(id);
+
+  if (baseUrl) {
+    return `${baseUrl}/${path}`;
+  }
+
+  return Linking.createURL(path);
+}
+
+export function buildContentShareUrl(id: GuideContentId): string {
+  const baseUrl = getWebBaseUrl();
+  const path = buildContentPath(id);
 
   if (baseUrl) {
     return `${baseUrl}/${path}`;

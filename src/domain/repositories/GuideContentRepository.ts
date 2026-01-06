@@ -1,4 +1,4 @@
-import type { GuideContent } from "../entities/GuideContent";
+import type { GuideContent, GuideContentId } from "../entities/GuideContent";
 
 export type GuideContentSort = "newest" | "oldest";
 
@@ -30,6 +30,7 @@ export type GuideContentPage = {
 
 export interface GuideContentRepository {
   listLatest(params?: GuideContentListParams): Promise<GuideContentPage>;
+  getById(id: GuideContentId): Promise<GuideContent | null>;
   createContent(payload: { title: string; description?: string; storeId: string }): Promise<{ id: string }>;
   updateContent(id: string, payload: { title?: string; description?: string; imageUrl?: string }): Promise<void>;
   requestImageUpload(

@@ -62,6 +62,12 @@ export class InMemoryGuideContentRepository implements GuideContentRepository {
     return { items, page, hasNext };
   }
 
+  async getById(id: string): Promise<GuideContent | null> {
+    const normalized = id.trim().toLowerCase();
+    const found = guides.find((guide) => guide.id.toLowerCase() === normalized);
+    return found ?? null;
+  }
+
   async createContent(): Promise<{ id: string }> {
     throw new Error("InMemory repository does not support createContent");
   }

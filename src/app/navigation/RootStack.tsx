@@ -18,7 +18,7 @@ import { CategoryStoresScreen } from "../../presentation/screens/categories/Cate
 import type { ThriftStoreId } from "../../domain/entities/ThriftStore";
 import type { RootTabParamList } from "./RootTabs";
 import type { User } from "../../domain/entities/User";
-import type { GuideContent } from "../../domain/entities/GuideContent";
+import type { GuideContent, GuideContentId } from "../../domain/entities/GuideContent";
 
 export type RootStackParamList = {
   login: undefined;
@@ -35,7 +35,7 @@ export type RootStackParamList = {
   contact: undefined;
   editContent: { articleId?: string; storeId: ThriftStoreId; article?: GuideContent };
   categoryStores: { categoryId?: string; title: string; type?: "nearby" | "category"; lat?: number; lng?: number };
-  contentDetail: { content: GuideContent };
+  contentDetail: { content: GuideContent } | { contentId: GuideContentId };
   contents:
     | {
         initialItems?: GuideContent[];

@@ -25,6 +25,11 @@ export class HttpGuideContentRemoteDataSource implements GuideContentRemoteDataS
     return res.data;
   }
 
+  async getById(id: string): Promise<GuideContent | null> {
+    const res = await api.get<GuideContent | null>(`/contents/${id}`);
+    return res.data;
+  }
+
   async createContent(payload: { title: string; description?: string; storeId: string }): Promise<{ id: string }> {
     const res = await api.post<{ id: string }>("/contents", payload);
     return res.data;
