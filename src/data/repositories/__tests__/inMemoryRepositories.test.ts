@@ -32,6 +32,14 @@ describe("InMemoryGuideContentRepository", () => {
     expect(page.items.length).toBeGreaterThan(0);
     expect(page.items[0].createdAt).toBeDefined();
   });
+
+  it("gets content by id", async () => {
+    const repo = new InMemoryGuideContentRepository();
+
+    const item = await repo.getById("garimpo-sucesso");
+
+    expect(item?.id).toBe("garimpo-sucesso");
+  });
 });
 
 describe("InMemoryThriftStoreRepository", () => {

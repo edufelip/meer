@@ -10,6 +10,7 @@ import { GetCategoriesUseCase } from "../GetCategoriesUseCase";
 import { GetCurrentUserUseCase } from "../GetCurrentUserUseCase";
 import { GetFavoriteThriftStoresUseCase } from "../GetFavoriteThriftStoresUseCase";
 import { GetFeaturedThriftStoresUseCase } from "../GetFeaturedThriftStoresUseCase";
+import { GetGuideContentByIdUseCase } from "../GetGuideContentByIdUseCase";
 import { GetGuideContentUseCase } from "../GetGuideContentUseCase";
 import { GetHomeUseCase } from "../GetHomeUseCase";
 import { GetMyFeedbackUseCase } from "../GetMyFeedbackUseCase";
@@ -170,6 +171,16 @@ describe("domain use cases", () => {
 
     expect(listLatest).toHaveBeenCalledWith(params);
     expect(result).toEqual({ items: [{ id: "content-1" }] });
+  });
+
+  it("GetGuideContentByIdUseCase delegates to repository", async () => {
+    const getById = jest.fn().mockResolvedValue({ id: "content-1" });
+    const useCase = new GetGuideContentByIdUseCase({ getById } as any);
+
+    const result = await useCase.execute("content-1");
+
+    expect(getById).toHaveBeenCalledWith("content-1");
+    expect(result).toEqual({ id: "content-1" });
   });
 
   it("GetHomeUseCase aggregates content and defaults to empty arrays", async () => {

@@ -243,11 +243,14 @@ describe("HttpCategoryRemoteDataSource", () => {
 
 describe("HttpGuideContentRemoteDataSource", () => {
   it("maps list params and delegates other calls", async () => {
-    apiMock.get.mockResolvedValue({ data: { items: [], page: 0, hasNext: false } });
+    apiMock.get
+      .mockResolvedValueOnce({ data: { items: [], page: 0, hasNext: false } })
+      .mockResolvedValueOnce({ data: { id: "content-1" } });
     apiMock.post.mockResolvedValue({ data: { id: "content-1" } });
 
     const ds = new HttpGuideContentRemoteDataSource();
     await ds.listLatest({ q: " Test ", sort: "newest", page: 2, pageSize: 5, storeId: "store" });
+    await ds.getById("content-1");
     await ds.createContent({ title: "Title", storeId: "store" });
     await ds.updateContent("content-1", { title: "Updated" });
     await ds.requestImageUpload("content-1", "image/png");
@@ -257,6 +260,7 @@ describe("HttpGuideContentRemoteDataSource", () => {
     expect(apiMock.get).toHaveBeenCalledWith("/contents", {
       params: { q: "Test", sort: "newest", page: 2, pageSize: 5, storeId: "store" }
     });
+    expect(apiMock.get).toHaveBeenCalledWith("/contents/content-1");
     expect(apiMock.post).toHaveBeenCalledWith("/contents", { title: "Title", storeId: "store" });
     expect(apiMock.put).toHaveBeenCalledWith("/contents/content-1", { title: "Updated" });
     expect(apiMock.post).toHaveBeenCalledWith("/contents/content-1/image/upload", { contentType: "image/png" });

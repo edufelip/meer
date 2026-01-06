@@ -87,6 +87,7 @@ describe("GuideContentRepositoryJson", () => {
   it("delegates guide content calls", async () => {
     const remote = {
       listLatest: jest.fn().mockResolvedValue({ items: [] }),
+      getById: jest.fn().mockResolvedValue({ id: "content-1" }),
       createContent: jest.fn().mockResolvedValue({ id: "content-1" }),
       updateContent: jest.fn().mockResolvedValue(undefined),
       requestImageUpload: jest.fn().mockResolvedValue({ uploadUrl: "url", fileKey: "key", contentType: "image/png" }),
@@ -95,6 +96,7 @@ describe("GuideContentRepositoryJson", () => {
     const repo = new GuideContentRepositoryJson(remote as any);
 
     expect(await repo.listLatest({ page: 1 })).toEqual({ items: [] });
+    expect(await repo.getById("content-1")).toEqual({ id: "content-1" });
     expect(await repo.createContent({ title: "Title", storeId: "store" })).toEqual({ id: "content-1" });
 
     await repo.updateContent("content-1", { title: "Updated" });
@@ -102,6 +104,7 @@ describe("GuideContentRepositoryJson", () => {
     await repo.deleteContent("content-1");
 
     expect(remote.listLatest).toHaveBeenCalledWith({ page: 1 });
+    expect(remote.getById).toHaveBeenCalledWith("content-1");
     expect(remote.createContent).toHaveBeenCalledWith({ title: "Title", storeId: "store" });
     expect(remote.updateContent).toHaveBeenCalledWith("content-1", { title: "Updated" });
     expect(remote.requestImageUpload).toHaveBeenCalledWith("content-1", "image/png");
