@@ -1,12 +1,15 @@
 import { ConfirmStorePhotosUseCase } from "../ConfirmStorePhotosUseCase";
 import { CreateContentUseCase } from "../CreateContentUseCase";
+import { CreateContentCommentUseCase } from "../CreateContentCommentUseCase";
 import { CreateOrUpdateStoreUseCase } from "../CreateOrUpdateStoreUseCase";
 import { DeleteAccountUseCase } from "../DeleteAccountUseCase";
+import { DeleteContentCommentUseCase } from "../DeleteContentCommentUseCase";
 import { DeleteContentUseCase } from "../DeleteContentUseCase";
 import { DeleteMyFeedbackUseCase } from "../DeleteMyFeedbackUseCase";
 import { GetCachedCategoriesUseCase } from "../GetCachedCategoriesUseCase";
 import { GetCachedProfileUseCase } from "../GetCachedProfileUseCase";
 import { GetCategoriesUseCase } from "../GetCategoriesUseCase";
+import { GetContentCommentsUseCase } from "../GetContentCommentsUseCase";
 import { GetCurrentUserUseCase } from "../GetCurrentUserUseCase";
 import { GetFavoriteThriftStoresUseCase } from "../GetFavoriteThriftStoresUseCase";
 import { GetFeaturedThriftStoresUseCase } from "../GetFeaturedThriftStoresUseCase";
@@ -21,13 +24,16 @@ import { GetStoreRatingsUseCase } from "../GetStoreRatingsUseCase";
 import { GetStoresByCategoryUseCase } from "../GetStoresByCategoryUseCase";
 import { GetThriftStoreByIdUseCase } from "../GetThriftStoreByIdUseCase";
 import { IsFavoriteThriftStoreUseCase } from "../IsFavoriteThriftStoreUseCase";
+import { LikeContentUseCase } from "../LikeContentUseCase";
 import { RequestAvatarUploadSlotUseCase } from "../RequestAvatarUploadSlotUseCase";
 import { RequestContentImageUploadUseCase } from "../RequestContentImageUploadUseCase";
 import { RequestStorePhotoUploadsUseCase } from "../RequestStorePhotoUploadsUseCase";
 import { SearchThriftStoresUseCase } from "../SearchThriftStoresUseCase";
 import { SendSupportMessageUseCase } from "../SendSupportMessageUseCase";
 import { ToggleFavoriteThriftStoreUseCase } from "../ToggleFavoriteThriftStoreUseCase";
+import { UnlikeContentUseCase } from "../UnlikeContentUseCase";
 import { UpdateContentUseCase } from "../UpdateContentUseCase";
+import { UpdateContentCommentUseCase } from "../UpdateContentCommentUseCase";
 import { UpdateProfileUseCase } from "../UpdateProfileUseCase";
 import { UpsertFeedbackUseCase } from "../UpsertFeedbackUseCase";
 
@@ -57,6 +63,26 @@ describe("domain use cases", () => {
     expect(result).toEqual({ id: "content-1" });
   });
 
+  it("CreateContentCommentUseCase validates and delegates", async () => {
+    const create = jest.fn().mockResolvedValue({ id: "comment-1" });
+    const useCase = new CreateContentCommentUseCase({ create } as any);
+
+    const result = await useCase.execute({ contentId: "content-1", body: "Oi" });
+
+    expect(create).toHaveBeenCalledWith("content-1", "Oi");
+    expect(result).toEqual({ id: "comment-1" });
+  });
+
+  it("CreateContentCommentUseCase rejects empty body", async () => {
+    const create = jest.fn();
+    const useCase = new CreateContentCommentUseCase({ create } as any);
+
+    await expect(useCase.execute({ contentId: "content-1", body: "   " })).rejects.toThrow(
+      "Comentário não pode ser vazio."
+    );
+    expect(create).not.toHaveBeenCalled();
+  });
+
   it("CreateOrUpdateStoreUseCase delegates create and update", async () => {
     const createStore = jest.fn().mockResolvedValue({ id: "store-1" });
     const updateStore = jest.fn().mockResolvedValue({ id: "store-1", name: "Updated" });
@@ -81,6 +107,15 @@ describe("domain use cases", () => {
     await useCase.execute("user@example.com");
 
     expect(deleteAccount).toHaveBeenCalledWith("user@example.com");
+  });
+
+  it("DeleteContentCommentUseCase delegates to repository", async () => {
+    const deleteComment = jest.fn().mockResolvedValue(undefined);
+    const useCase = new DeleteContentCommentUseCase({ delete: deleteComment } as any);
+
+    await useCase.execute({ contentId: "content-1", commentId: "comment-1" });
+
+    expect(deleteComment).toHaveBeenCalledWith("content-1", "comment-1");
   });
 
   it("DeleteContentUseCase delegates to repository", async () => {
@@ -129,6 +164,17 @@ describe("domain use cases", () => {
 
     expect(list).toHaveBeenCalledTimes(1);
     expect(result).toEqual([{ id: "cat-1" }]);
+  });
+
+  it("GetContentCommentsUseCase delegates to repository", async () => {
+    const list = jest.fn().mockResolvedValue({ items: [], page: 0, hasNext: false });
+    const useCase = new GetContentCommentsUseCase({ list } as any);
+
+    const params = { contentId: "content-1", page: 0, pageSize: 20 };
+    const result = await useCase.execute(params);
+
+    expect(list).toHaveBeenCalledWith(params);
+    expect(result).toEqual({ items: [], page: 0, hasNext: false });
   });
 
   it("GetCurrentUserUseCase delegates to repository", async () => {
@@ -284,6 +330,24 @@ describe("domain use cases", () => {
     expect(result).toBe(true);
   });
 
+  it("LikeContentUseCase delegates to repository", async () => {
+    const like = jest.fn().mockResolvedValue(undefined);
+    const useCase = new LikeContentUseCase({ like } as any);
+
+    await useCase.execute("content-1");
+
+    expect(like).toHaveBeenCalledWith("content-1");
+  });
+
+  it("UnlikeContentUseCase delegates to repository", async () => {
+    const unlike = jest.fn().mockResolvedValue(undefined);
+    const useCase = new UnlikeContentUseCase({ unlike } as any);
+
+    await useCase.execute("content-1");
+
+    expect(unlike).toHaveBeenCalledWith("content-1");
+  });
+
   it("RequestAvatarUploadSlotUseCase delegates to repository", async () => {
     const requestAvatarUploadSlot = jest.fn().mockResolvedValue({ uploadUrl: "url", fileKey: "key", contentType: "image/jpeg" });
     const useCase = new RequestAvatarUploadSlotUseCase({ requestAvatarUploadSlot } as any);
@@ -352,6 +416,16 @@ describe("domain use cases", () => {
 
     expect(updateContent).toHaveBeenCalledWith("content-1", payload);
     expect(result).toEqual({ id: "content-1" });
+  });
+
+  it("UpdateContentCommentUseCase validates and delegates", async () => {
+    const update = jest.fn().mockResolvedValue({ id: "comment-1" });
+    const useCase = new UpdateContentCommentUseCase({ update } as any);
+
+    const result = await useCase.execute({ contentId: "content-1", commentId: "comment-1", body: "Oi" });
+
+    expect(update).toHaveBeenCalledWith("content-1", "comment-1", "Oi");
+    expect(result).toEqual({ id: "comment-1" });
   });
 
   it("UpdateProfileUseCase delegates to repository", async () => {

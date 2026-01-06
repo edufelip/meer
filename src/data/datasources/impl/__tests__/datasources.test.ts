@@ -8,6 +8,8 @@ import { loadFromJson, saveToJson } from "../LocalJsonClient";
 import { HttpCategoryRemoteDataSource } from "../HttpCategoryRemoteDataSource";
 import { HttpFavoriteRemoteDataSource } from "../HttpFavoriteRemoteDataSource";
 import { HttpFeedbackRemoteDataSource } from "../HttpFeedbackRemoteDataSource";
+import { HttpContentCommentRemoteDataSource } from "../HttpContentCommentRemoteDataSource";
+import { HttpContentLikeRemoteDataSource } from "../HttpContentLikeRemoteDataSource";
 import { HttpGuideContentRemoteDataSource } from "../HttpGuideContentRemoteDataSource";
 import { HttpProfileRemoteDataSource } from "../HttpProfileRemoteDataSource";
 import { HttpSupportRemoteDataSource } from "../HttpSupportRemoteDataSource";
@@ -266,6 +268,42 @@ describe("HttpGuideContentRemoteDataSource", () => {
     expect(apiMock.post).toHaveBeenCalledWith("/contents/content-1/image/upload", { contentType: "image/png" });
     expect(apiMock.post).toHaveBeenCalledWith("/contents/content-1/image/upload", {});
     expect(apiMock.delete).toHaveBeenCalledWith("/contents/content-1");
+  });
+});
+
+describe("HttpContentCommentRemoteDataSource", () => {
+  it("lists and mutates comments", async () => {
+    apiMock.get.mockResolvedValue({ data: { items: [], page: 0, hasNext: false } });
+    apiMock.post.mockResolvedValue({ data: { id: "comment-1" } });
+    apiMock.patch.mockResolvedValue({ data: { id: "comment-1" } });
+    apiMock.delete.mockResolvedValue({ data: {} });
+
+    const ds = new HttpContentCommentRemoteDataSource();
+    await ds.list({ contentId: "content-1", page: 0, pageSize: 20 });
+    await ds.create("content-1", "Oi");
+    await ds.update("content-1", "comment-1", "Oi");
+    await ds.delete("content-1", "comment-1");
+
+    expect(apiMock.get).toHaveBeenCalledWith("/contents/content-1/comments", {
+      params: { page: 0, pageSize: 20 }
+    });
+    expect(apiMock.post).toHaveBeenCalledWith("/contents/content-1/comments", { body: "Oi" });
+    expect(apiMock.patch).toHaveBeenCalledWith("/contents/content-1/comments/comment-1", { body: "Oi" });
+    expect(apiMock.delete).toHaveBeenCalledWith("/contents/content-1/comments/comment-1");
+  });
+});
+
+describe("HttpContentLikeRemoteDataSource", () => {
+  it("likes and unlikes content", async () => {
+    apiMock.post.mockResolvedValue({ data: {} });
+    apiMock.delete.mockResolvedValue({ data: {} });
+
+    const ds = new HttpContentLikeRemoteDataSource();
+    await ds.like("content-1");
+    await ds.unlike("content-1");
+
+    expect(apiMock.post).toHaveBeenCalledWith("/contents/content-1/likes");
+    expect(apiMock.delete).toHaveBeenCalledWith("/contents/content-1/likes");
   });
 });
 

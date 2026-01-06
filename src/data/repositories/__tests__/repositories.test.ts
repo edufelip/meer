@@ -1,5 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { CategoryRepositoryJson } from "../CategoryRepositoryJson";
+import { ContentCommentRepositoryImpl } from "../ContentCommentRepositoryImpl";
+import { ContentLikeRepositoryImpl } from "../ContentLikeRepositoryImpl";
 import { FeedbackRepositoryImpl } from "../FeedbackRepositoryImpl";
 import { FavoriteRepositoryAsyncStorage } from "../FavoriteRepositoryAsyncStorage";
 import { FavoriteRepositoryHybrid } from "../FavoriteRepositoryHybrid";
@@ -109,6 +111,48 @@ describe("GuideContentRepositoryJson", () => {
     expect(remote.updateContent).toHaveBeenCalledWith("content-1", { title: "Updated" });
     expect(remote.requestImageUpload).toHaveBeenCalledWith("content-1", "image/png");
     expect(remote.deleteContent).toHaveBeenCalledWith("content-1");
+  });
+});
+
+describe("ContentCommentRepositoryImpl", () => {
+  it("delegates comment operations", async () => {
+    const remote = {
+      list: jest.fn().mockResolvedValue({ items: [], page: 0, hasNext: false }),
+      create: jest.fn().mockResolvedValue({ id: "comment-1" }),
+      update: jest.fn().mockResolvedValue({ id: "comment-1" }),
+      delete: jest.fn().mockResolvedValue(undefined)
+    };
+    const repo = new ContentCommentRepositoryImpl(remote as any);
+
+    expect(await repo.list({ contentId: "content-1", page: 0, pageSize: 20 })).toEqual({
+      items: [],
+      page: 0,
+      hasNext: false
+    });
+    expect(await repo.create("content-1", "Oi")).toEqual({ id: "comment-1" });
+    expect(await repo.update("content-1", "comment-1", "Oi")).toEqual({ id: "comment-1" });
+    await repo.delete("content-1", "comment-1");
+
+    expect(remote.list).toHaveBeenCalledWith({ contentId: "content-1", page: 0, pageSize: 20 });
+    expect(remote.create).toHaveBeenCalledWith("content-1", "Oi");
+    expect(remote.update).toHaveBeenCalledWith("content-1", "comment-1", "Oi");
+    expect(remote.delete).toHaveBeenCalledWith("content-1", "comment-1");
+  });
+});
+
+describe("ContentLikeRepositoryImpl", () => {
+  it("delegates like operations", async () => {
+    const remote = {
+      like: jest.fn().mockResolvedValue(undefined),
+      unlike: jest.fn().mockResolvedValue(undefined)
+    };
+    const repo = new ContentLikeRepositoryImpl(remote as any);
+
+    await repo.like("content-1");
+    await repo.unlike("content-1");
+
+    expect(remote.like).toHaveBeenCalledWith("content-1");
+    expect(remote.unlike).toHaveBeenCalledWith("content-1");
   });
 });
 

@@ -14,16 +14,33 @@ jest.mock("react-native-safe-area-context", () => ({
 const mockGoBack = jest.fn();
 const mockUseRoute = jest.fn();
 const mockGetGuideContentById = jest.fn();
+const mockGetContentComments = jest.fn();
+const mockCreateContentComment = jest.fn();
+const mockLikeContent = jest.fn();
+const mockUnlikeContent = jest.fn();
+const mockGetTokens = jest.fn();
+const mockGetAccessTokenSync = jest.fn();
 
 jest.mock("@react-navigation/native", () => ({
   useNavigation: () => ({ goBack: mockGoBack }),
   useRoute: () => mockUseRoute()
 }));
 
+const dependencies = {
+  getGuideContentByIdUseCase: { execute: (...args: any[]) => mockGetGuideContentById(...args) },
+  getContentCommentsUseCase: { execute: (...args: any[]) => mockGetContentComments(...args) },
+  createContentCommentUseCase: { execute: (...args: any[]) => mockCreateContentComment(...args) },
+  likeContentUseCase: { execute: (...args: any[]) => mockLikeContent(...args) },
+  unlikeContentUseCase: { execute: (...args: any[]) => mockUnlikeContent(...args) }
+};
+
 jest.mock("../../../../app/providers/AppProvidersWithDI", () => ({
-  useDependencies: () => ({
-    getGuideContentByIdUseCase: { execute: (...args: any[]) => mockGetGuideContentById(...args) }
-  })
+  useDependencies: () => dependencies
+}));
+
+jest.mock("../../../../storage/authStorage", () => ({
+  getTokens: () => mockGetTokens(),
+  getAccessTokenSync: () => mockGetAccessTokenSync()
 }));
 
 describe("ContentDetailScreen", () => {
@@ -47,6 +64,12 @@ describe("ContentDetailScreen", () => {
   beforeEach(() => {
     mockGoBack.mockClear();
     mockGetGuideContentById.mockReset();
+    mockGetContentComments.mockReset();
+    mockCreateContentComment.mockReset();
+    mockLikeContent.mockReset();
+    mockUnlikeContent.mockReset();
+    mockGetTokens.mockReset();
+    mockGetAccessTokenSync.mockReset();
     mockUseRoute.mockReturnValue({
       params: {
         content: {
@@ -59,6 +82,9 @@ describe("ContentDetailScreen", () => {
         }
       }
     });
+    mockGetContentComments.mockResolvedValue({ items: [], page: 0, hasNext: false });
+    mockGetTokens.mockResolvedValue({ token: "token" });
+    mockGetAccessTokenSync.mockReturnValue("token");
   });
 
   it("renders content and handles back", () => {
@@ -67,6 +93,7 @@ describe("ContentDetailScreen", () => {
     expect(getByText("Guia")).toBeTruthy();
     expect(getByText("Texto")).toBeTruthy();
     expect(getByText("Loja")).toBeTruthy();
+    expect(getByText("Comentários")).toBeTruthy();
 
     fireEvent.press(getByLabelText("Voltar"));
     expect(mockGoBack).toHaveBeenCalledTimes(1);
@@ -87,5 +114,60 @@ describe("ContentDetailScreen", () => {
 
     await waitFor(() => expect(view.getByText("Conteúdo 2")).toBeTruthy());
     expect(mockGetGuideContentById).toHaveBeenCalledWith("content-2");
+  });
+
+  it("submits a comment when authenticated", async () => {
+    mockCreateContentComment.mockResolvedValue({
+      id: "comment-1",
+      body: "Novo comentário",
+      userId: "user-1",
+      userDisplayName: "Eu",
+      createdAt: "2024-01-02T12:00:00.000Z"
+    });
+
+    const view = render(<ContentDetailScreen />);
+    const input = await waitFor(() => view.getByTestId("comment-input"));
+
+    fireEvent.changeText(input, "Novo comentário");
+    fireEvent.press(view.getByTestId("comment-send"));
+
+    await waitFor(() =>
+      expect(mockCreateContentComment).toHaveBeenCalledWith({ contentId: "content-1", body: "Novo comentário" })
+    );
+    await waitFor(() => expect(view.getByText("Novo comentário")).toBeTruthy());
+  });
+
+  it("shows auth notice when trying to comment anonymously", async () => {
+    mockGetTokens.mockResolvedValue({ token: undefined });
+    mockGetAccessTokenSync.mockReturnValue(null);
+
+    const view = render(<ContentDetailScreen />);
+    const input = await waitFor(() => view.getByTestId("comment-input"));
+
+    fireEvent.changeText(input, "Oi");
+    fireEvent.press(view.getByTestId("comment-send"));
+
+    await waitFor(() => expect(view.getByText("Faça login para comentar.")).toBeTruthy());
+    expect(mockCreateContentComment).not.toHaveBeenCalled();
+  });
+
+  it("optimistically updates likes", async () => {
+    let resolveLike: () => void;
+    const likePromise = new Promise<void>((resolve) => {
+      resolveLike = resolve;
+    });
+    mockLikeContent.mockReturnValue(likePromise);
+
+    const view = render(<ContentDetailScreen />);
+    const likeButton = await waitFor(() => view.getByTestId("content-like-button"));
+
+    expect(view.getByTestId("content-like-count").props.children).toBe(0);
+
+    fireEvent.press(likeButton);
+
+    await waitFor(() => expect(view.getByTestId("content-like-count").props.children).toBe(1));
+    expect(mockLikeContent).toHaveBeenCalledWith("content-1");
+
+    resolveLike!();
   });
 });
