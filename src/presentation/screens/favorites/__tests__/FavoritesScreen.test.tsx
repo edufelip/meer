@@ -1,7 +1,15 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react-native";
 import { FavoritesScreen } from "../FavoritesScreen";
-import { useFavoritesStore } from "../../../state/favoritesStore";
+
+const mockFavoritesState = {
+  items: [],
+  loading: false,
+  refreshing: false,
+  setFavorites: jest.fn(),
+  setLoading: jest.fn(),
+  setRefreshing: jest.fn()
+};
 
 const mockGetFavorites = jest.fn();
 
@@ -14,6 +22,10 @@ jest.mock("../../../../app/providers/AppProvidersWithDI", () => ({
   useDependencies: () => ({
     getFavoriteThriftStoresUseCase: { execute: (...args: any[]) => mockGetFavorites(...args) }
   })
+}));
+
+jest.mock("../../../state/favoritesStore", () => ({
+  useFavoritesStore: (selector: any) => (selector ? selector(mockFavoritesState) : mockFavoritesState)
 }));
 
 jest.mock("@expo/vector-icons", () => ({
@@ -30,7 +42,9 @@ describe("FavoritesScreen", () => {
   const originalConsoleError = console.error;
 
   beforeEach(() => {
-    useFavoritesStore.getState().reset();
+    mockFavoritesState.items = [];
+    mockFavoritesState.loading = false;
+    mockFavoritesState.refreshing = false;
     mockGetFavorites.mockResolvedValue([]);
   });
 
