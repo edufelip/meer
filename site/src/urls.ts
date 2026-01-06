@@ -1,7 +1,7 @@
 import urls from "../../constants/urls.json";
 
 export const appName = "Guia Brechó";
-export const androidPackage = "com.edufelip.amazing_note";
+export const androidPackage = "com.edufelip.meer";
 export const iosAppStoreId = "6756424043";
 
 export const webBaseUrl = urls.webBaseUrl;

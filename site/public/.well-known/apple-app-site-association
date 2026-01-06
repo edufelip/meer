@@ -4,7 +4,7 @@
     "details": [
       {
         "appID": "L4N9Z3Z82V.com.edufelip.meer",
-        "paths": ["/", "/store/*"]
+        "paths": ["/content/*", "/store/*"]
       }
     ]
   }

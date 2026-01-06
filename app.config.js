@@ -71,6 +71,10 @@ function ensureStoreIntentFilter(intentFilters, hostname) {
   return ensureIntentFilter(intentFilters, { hostname, pathPrefix: "/store" });
 }
 
+function ensureContentIntentFilter(intentFilters, hostname) {
+  return ensureIntentFilter(intentFilters, { hostname, pathPrefix: "/content" });
+}
+
 function ensureRootIntentFilter(intentFilters, hostname) {
   return ensureIntentFilter(intentFilters, { hostname, path: "/" });
 }
@@ -128,8 +132,10 @@ module.exports = ({ config }) => {
 
   let intentFilters = config.android?.intentFilters;
   intentFilters = ensureStoreIntentFilter(intentFilters, hostname);
+  intentFilters = ensureContentIntentFilter(intentFilters, hostname);
   intentFilters = ensureRootIntentFilter(intentFilters, hostname);
   intentFilters = ensureStoreIntentFilter(intentFilters, wwwHostname);
+  intentFilters = ensureContentIntentFilter(intentFilters, wwwHostname);
   intentFilters = ensureRootIntentFilter(intentFilters, wwwHostname);
 
   return {
