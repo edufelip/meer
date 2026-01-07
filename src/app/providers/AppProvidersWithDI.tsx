@@ -60,6 +60,16 @@ import { SendSupportMessageUseCase } from "../../domain/usecases/SendSupportMess
 import { RequestAvatarUploadSlotUseCase } from "../../domain/usecases/RequestAvatarUploadSlotUseCase";
 import { RequestStorePhotoUploadsUseCase } from "../../domain/usecases/RequestStorePhotoUploadsUseCase";
 import { ConfirmStorePhotosUseCase } from "../../domain/usecases/ConfirmStorePhotosUseCase";
+import { AsyncStoragePushNotificationsLocalDataSource } from "../../data/datasources/impl/AsyncStoragePushNotificationsLocalDataSource";
+import { HttpPushNotificationsRemoteDataSource } from "../../data/datasources/impl/HttpPushNotificationsRemoteDataSource";
+import { PushNotificationsRepositoryImpl } from "../../data/repositories/PushNotificationsRepositoryImpl";
+import { RequestPushPermissionUseCase } from "../../domain/usecases/RequestPushPermissionUseCase";
+import { GetPushTokenUseCase } from "../../domain/usecases/GetPushTokenUseCase";
+import { RegisterPushTokenUseCase } from "../../domain/usecases/RegisterPushTokenUseCase";
+import { UnregisterPushTokenUseCase } from "../../domain/usecases/UnregisterPushTokenUseCase";
+import { ObservePushTokenRefreshUseCase } from "../../domain/usecases/ObservePushTokenRefreshUseCase";
+import { ObserveNotificationOpenUseCase } from "../../domain/usecases/ObserveNotificationOpenUseCase";
+import { GetInitialNotificationUseCase } from "../../domain/usecases/GetInitialNotificationUseCase";
 
 interface Dependencies {
   getCurrentUserUseCase: GetCurrentUserUseCase;
@@ -100,6 +110,13 @@ interface Dependencies {
   deleteMyFeedbackUseCase: DeleteMyFeedbackUseCase;
   getStoreRatingsUseCase: GetStoreRatingsUseCase;
   sendSupportMessageUseCase: SendSupportMessageUseCase;
+  requestPushPermissionUseCase: RequestPushPermissionUseCase;
+  getPushTokenUseCase: GetPushTokenUseCase;
+  registerPushTokenUseCase: RegisterPushTokenUseCase;
+  unregisterPushTokenUseCase: UnregisterPushTokenUseCase;
+  observePushTokenRefreshUseCase: ObservePushTokenRefreshUseCase;
+  observeNotificationOpenUseCase: ObserveNotificationOpenUseCase;
+  getInitialNotificationUseCase: GetInitialNotificationUseCase;
 }
 
 const DependenciesContext = createContext<Dependencies | undefined>(undefined);
@@ -122,6 +139,8 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const favoriteRemote = new HttpFavoriteRemoteDataSource();
     const feedbackRemote = new HttpFeedbackRemoteDataSource();
     const supportRemote = new HttpSupportRemoteDataSource();
+    const pushRemote = new HttpPushNotificationsRemoteDataSource();
+    const pushLocal = new AsyncStoragePushNotificationsLocalDataSource();
     const guideContentRemote = new HttpGuideContentRemoteDataSource();
     const contentCommentRemote = new HttpContentCommentRemoteDataSource();
     const contentLikeRemote = new HttpContentLikeRemoteDataSource();
@@ -133,6 +152,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const favoriteRepository = new FavoriteRepositoryHybrid(favoriteRemote);
     const feedbackRepository = new FeedbackRepositoryImpl(feedbackRemote);
     const supportRepository = new SupportRepositoryImpl(supportRemote);
+    const pushRepository = new PushNotificationsRepositoryImpl(pushRemote, pushLocal);
 
     const thriftStoreRepository = new ThriftStoreRepositoryJson(thriftStoreRemote, featuredLocal);
     const guideContentRepository = new GuideContentRepositoryJson(guideContentRemote);
@@ -178,6 +198,13 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const deleteMyFeedbackUseCase = new DeleteMyFeedbackUseCase(feedbackRepository);
     const getStoreRatingsUseCase = new GetStoreRatingsUseCase(feedbackRepository);
     const sendSupportMessageUseCase = new SendSupportMessageUseCase(supportRepository);
+    const requestPushPermissionUseCase = new RequestPushPermissionUseCase(pushRepository);
+    const getPushTokenUseCase = new GetPushTokenUseCase(pushRepository);
+    const registerPushTokenUseCase = new RegisterPushTokenUseCase(pushRepository);
+    const unregisterPushTokenUseCase = new UnregisterPushTokenUseCase(pushRepository);
+    const observePushTokenRefreshUseCase = new ObservePushTokenRefreshUseCase(pushRepository);
+    const observeNotificationOpenUseCase = new ObserveNotificationOpenUseCase(pushRepository);
+    const getInitialNotificationUseCase = new GetInitialNotificationUseCase(pushRepository);
 
     return {
       getCurrentUserUseCase,
@@ -217,7 +244,14 @@ export function DependenciesProvider(props: PropsWithChildren) {
       upsertFeedbackUseCase,
       deleteMyFeedbackUseCase,
       getStoreRatingsUseCase,
-      sendSupportMessageUseCase
+      sendSupportMessageUseCase,
+      requestPushPermissionUseCase,
+      getPushTokenUseCase,
+      registerPushTokenUseCase,
+      unregisterPushTokenUseCase,
+      observePushTokenRefreshUseCase,
+      observeNotificationOpenUseCase,
+      getInitialNotificationUseCase
     };
   }, []);
 

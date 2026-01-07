@@ -30,6 +30,7 @@ import { useLoginWithGoogle } from "../../../hooks/useLoginWithGoogle";
 import { IS_DEBUG_API_BASE_URL } from "../../../network/config";
 import { saveTokens } from "../../../storage/authStorage";
 import { cacheProfile } from "../../../storage/profileCache";
+import { triggerPushRegistration } from "../../../services/pushRegistration";
 
 export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -104,6 +105,7 @@ export function LoginScreen() {
         email: authResult.user.email
       });
       primeApiToken(authResult.token);
+      triggerPushRegistration();
       try {
         const fullProfile = await getProfileUseCase.execute();
         await cacheProfile(fullProfile as any);
@@ -194,6 +196,7 @@ export function LoginScreen() {
                         email: auth.user.email
                       });
                       primeApiToken(auth.token);
+                      triggerPushRegistration();
                       try {
                         const fullProfile = await getProfileUseCase.execute();
                         await cacheProfile(fullProfile as any);
@@ -293,6 +296,7 @@ export function LoginScreen() {
                       email: auth.user.email
                     });
                     primeApiToken(auth.token);
+                    triggerPushRegistration();
                     try {
                       const fullProfile = await getProfileUseCase.execute();
                       await cacheProfile(fullProfile as any);

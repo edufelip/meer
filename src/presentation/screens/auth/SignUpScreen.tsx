@@ -23,6 +23,7 @@ import { saveTokens } from "../../../storage/authStorage";
 import { primeApiToken } from "../../../api/client";
 import { cacheProfile } from "../../../storage/profileCache";
 import { useDependencies } from "../../../app/providers/AppProvidersWithDI";
+import { triggerPushRegistration } from "../../../services/pushRegistration";
 
 export function SignUpScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -195,6 +196,7 @@ export function SignUpScreen() {
                       email: auth.user.email
                     });
                     primeApiToken(auth.token);
+                    triggerPushRegistration();
                     try {
                       const fullProfile = await getProfileUseCase.execute();
                       await cacheProfile(fullProfile as any);
