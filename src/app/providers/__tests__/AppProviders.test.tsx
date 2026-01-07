@@ -19,6 +19,7 @@ const mockDeps = {
   getPushTokenUseCase: { execute: jest.fn().mockResolvedValue("push-token") },
   registerPushTokenUseCase: { execute: jest.fn().mockResolvedValue(undefined) },
   unregisterPushTokenUseCase: { execute: jest.fn().mockResolvedValue(undefined) },
+  syncPushTopicsUseCase: { execute: jest.fn().mockResolvedValue(undefined) },
   observePushTokenRefreshUseCase: { execute: jest.fn(() => () => undefined) },
   observeNotificationOpenUseCase: { execute: jest.fn(() => () => undefined) },
   getInitialNotificationUseCase: { execute: jest.fn().mockResolvedValue(null) }

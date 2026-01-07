@@ -32,6 +32,7 @@ import { SearchThriftStoresUseCase } from "../SearchThriftStoresUseCase";
 import { SendSupportMessageUseCase } from "../SendSupportMessageUseCase";
 import { ToggleFavoriteThriftStoreUseCase } from "../ToggleFavoriteThriftStoreUseCase";
 import { UnlikeContentUseCase } from "../UnlikeContentUseCase";
+import { UnregisterPushTokenUseCase } from "../UnregisterPushTokenUseCase";
 import { UpdateContentUseCase } from "../UpdateContentUseCase";
 import { UpdateContentCommentUseCase } from "../UpdateContentCommentUseCase";
 import { UpdateProfileUseCase } from "../UpdateProfileUseCase";
@@ -437,6 +438,27 @@ describe("domain use cases", () => {
 
     expect(updateProfile).toHaveBeenCalledWith(payload);
     expect(result).toEqual({ id: "user-1" });
+  });
+
+  it("UnregisterPushTokenUseCase uses stored environment when available", async () => {
+    const unregisterToken = jest.fn().mockResolvedValue(undefined);
+    const getLastEnvironment = jest.fn().mockResolvedValue("staging");
+    const useCase = new UnregisterPushTokenUseCase({ unregisterToken, getLastEnvironment } as any);
+
+    await useCase.execute("prod");
+
+    expect(getLastEnvironment).toHaveBeenCalled();
+    expect(unregisterToken).toHaveBeenCalledWith("staging");
+  });
+
+  it("UnregisterPushTokenUseCase falls back to provided environment", async () => {
+    const unregisterToken = jest.fn().mockResolvedValue(undefined);
+    const getLastEnvironment = jest.fn().mockResolvedValue(null);
+    const useCase = new UnregisterPushTokenUseCase({ unregisterToken, getLastEnvironment } as any);
+
+    await useCase.execute("prod");
+
+    expect(unregisterToken).toHaveBeenCalledWith("prod");
   });
 
   it("UpsertFeedbackUseCase delegates to repository", async () => {
