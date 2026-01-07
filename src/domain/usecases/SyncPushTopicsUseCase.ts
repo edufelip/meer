@@ -1,11 +1,10 @@
 import type { PushEnvironment } from "../../shared/pushEnvironment";
 import type { PushNotificationsRepository } from "../repositories/PushNotificationsRepository";
 
-export class UnregisterPushTokenUseCase {
+export class SyncPushTopicsUseCase {
   constructor(private readonly repo: PushNotificationsRepository) {}
 
-  async execute(environment: PushEnvironment): Promise<void> {
-    const lastEnv = await this.repo.getLastEnvironment();
-    return this.repo.unregisterToken(lastEnv ?? environment);
+  execute(payload: { notifyPromos: boolean; notifyNewStores: boolean; environment: PushEnvironment }): Promise<void> {
+    return this.repo.syncTopicSubscriptions(payload);
   }
 }

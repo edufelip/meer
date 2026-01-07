@@ -1,10 +1,12 @@
+import type { PushEnvironment, PushPlatform } from "../../shared/pushEnvironment";
+
 export interface PushNotificationsRemoteDataSource {
   registerToken(payload: {
-    token: string;
+    fcmToken: string;
     deviceId: string;
-    platform: "ios" | "android";
-    environment: "dev" | "staging" | "prod";
+    platform: PushPlatform;
+    environment: PushEnvironment;
     appVersion: string;
   }): Promise<void>;
-  unregisterToken(deviceId: string): Promise<void>;
+  unregisterToken(deviceId: string, environment: PushEnvironment): Promise<void>;
 }

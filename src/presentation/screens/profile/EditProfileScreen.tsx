@@ -29,6 +29,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 import { uploadAsync } from "expo-file-system/legacy";
 import { useLogout } from "../../../hooks/useLogout";
 import { useProfileSummaryStore } from "../../state/profileSummaryStore";
+import { triggerPushRegistration } from "../../../services/pushRegistration";
 
 export function EditProfileScreen() {
   const navigation = useNavigation();
@@ -171,6 +172,7 @@ export function EditProfileScreen() {
 
       const updated = await updateProfileUseCase.execute(payload);
       setProfile(updated);
+      triggerPushRegistration();
       goBackSafe();
     } catch {
       Alert.alert("Erro", "Não foi possível salvar as alterações. Tente novamente.");

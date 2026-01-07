@@ -14,18 +14,10 @@ import messaging from "@react-native-firebase/messaging";
 import Constants from "expo-constants";
 import { parsePushNotificationData } from "../../shared/pushNotifications";
 import type { PushNotificationData } from "../../domain/entities/PushNotification";
-import { IS_DEBUG_API_BASE_URL } from "../../network/config";
 import { setPushRegistrationHandler } from "../../services/pushRegistration";
+import { resolvePushEnvironment } from "../../shared/pushEnvironment";
 
 const PUSH_CHANNEL_ID = "default";
-
-const getPushEnvironment = (): "dev" | "staging" | "prod" => {
-  const override = process.env.EXPO_PUBLIC_ENV;
-  if (override === "dev" || override === "staging" || override === "prod") {
-    return override;
-  }
-  return IS_DEBUG_API_BASE_URL ? "dev" : "prod";
-};
 
 const getAppVersion = (): string => {
   return (
@@ -82,7 +74,9 @@ function PushNotificationsBootstrap() {
     unregisterPushTokenUseCase,
     observePushTokenRefreshUseCase,
     observeNotificationOpenUseCase,
-    getInitialNotificationUseCase
+    getInitialNotificationUseCase,
+    getCachedProfileUseCase,
+    syncPushTopicsUseCase
   } = useDependencies();
   const listenersRef = useRef<{
     token?: () => void;
@@ -184,11 +178,14 @@ function PushNotificationsBootstrap() {
     try {
       const { token } = await getTokens();
       authTokenRef.current = token ?? null;
+      const environment = resolvePushEnvironment();
+
+      await ensureChannel();
 
       if (!token) {
         if (lastTokenRef.current) {
           try {
-            await unregisterPushTokenUseCase.execute();
+            await unregisterPushTokenUseCase.execute(environment);
           } catch {
             // ignore unregister failures on logout
           }
@@ -202,18 +199,26 @@ function PushNotificationsBootstrap() {
       if (!permissionGranted) return;
 
       const fcmToken = await getPushTokenUseCase.execute();
-      const environment = getPushEnvironment();
       const appVersion = getAppVersion();
       const platform = Platform.OS === "ios" ? "ios" : "android";
 
       if (lastTokenRef.current !== fcmToken) {
         await registerPushTokenUseCase.execute({
-          token: fcmToken,
+          fcmToken,
           platform,
           environment,
           appVersion
         });
         lastTokenRef.current = fcmToken;
+      }
+
+      const cachedProfile = await getCachedProfileUseCase.execute();
+      if (cachedProfile) {
+        await syncPushTopicsUseCase.execute({
+          notifyPromos: cachedProfile.notifyPromos ?? false,
+          notifyNewStores: cachedProfile.notifyNewStores ?? false,
+          environment
+        });
       }
 
       if (pendingOpenRef.current) {
@@ -225,12 +230,20 @@ function PushNotificationsBootstrap() {
       if (!listenersRef.current.token) {
         listenersRef.current.token = observePushTokenRefreshUseCase.execute(async (newToken) => {
           await registerPushTokenUseCase.execute({
-            token: newToken,
+            fcmToken: newToken,
             platform,
             environment,
             appVersion
           });
           lastTokenRef.current = newToken;
+          const profile = await getCachedProfileUseCase.execute();
+          if (profile) {
+            await syncPushTopicsUseCase.execute({
+              notifyPromos: profile.notifyPromos ?? false,
+              notifyNewStores: profile.notifyNewStores ?? false,
+              environment
+            });
+          }
         });
       }
 
@@ -265,11 +278,13 @@ function PushNotificationsBootstrap() {
     cleanupListeners,
     displayForegroundNotification,
     getPushTokenUseCase,
+    getCachedProfileUseCase,
     handleOpen,
     observeNotificationOpenUseCase,
     observePushTokenRefreshUseCase,
     registerPushTokenUseCase,
     requestPushPermissionUseCase,
+    syncPushTopicsUseCase,
     unregisterPushTokenUseCase,
     navigateToNotification
   ]);

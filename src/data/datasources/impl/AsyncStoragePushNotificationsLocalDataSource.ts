@@ -3,6 +3,7 @@ import type { PushNotificationsLocalDataSource } from "../PushNotificationsLocal
 
 const DEVICE_ID_KEY = "push.deviceId";
 const LAST_TOKEN_KEY = "push.lastToken";
+const LAST_ENV_KEY = "push.lastEnv";
 
 export class AsyncStoragePushNotificationsLocalDataSource implements PushNotificationsLocalDataSource {
   getDeviceId(): Promise<string | null> {
@@ -22,5 +23,16 @@ export class AsyncStoragePushNotificationsLocalDataSource implements PushNotific
       return AsyncStorage.removeItem(LAST_TOKEN_KEY);
     }
     return AsyncStorage.setItem(LAST_TOKEN_KEY, token);
+  }
+
+  getLastEnvironment(): Promise<string | null> {
+    return AsyncStorage.getItem(LAST_ENV_KEY);
+  }
+
+  setLastEnvironment(environment: string | null): Promise<void> {
+    if (!environment) {
+      return AsyncStorage.removeItem(LAST_ENV_KEY);
+    }
+    return AsyncStorage.setItem(LAST_ENV_KEY, environment);
   }
 }

@@ -1,18 +1,19 @@
 import { registerPushToken, unregisterPushToken } from "../../../api/pushTokens";
 import type { PushNotificationsRemoteDataSource } from "../PushNotificationsRemoteDataSource";
+import type { PushEnvironment, PushPlatform } from "../../../shared/pushEnvironment";
 
 export class HttpPushNotificationsRemoteDataSource implements PushNotificationsRemoteDataSource {
   registerToken(payload: {
-    token: string;
+    fcmToken: string;
     deviceId: string;
-    platform: "ios" | "android";
-    environment: "dev" | "staging" | "prod";
+    platform: PushPlatform;
+    environment: PushEnvironment;
     appVersion: string;
   }): Promise<void> {
     return registerPushToken(payload);
   }
 
-  unregisterToken(deviceId: string): Promise<void> {
-    return unregisterPushToken(deviceId);
+  unregisterToken(deviceId: string, environment: PushEnvironment): Promise<void> {
+    return unregisterPushToken(deviceId, environment);
   }
 }

@@ -5,6 +5,7 @@ import { navigationRef } from "../app/navigation/navigationRef";
 import { resetAllStores } from "../presentation/state/resetAllStores";
 import { triggerPushRegistration } from "../services/pushRegistration";
 import { useDependencies } from "../app/providers/AppProvidersWithDI";
+import { resolvePushEnvironment } from "../shared/pushEnvironment";
 
 export function useLogout() {
   const queryClient = useQueryClient();
@@ -12,7 +13,7 @@ export function useLogout() {
 
   return useCallback(async () => {
     try {
-      await unregisterPushTokenUseCase.execute();
+      await unregisterPushTokenUseCase.execute(resolvePushEnvironment());
     } catch {
       // ignore push token unregister failures
     }

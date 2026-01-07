@@ -7,6 +7,8 @@ import type { PushNotificationsRepository } from "../../domain/repositories/Push
 import type { PushNotificationsLocalDataSource } from "../datasources/PushNotificationsLocalDataSource";
 import type { PushNotificationsRemoteDataSource } from "../datasources/PushNotificationsRemoteDataSource";
 import { parsePushNotificationData } from "../../shared/pushNotifications";
+import type { PushEnvironment, PushPlatform } from "../../shared/pushEnvironment";
+import { buildTopicName } from "../../shared/pushEnvironment";
 
 export class PushNotificationsRepositoryImpl implements PushNotificationsRepository {
   constructor(
@@ -38,25 +40,60 @@ export class PushNotificationsRepositoryImpl implements PushNotificationsReposit
   }
 
   async registerToken(payload: {
-    token: string;
-    platform: "ios" | "android";
-    environment: "dev" | "staging" | "prod";
+    fcmToken: string;
+    platform: PushPlatform;
+    environment: PushEnvironment;
     appVersion: string;
   }): Promise<void> {
     const deviceId = await this.ensureDeviceId();
     await this.remote.registerToken({ ...payload, deviceId });
-    await this.local.setLastToken(payload.token);
+    await this.local.setLastToken(payload.fcmToken);
+    await this.local.setLastEnvironment(payload.environment);
   }
 
-  async unregisterToken(): Promise<void> {
+  async unregisterToken(environment: PushEnvironment): Promise<void> {
     const deviceId = await this.local.getDeviceId();
     if (!deviceId) return;
-    await this.remote.unregisterToken(deviceId);
-    await this.local.setLastToken(null);
+    try {
+      await this.remote.unregisterToken(deviceId, environment);
+    } finally {
+      await this.syncTopicSubscriptions({ notifyPromos: false, notifyNewStores: false, environment });
+      await this.local.setLastToken(null);
+      await this.local.setLastEnvironment(null);
+    }
+  }
+
+  async getLastEnvironment(): Promise<PushEnvironment | null> {
+    const env = await this.local.getLastEnvironment();
+    if (env === "dev" || env === "staging" || env === "prod") return env;
+    return null;
   }
 
   onTokenRefresh(handler: (token: string) => void): () => void {
     return messaging().onTokenRefresh(handler);
+  }
+
+  async syncTopicSubscriptions(payload: {
+    notifyPromos: boolean;
+    notifyNewStores: boolean;
+    environment: PushEnvironment;
+  }): Promise<void> {
+    const promosTopic = buildTopicName("promos", payload.environment);
+    const newStoresTopic = buildTopicName("new_stores", payload.environment);
+
+    const promoOp = payload.notifyPromos
+      ? messaging().subscribeToTopic(promosTopic)
+      : messaging().unsubscribeFromTopic(promosTopic);
+    const newStoresOp = payload.notifyNewStores
+      ? messaging().subscribeToTopic(newStoresTopic)
+      : messaging().unsubscribeFromTopic(newStoresTopic);
+
+    const results = await Promise.allSettled([promoOp, newStoresOp]);
+    results.forEach((result) => {
+      if (result.status === "rejected") {
+        console.log("[Push] Topic sync failed", result.reason);
+      }
+    });
   }
 
   onNotificationOpen(handler: (data: PushNotificationData) => void): () => void {

@@ -70,6 +70,7 @@ import { UnregisterPushTokenUseCase } from "../../domain/usecases/UnregisterPush
 import { ObservePushTokenRefreshUseCase } from "../../domain/usecases/ObservePushTokenRefreshUseCase";
 import { ObserveNotificationOpenUseCase } from "../../domain/usecases/ObserveNotificationOpenUseCase";
 import { GetInitialNotificationUseCase } from "../../domain/usecases/GetInitialNotificationUseCase";
+import { SyncPushTopicsUseCase } from "../../domain/usecases/SyncPushTopicsUseCase";
 
 interface Dependencies {
   getCurrentUserUseCase: GetCurrentUserUseCase;
@@ -114,6 +115,7 @@ interface Dependencies {
   getPushTokenUseCase: GetPushTokenUseCase;
   registerPushTokenUseCase: RegisterPushTokenUseCase;
   unregisterPushTokenUseCase: UnregisterPushTokenUseCase;
+  syncPushTopicsUseCase: SyncPushTopicsUseCase;
   observePushTokenRefreshUseCase: ObservePushTokenRefreshUseCase;
   observeNotificationOpenUseCase: ObserveNotificationOpenUseCase;
   getInitialNotificationUseCase: GetInitialNotificationUseCase;
@@ -202,6 +204,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
     const getPushTokenUseCase = new GetPushTokenUseCase(pushRepository);
     const registerPushTokenUseCase = new RegisterPushTokenUseCase(pushRepository);
     const unregisterPushTokenUseCase = new UnregisterPushTokenUseCase(pushRepository);
+    const syncPushTopicsUseCase = new SyncPushTopicsUseCase(pushRepository);
     const observePushTokenRefreshUseCase = new ObservePushTokenRefreshUseCase(pushRepository);
     const observeNotificationOpenUseCase = new ObserveNotificationOpenUseCase(pushRepository);
     const getInitialNotificationUseCase = new GetInitialNotificationUseCase(pushRepository);
@@ -249,6 +252,7 @@ export function DependenciesProvider(props: PropsWithChildren) {
       getPushTokenUseCase,
       registerPushTokenUseCase,
       unregisterPushTokenUseCase,
+      syncPushTopicsUseCase,
       observePushTokenRefreshUseCase,
       observeNotificationOpenUseCase,
       getInitialNotificationUseCase
