@@ -17,7 +17,8 @@ const shortcuts: ShortcutItem[] = [
   { title: "Conteúdos", description: "Publicações dos brechós", href: "/contents", icon: dashboardIcons.contents },
   { title: "Usuários", description: "Gerenciar contas e privilégios", href: "/users", icon: dashboardIcons.users },
   { title: "Moderação", description: "Fila de denúncias e revisões", href: "/moderation", icon: dashboardIcons.moderation },
-  { title: "Categorias", description: "Gerenciar categorias", href: "/categories", icon: dashboardIcons.categories }
+  { title: "Categorias", description: "Gerenciar categorias", href: "/categories", icon: dashboardIcons.categories },
+  { title: "Notificações", description: "Enviar push para usuários", href: "/push", icon: dashboardIcons.notifications }
 ];
 
 export default function DashboardPage() {
