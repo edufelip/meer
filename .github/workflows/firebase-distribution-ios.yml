@@ -90,13 +90,13 @@ jobs:
           cd ios
           pod install --silent
 
-      - name: Write GoogleService-Info.plist
+      - name: Write GoogleService-Info-Dev.plist
         working-directory: ios
         env:
           GOOGLE_SERVICE_INFO_PLIST_BASE64: ${{ secrets.GOOGLE_SERVICE_INFO_PLIST_BASE64_DEV }}
         run: |
           mkdir -p Meer
-          echo "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 -d > Meer/GoogleService-Info.plist
+          echo "$GOOGLE_SERVICE_INFO_PLIST_BASE64" | base64 -d > Meer/GoogleService-Info-Dev.plist
 
       - name: Sync Google Sign-In scheme (dev)
         run: |
@@ -105,7 +105,7 @@ jobs:
           import sys
 
           info_path = "ios/Meer/Info.plist"
-          gservice_path = "ios/Meer/GoogleService-Info.plist"
+          gservice_path = "ios/Meer/GoogleService-Info-Dev.plist"
 
           with open(gservice_path, "rb") as f:
             gservice = plistlib.load(f)
@@ -140,7 +140,7 @@ jobs:
 
       - name: Validate Google Sign-In scheme
         run: |
-          PLIST_REVERSED=$(/usr/libexec/PlistBuddy -c "Print :REVERSED_CLIENT_ID" ios/Meer/GoogleService-Info.plist)
+          PLIST_REVERSED=$(/usr/libexec/PlistBuddy -c "Print :REVERSED_CLIENT_ID" ios/Meer/GoogleService-Info-Dev.plist)
           if ! /usr/libexec/PlistBuddy -c "Print :CFBundleURLTypes" ios/Meer/Info.plist | grep -Fq "$PLIST_REVERSED"; then
             echo "Google Sign-In mismatch: Info.plist missing REVERSED_CLIENT_ID scheme ($PLIST_REVERSED)" >&2
             exit 1
