@@ -119,6 +119,22 @@ const CategoryChip: React.FC<CategoryChipProps> = ({ id, label, active, onToggle
   );
 };
 
+const formatPhoneBrazil = (raw: string) => {
+  const digits = (raw || "").replace(/\D/g, "").slice(0, 11);
+  if (!digits) return "";
+  if (digits.length <= 2) return `(${digits}`;
+  const area = digits.slice(0, 2);
+  const rest = digits.slice(2);
+  return `(${area})${rest}`;
+};
+
+const RequiredLabel = ({ text, className }: { text: string; className?: string }) => (
+  <Text className={className}>
+    {text}
+    <Text className="text-[#B55D05]"> *</Text>
+  </Text>
+);
+
 export function BrechoFormScreen() {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RootStackParamList, "brechoForm">>();
@@ -141,7 +157,9 @@ export function BrechoFormScreen() {
   const [addressCoords, setAddressCoords] = useState<{ latitude?: number; longitude?: number } | null>(null);
   const [neighborhood, setNeighborhood] = useState<string | undefined>(initial.neighborhood);
   const [addressConfirmed, setAddressConfirmed] = useState<boolean>(Boolean(thriftStore?.id && initial.addressLine));
-  const [phone, setPhone] = useState((thriftStore as any)?.phone ?? (thriftStore as any)?.whatsapp ?? "");
+  const [phone, setPhone] = useState(
+    formatPhoneBrazil((thriftStore as any)?.phone ?? (thriftStore as any)?.whatsapp ?? "")
+  );
   const [email, setEmail] = useState((thriftStore as any)?.email ?? "");
   const [instagram, setInstagram] = useState(
     initial.social?.instagram?.replace(/^@+/, "") ?? ""
@@ -196,7 +214,7 @@ export function BrechoFormScreen() {
 
   const isValidPhone = (raw: string) => {
     const digits = (raw || "").replace(/\D/g, "");
-    return digits.length >= 10 && digits.length <= 13;
+    return digits.length >= 10 && digits.length <= 11;
   };
 
   const isSingleWord = (raw: string) => {
@@ -500,7 +518,7 @@ export function BrechoFormScreen() {
     if (description.trim()) textChanges.description = description.trim();
     if (hours.trim()) textChanges.openingHours = hours.trim();
     if (address.trim()) textChanges.addressLine = address.trim();
-    textChanges.phone = phone.trim();
+    textChanges.phone = phone.replace(/\D/g, "").trim();
     if (email.trim()) textChanges.email = email.trim();
     const instagramHandle = instagram.trim().replace(/^@+/, "");
     const websiteValue = website.trim();
@@ -748,7 +766,7 @@ export function BrechoFormScreen() {
           <Text className="text-lg font-bold mb-4">Informações Gerais</Text>
           <View className="space-y-4">
             <View>
-              <Text className="text-sm font-medium text-gray-700 mb-2">Nome do Brechó</Text>
+              <RequiredLabel text="Nome do Brechó" className="text-sm font-medium text-gray-700 mb-2" />
               <TextInput
                 value={name}
                 onChangeText={(t) => {
@@ -760,7 +778,7 @@ export function BrechoFormScreen() {
               />
             </View>
             <View>
-              <Text className="text-sm font-medium text-gray-700 mb-2">Descrição</Text>
+              <RequiredLabel text="Descrição" className="text-sm font-medium text-gray-700 mb-2" />
               <TextInput
                 value={description}
                 onChangeText={(t) => {
@@ -775,7 +793,10 @@ export function BrechoFormScreen() {
               />
             </View>
             <View>
-              <Text className="text-sm font-medium text-gray-700 mb-2">Horário de Funcionamento</Text>
+              <RequiredLabel
+                text="Horário de Funcionamento"
+                className="text-sm font-medium text-gray-700 mb-2"
+              />
               <TextInput
                 value={hours}
                 onChangeText={(t) => {
@@ -790,7 +811,7 @@ export function BrechoFormScreen() {
         </View>
 
         <View className="bg-white p-4 rounded-xl shadow-sm mb-4">
-          <Text className="text-lg font-bold mb-2">Fotos do Brechó</Text>
+          <RequiredLabel text="Fotos do Brechó" className="text-lg font-bold mb-2" />
           <DraggableFlatList
             data={photos.filter((p) => !p.markedForDelete).sort((a, b) => a.uiPosition - b.uiPosition)}
             horizontal
@@ -833,7 +854,7 @@ export function BrechoFormScreen() {
           <Text className="text-lg font-bold mb-4">Endereço e Contato</Text>
           <View className="space-y-4">
             <View>
-              <Text className="text-sm font-medium text-gray-700 mb-2">Endereço</Text>
+              <RequiredLabel text="Endereço" className="text-sm font-medium text-gray-700 mb-2" />
               <TextInput
                 value={address}
                 onChangeText={(text) => {
@@ -870,19 +891,18 @@ export function BrechoFormScreen() {
               )}
             </View>
             <View>
-              <Text className="text-sm font-medium text-gray-700 mb-2">Telefone / WhatsApp</Text>
+              <RequiredLabel text="Telefone / WhatsApp" className="text-sm font-medium text-gray-700 mb-2" />
               <TextInput
                 value={phone}
                 onChangeText={(t) => {
-                  const digitsOnly = t.replace(/[^0-9]/g, "");
-                  setPhone(digitsOnly);
+                  setPhone(formatPhoneBrazil(t));
                   markDirty();
                 }}
-                placeholder="(11) 99999-9999"
+                placeholder="(11)999999999"
                 className="w-full rounded-lg border border-gray-300 bg-white px-3 py-3 mb-2"
                 keyboardType="number-pad"
                 inputMode="numeric"
-                maxLength={14}
+                maxLength={13}
               />
             </View>
             <View>

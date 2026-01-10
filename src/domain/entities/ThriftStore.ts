@@ -40,6 +40,8 @@ export interface ThriftStore {
     whatsapp?: string;
     website?: string;
   };
+  phone?: string;
+  email?: string;
 
   // Taxonomy
   categories: string[]; // e.g., ["Feminino", "Vintage", "Acessórios"]

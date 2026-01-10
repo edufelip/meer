@@ -45,6 +45,15 @@ interface ThriftDetailScreenProps {
   route?: { params?: { id?: ThriftStoreId } };
 }
 
+const formatPhoneBrazil = (raw: string) => {
+  const digits = (raw || "").replace(/\D/g, "").slice(0, 11);
+  if (!digits) return "";
+  if (digits.length <= 2) return `(${digits}`;
+  const area = digits.slice(0, 2);
+  const rest = digits.slice(2);
+  return `(${area})${rest}`;
+};
+
 function RatingStarButton({
   score,
   active,
@@ -307,6 +316,67 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
       .map((img) => ({ uri: img.url })) || [];
 
   const resolvedGallery = galleryImages.length > 0 ? galleryImages.map((g) => g.uri) : heroImage ? [heroImage] : [];
+  const galleryCount = galleryImages.length;
+
+  const ViewerHeader = ({ imageIndex }: { imageIndex: number }) => {
+    const canGoBack = imageIndex > 0;
+    const canGoForward = imageIndex < galleryCount - 1;
+
+    return (
+      <View pointerEvents="box-none" style={{ position: "absolute", inset: 0 }}>
+        <View
+          className="flex-row items-center justify-between px-4"
+          style={{ paddingTop: insets.top + 12 }}
+        >
+          <Pressable
+            className="h-10 w-10 rounded-full bg-black/60 items-center justify-center"
+            onPress={() => setViewerVisible(false)}
+            accessibilityRole="button"
+            accessibilityLabel="Fechar galeria"
+          >
+            <Ionicons name="close" size={22} color="#FFFFFF" />
+          </Pressable>
+          {galleryCount > 0 ? (
+            <View className="px-3 py-1.5 rounded-full bg-black/60">
+              <Text className="text-white text-xs font-semibold">{`${imageIndex + 1}/${galleryCount}`}</Text>
+            </View>
+          ) : (
+            <View />
+          )}
+          <View className="w-10" />
+        </View>
+
+        {galleryCount > 1 ? (
+          <View pointerEvents="box-none" style={{ position: "absolute", left: 0, right: 0, top: "50%", marginTop: -24 }}>
+            <View className="flex-row items-center justify-between px-3">
+              <Pressable
+                className="h-12 w-12 rounded-full bg-black/60 items-center justify-center"
+                onPress={() => setViewerIndex((prev) => Math.max(0, prev - 1))}
+                disabled={!canGoBack}
+                style={{ opacity: canGoBack ? 1 : 0.35 }}
+                accessibilityRole="button"
+                accessibilityLabel="Imagem anterior"
+                hitSlop={8}
+              >
+                <Ionicons name="chevron-back" size={24} color="#FFFFFF" />
+              </Pressable>
+              <Pressable
+                className="h-12 w-12 rounded-full bg-black/60 items-center justify-center"
+                onPress={() => setViewerIndex((prev) => Math.min(galleryCount - 1, prev + 1))}
+                disabled={!canGoForward}
+                style={{ opacity: canGoForward ? 1 : 0.35 }}
+                accessibilityRole="button"
+                accessibilityLabel="Próxima imagem"
+                hitSlop={8}
+              >
+                <Ionicons name="chevron-forward" size={24} color="#FFFFFF" />
+              </Pressable>
+            </View>
+          </View>
+        ) : null}
+      </View>
+    );
+  };
 
   const renderStars = (value: number, size = 18) => {
     const rounded = Math.round(value * 2) / 2; // keep halves if needed
@@ -728,6 +798,59 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
                 );
               })()}
 
+              {(() => {
+                const rawPhone = (store.phone ?? store.social?.whatsapp ?? "").trim();
+                const digits = rawPhone.replace(/\D/g, "");
+                const displayPhone = formatPhoneBrazil(rawPhone) || rawPhone;
+                const hasPhone = digits.length >= 10;
+                const emailRaw = (store.email ?? "").trim();
+                const hasEmail = emailRaw.length > 0;
+                if (!hasPhone && !hasEmail) return null;
+                const whatsappAppUrl = hasPhone ? `whatsapp://send?phone=55${digits}` : "";
+                const telUrl = hasPhone ? `tel:${digits}` : "";
+
+                return (
+                  <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
+                    <Text className="font-bold text-[#374151] mb-2">Contato</Text>
+                    <View className="space-y-2">
+                      {hasPhone ? (
+                        <Pressable
+                          className="flex-row items-center gap-2"
+                          onPress={() => {
+                            if (!whatsappAppUrl || !telUrl) return;
+                            Linking.canOpenURL(whatsappAppUrl)
+                              .then((canOpen) => {
+                                if (canOpen) {
+                                  Linking.openURL(whatsappAppUrl);
+                                } else {
+                                  Linking.openURL(telUrl);
+                                }
+                              })
+                              .catch(() => Linking.openURL(telUrl));
+                          }}
+                          accessibilityRole="link"
+                          accessibilityLabel="Abrir WhatsApp"
+                        >
+                          <Ionicons name="logo-whatsapp" size={18} color={theme.colors.highlight} />
+                          <Text className="text-sm text-gray-500 underline">{displayPhone}</Text>
+                        </Pressable>
+                      ) : null}
+                      {hasEmail ? (
+                        <Pressable
+                          className="flex-row items-center gap-2"
+                          onPress={() => Linking.openURL(`mailto:${emailRaw}`)}
+                          accessibilityRole="link"
+                          accessibilityLabel="Enviar e-mail"
+                        >
+                          <Ionicons name="mail-outline" size={18} color={theme.colors.highlight} />
+                          <Text className="text-sm text-gray-500 underline">{emailRaw}</Text>
+                        </Pressable>
+                      ) : null}
+                    </View>
+                  </View>
+                );
+              })()}
+
               <View style={{ marginTop: 16, borderTopWidth: 1, borderColor: "#E5E7EB", paddingTop: 16 }}>
                 <Text className="font-bold text-[#374151] mb-2">Categorias</Text>
                 <View className="flex-row flex-wrap gap-2">
@@ -752,6 +875,8 @@ export function ThriftDetailScreen({ route }: ThriftDetailScreenProps) {
 	            imageIndex={viewerIndex}
 	            visible={viewerVisible}
 	            onRequestClose={() => setViewerVisible(false)}
+              onImageIndexChange={setViewerIndex}
+              HeaderComponent={ViewerHeader}
 	          />
 	        ) : null}
 
