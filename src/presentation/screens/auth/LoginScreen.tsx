@@ -34,6 +34,8 @@ import { triggerPushRegistration } from "../../../services/pushRegistration";
 import { useAuthModeStore } from "../../state/authModeStore";
 import { resetAllStores } from "../../state/resetAllStores";
 
+const RESET_COOLDOWN_SECONDS = 60;
+
 export function LoginScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const { getProfileUseCase } = useDependencies();
@@ -52,6 +54,7 @@ export function LoginScreen() {
   const [resetError, setResetError] = useState<string | null>(null);
   const [resetLoading, setResetLoading] = useState(false);
   const [resetSuccess, setResetSuccess] = useState(false);
+  const [resetCooldown, setResetCooldown] = useState(0);
   const [debugBaseUrlVisible, setDebugBaseUrlVisible] = useState(false);
   const [debugBaseUrlValue, setDebugBaseUrlValue] = useState("");
 
@@ -80,6 +83,14 @@ export function LoginScreen() {
       setResetLoading(false);
     }
   }, [resetVisible]);
+
+  useEffect(() => {
+    if (resetCooldown <= 0) return;
+    const timeout = setTimeout(() => {
+      setResetCooldown((current) => (current > 0 ? current - 1 : 0));
+    }, 1000);
+    return () => clearTimeout(timeout);
+  }, [resetCooldown]);
 
   useEffect(() => {
     GoogleSignin.configure({
@@ -442,8 +453,12 @@ export function LoginScreen() {
             >
             {resetSuccess ? (
               <>
-                <Text className="text-base text-[#374151] mb-6">
-                  Você receberá um e-mail em breve, verifique sua caixa de entrada.
+                <Text className="text-base text-[#374151] mb-2">
+                  Se o e-mail estiver cadastrado, enviaremos um link de redefinição em alguns minutos.
+                </Text>
+                <Text className="text-sm text-[#6B7280] mb-6">
+                  Verifique sua caixa de entrada e spam.
+                  {resetCooldown > 0 ? ` Você poderá reenviar em ${resetCooldown}s.` : ""}
                 </Text>
                 <Pressable
                   className="h-12 rounded-lg bg-[#B55D05] items-center justify-center"
@@ -468,23 +483,37 @@ export function LoginScreen() {
                   testID="login-reset-email-input"
                 />
                 {resetError ? <Text className="text-sm text-red-500 mt-2">{resetError}</Text> : null}
+                <Text className="text-xs text-[#6B7280] mt-2">
+                  Se o e-mail estiver cadastrado, enviaremos um link de redefinição.
+                  {resetCooldown > 0 ? ` Aguarde ${resetCooldown}s para reenviar.` : ""}
+                </Text>
                 <Pressable
                   className={`h-12 rounded-lg items-center justify-center mt-4 ${
-                    resetLoading ? "bg-[#B55D05]/60" : "bg-[#B55D05]"
+                    resetLoading || resetCooldown > 0 ? "bg-[#B55D05]/60" : "bg-[#B55D05]"
                   }`}
-                  disabled={resetLoading}
+                  disabled={resetLoading || resetCooldown > 0}
                   onPress={async () => {
                     setResetError(null);
                     if (!isValidEmail(resetEmail)) {
                       setResetError("Digite um e-mail válido.");
                       return;
                     }
+                    if (resetCooldown > 0) return;
                     try {
                       setResetLoading(true);
                       await forgotPasswordMutation.mutateAsync({ email: resetEmail.trim() });
                       setResetSuccess(true);
-                    } catch {
-                      setResetError("Não foi possível enviar o e-mail. Tente novamente.");
+                      setResetCooldown(RESET_COOLDOWN_SECONDS);
+                    } catch (err: any) {
+                      const isNetworkError =
+                        (err?.isAxiosError && !err?.response) ||
+                        (typeof err?.message === "string" && err.message.toLowerCase().includes("network"));
+                      if (isNetworkError) {
+                        setResetError("Sem conexão com a internet.");
+                        return;
+                      }
+                      setResetSuccess(true);
+                      setResetCooldown(RESET_COOLDOWN_SECONDS);
                     } finally {
                       setResetLoading(false);
                     }
