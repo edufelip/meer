@@ -33,6 +33,7 @@ import { cacheProfile } from "../../../storage/profileCache";
 import { triggerPushRegistration } from "../../../services/pushRegistration";
 import { useAuthModeStore } from "../../state/authModeStore";
 import { resetAllStores } from "../../state/resetAllStores";
+import { theme } from "../../../shared/theme";
 
 const RESET_COOLDOWN_SECONDS = 60;
 
@@ -43,7 +44,9 @@ export function LoginScreen() {
   const googleMutation = useLoginWithGoogle();
   const appleMutation = useLoginWithApple();
   const forgotPasswordMutation = useForgotPassword();
+  const authMode = useAuthModeStore((state) => state.mode);
   const setAuthMode = useAuthModeStore((state) => state.setMode);
+  const isGuest = authMode === "guest";
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -164,13 +167,35 @@ export function LoginScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View className="w-full max-w-md items-center">
-            <View className="items-center pb-4">
-              <Image
-                source={require("../../../../assets/images/app-icon.png")}
-                style={{ width: 48, height: 48 }}
-                resizeMode="contain"
-              />
-            </View>
+            {isGuest ? (
+              <View className="flex-row items-center w-full mb-6">
+                <Pressable
+                  className="p-2 rounded-full"
+                  onPress={() => navigation.goBack()}
+                  accessibilityRole="button"
+                  accessibilityLabel="Voltar"
+                  testID="login-back-button"
+                >
+                  <Ionicons name="arrow-back" size={22} color={theme.colors.highlight} />
+                </Pressable>
+                <View className="flex-1 items-center">
+                  <Image
+                    source={require("../../../../assets/images/app-icon.png")}
+                    style={{ width: 48, height: 48 }}
+                    resizeMode="contain"
+                  />
+                </View>
+                <View style={{ width: 38 }} />
+              </View>
+            ) : (
+              <View className="items-center pb-4">
+                <Image
+                  source={require("../../../../assets/images/app-icon.png")}
+                  style={{ width: 48, height: 48 }}
+                  resizeMode="contain"
+                />
+              </View>
+            )}
 
             {IS_DEBUG_API_BASE_URL ? (
               <Pressable
@@ -366,14 +391,16 @@ export function LoginScreen() {
                 <Text className="text-base font-bold text-[#B55D05]">Cadastre-se</Text>
               </Pressable>
             </View>
-            <Pressable
-              className="pt-4"
-              onPress={handleContinueAsGuest}
-              disabled={loading}
-              testID="login-guest-cta"
-            >
-              <Text className="text-sm font-semibold text-[#6B7280]">Continuar como visitante</Text>
-            </Pressable>
+            {!isGuest ? (
+              <Pressable
+                className="pt-4"
+                onPress={handleContinueAsGuest}
+                disabled={loading}
+                testID="login-guest-cta"
+              >
+                <Text className="text-sm font-semibold text-[#6B7280]">Continuar como visitante</Text>
+              </Pressable>
+            ) : null}
 
           </View>
         </ScrollView>
