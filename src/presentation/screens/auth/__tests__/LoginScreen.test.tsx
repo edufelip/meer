@@ -2,10 +2,12 @@ import React from "react";
 import { Platform } from "react-native";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import { LoginScreen } from "../LoginScreen";
+import { useAuthModeStore } from "../../../state/authModeStore";
 
 const mockConfigure = jest.fn();
 const mockNavigate = jest.fn();
 const mockReset = jest.fn();
+const mockGoBack = jest.fn();
 const mockGetProfile = jest.fn();
 const mockLogin = jest.fn();
 const mockGoogleLogin = jest.fn();
@@ -22,7 +24,7 @@ const mockGoogleSignIn = jest.fn();
 const mockAppleSignIn = jest.fn();
 
 jest.mock("@react-navigation/native", () => ({
-  useNavigation: () => ({ reset: mockReset, navigate: mockNavigate })
+  useNavigation: () => ({ reset: mockReset, navigate: mockNavigate, goBack: mockGoBack })
 }));
 
 jest.mock("@react-native-google-signin/google-signin", () => ({
@@ -90,6 +92,7 @@ describe("LoginScreen", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useAuthModeStore.getState().reset();
     mockGetProfile.mockResolvedValue(null);
     mockLogin.mockResolvedValue({ token: "token-1", refreshToken: "refresh-1", user: { id: "u1", name: "Ana", email: "ana@test.com" } });
     mockGoogleLogin.mockResolvedValue({ token: "token-2", refreshToken: "refresh-2", user: { id: "u2", name: "Bea", email: "bea@test.com" } });
@@ -108,6 +111,13 @@ describe("LoginScreen", () => {
     const { getByText } = render(<LoginScreen />);
     expect(getByText(/Guia Brechó/i)).toBeTruthy();
     expect(mockConfigure).toHaveBeenCalled();
+  });
+
+  it("shows back button and hides guest CTA when in guest mode", () => {
+    useAuthModeStore.getState().setMode("guest");
+    const { getByTestId, queryByText } = render(<LoginScreen />);
+    expect(getByTestId("login-back-button")).toBeTruthy();
+    expect(queryByText("Continuar como visitante")).toBeNull();
   });
 
   it("shows error for invalid email", () => {
