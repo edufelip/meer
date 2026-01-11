@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { passwordRules, validatePassword } from "../../../../src/shared/validation/password";
 import { selectApiBase } from "../../../src/apiBase";
 
 type ResetPasswordFormProps = {
@@ -13,48 +14,12 @@ type StrengthLevel = {
   tone: "weak" | "ok" | "strong";
 };
 
-type PasswordRule = {
-  label: string;
-  error: string;
-  test: (value: string) => boolean;
-};
-
-const passwordRules: PasswordRule[] = [
-  {
-    label: "Minimo de 6 caracteres",
-    error: "A senha deve ter pelo menos 6 caracteres.",
-    test: (value) => value.length >= 6
-  },
-  {
-    label: "1 letra maiuscula",
-    error: "A senha deve ter pelo menos 1 letra maiuscula.",
-    test: (value) => /[A-Z]/.test(value)
-  },
-  {
-    label: "1 numero",
-    error: "A senha deve ter pelo menos 1 numero.",
-    test: (value) => /[0-9]/.test(value)
-  },
-  {
-    label: "1 caractere especial",
-    error: "A senha deve ter pelo menos 1 caractere especial.",
-    test: (value) => /[^A-Za-z0-9]/.test(value)
-  }
-];
-
 function getStrength(password: string): StrengthLevel {
   const score = passwordRules.filter((rule) => rule.test(password)).length;
   if (score === 0) return { label: "", score: 0, tone: "weak" };
   if (score <= 2) return { label: "Fraca", score, tone: "weak" };
   if (score === 3) return { label: "Boa", score, tone: "ok" };
   return { label: "Forte", score, tone: "strong" };
-}
-
-function validatePassword(value: string): string | null {
-  for (const rule of passwordRules) {
-    if (!rule.test(value)) return rule.error;
-  }
-  return null;
 }
 
 export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
@@ -75,9 +40,9 @@ export default function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     setError(null);
     setSuccess(null);
 
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      setError(passwordError);
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      setError(passwordValidation.error ?? "Senha invalida.");
       return;
     }
 
