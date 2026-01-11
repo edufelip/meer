@@ -1,4 +1,5 @@
 import React from "react";
+import { Easing } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
 import { HomeScreen } from "../../presentation/screens/home/HomeScreen";
@@ -27,6 +28,14 @@ export function RootTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+        animation: "fade",
+        transitionSpec: {
+          animation: "timing",
+          config: {
+            duration: 150,
+            easing: Easing.inOut(Easing.ease)
+          }
+        },
         tabBarLabel:
           route.name === "home"
             ? "Home"
