@@ -32,6 +32,10 @@ jest.mock("@expo/vector-icons", () => ({
   Ionicons: () => null
 }));
 
+jest.mock("expo-linear-gradient", () => ({
+  LinearGradient: ({ children }: { children?: React.ReactNode }) => <>{children}</>
+}));
+
 jest.mock("../../../../shared/theme", () => ({
   theme: { colors: { highlight: "#000" } }
 }));
