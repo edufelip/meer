@@ -278,6 +278,7 @@ function PushNotificationsBootstrap() {
   }, [
     cleanupListeners,
     displayForegroundNotification,
+    ensureChannel,
     getPushTokenUseCase,
     getCachedProfileUseCase,
     handleOpen,
@@ -375,7 +376,7 @@ function AuthBootstrap({ children }: PropsWithChildren) {
         navigationRef.navigate("login");
       }
     }
-  }, [validateTokenQuery.status]);
+  }, [setAuthMode, validateTokenQuery.status]);
 
   useEffect(() => {
     if (booting) return;
@@ -395,7 +396,7 @@ function AuthBootstrap({ children }: PropsWithChildren) {
         cancelled = true;
       };
     }
-  }, [booting, validateTokenQuery.status]);
+  }, [authMode, booting, validateTokenQuery.status]);
 
   if (booting) {
     return null; // keep splash
