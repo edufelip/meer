@@ -31,7 +31,7 @@ export default function ContentRedirect() {
   return (
     <div className="card redirect-card">
       <p className="redirect-note">
-        Se o app nao estiver instalado, voce sera redirecionado para a loja em instantes.
+        Se o app não estiver instalado, você será redirecionado para a loja em instantes.
       </p>
       <div className="redirect-actions">
         <a className="button secondary" href={storeUrl}>

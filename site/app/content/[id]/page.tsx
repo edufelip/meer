@@ -24,9 +24,7 @@ export default function ContentPage({ params }: ContentPageProps) {
     <main className="page">
       <ContentRedirect />
       <section className="hero">
-        <span className="eyebrow">Conteúdo</span>
-        <h1>{contentId}</h1>
-        <p>Este link abre direto no app. Se ele nao abrir, use o botao abaixo.</p>
+        <p>Este link abre direto no app. Se ele não abrir, use o botão abaixo.</p>
         <div className="hero-actions">
           <a className="button" href={`meer://content/${encodedId}`}>
             Abrir no app
