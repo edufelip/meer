@@ -183,6 +183,8 @@ button.button {
   display: flex;
   flex-direction: column;
   gap: 18px;
+  width: 100%;
+  max-width: 50%;
 }
 
 .form-field {
@@ -302,5 +304,9 @@ button.button {
   .toggle {
     width: 100%;
     text-align: center;
+  }
+
+  .form-card {
+    max-width: 100%;
   }
 }
