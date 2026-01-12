@@ -10,19 +10,22 @@ const mockOnTokenRefresh = jest.fn();
 const mockOnNotificationOpenedApp = jest.fn();
 const mockGetInitialNotification = jest.fn();
 
-jest.mock("@react-native-firebase/messaging", () => ({
-  __esModule: true,
-  getMessaging: jest.fn(() => mockMessagingInstance),
-  subscribeToTopic: mockSubscribeToTopic,
-  unsubscribeFromTopic: mockUnsubscribeFromTopic,
-  requestPermission: mockRequestPermission,
-  registerDeviceForRemoteMessages: mockRegisterDeviceForRemoteMessages,
-  getToken: mockGetToken,
-  onTokenRefresh: mockOnTokenRefresh,
-  onNotificationOpenedApp: mockOnNotificationOpenedApp,
-  getInitialNotification: mockGetInitialNotification,
-  AuthorizationStatus: { AUTHORIZED: 1, PROVISIONAL: 2 }
-}));
+jest.mock("@react-native-firebase/messaging", () => {
+  const mockMessagingInstance = {};
+  return {
+    __esModule: true,
+    getMessaging: jest.fn(() => mockMessagingInstance),
+    subscribeToTopic: jest.fn((_m, ...args) => mockSubscribeToTopic(...args)),
+    unsubscribeFromTopic: jest.fn((_m, ...args) => mockUnsubscribeFromTopic(...args)),
+    requestPermission: jest.fn((_m, ...args) => mockRequestPermission(...args)),
+    registerDeviceForRemoteMessages: jest.fn((_m, ...args) => mockRegisterDeviceForRemoteMessages(...args)),
+    getToken: jest.fn((_m, ...args) => mockGetToken(...args)),
+    onTokenRefresh: jest.fn((_m, ...args) => mockOnTokenRefresh(...args)),
+    onNotificationOpenedApp: jest.fn((_m, ...args) => mockOnNotificationOpenedApp(...args)),
+    getInitialNotification: jest.fn((_m, ...args) => mockGetInitialNotification(...args)),
+    AuthorizationStatus: { AUTHORIZED: 1, PROVISIONAL: 2 }
+  };
+});
 
 jest.mock("@notifee/react-native", () => ({
   __esModule: true,

@@ -210,7 +210,7 @@ describe("BrechoFormScreen", () => {
     fireEvent.changeText(getByPlaceholderText("Ex: Brechó Estilo Único"), "Brecho X");
     fireEvent.changeText(getByPlaceholderText("Descreva o que torna seu brechó especial"), "Descricao");
     fireEvent.changeText(getByPlaceholderText("Ex: Seg-Sex 9h-18h, Sáb 10h-14h"), "9-18");
-    fireEvent.changeText(getByPlaceholderText("(11) 99999-9999"), "11999999999");
+    fireEvent.changeText(getByPlaceholderText("(11)999999999"), "11999999999");
     fireEvent.changeText(getByPlaceholderText("seu_brecho"), "invalido handle");
 
     fireEvent.press(getByText("Salvar alterações"));
