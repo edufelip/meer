@@ -54,3 +54,7 @@ src/services/firebase/firebaseConfig.ts
 
 # test output
 coverage/
+
+# Gemini CLI
+GEMINI.md
+
